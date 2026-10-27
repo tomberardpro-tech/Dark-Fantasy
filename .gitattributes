@@ -1,2 +1,4 @@
 # Fins de ligne normalisées pour les fichiers texte
 * text=auto eol=lf
+# Les fichiers .bat de Windows ont besoin de fins de ligne Windows
+*.bat text eol=crlf
