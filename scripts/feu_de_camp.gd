@@ -2,6 +2,9 @@ extends Node3D
 ## Feu de camp, animé comme sur la maquette : un cercle de galets, des bûches,
 ## trois flammes qui vacillent et tournent, des braises qui montent en tourbillonnant,
 ## et une lumière orange qui tremble.
+## Le vent (voir vent.gd) couche les flammes et emporte les braises.
+## La lumière vacille de façon irrégulière, change un peu de teinte et bouge légèrement,
+## pour que les ombres dansent comme autour d'un vrai feu.
 
 ## Puissance de la lumière du feu.
 @export var puissance := 2.6
@@ -12,14 +15,21 @@ extends Node3D
 
 const GALETS := ["Pebble_Round_1", "Pebble_Round_2", "Pebble_Round_3", "Pebble_Round_4", "Pebble_Round_5"]
 
+const COULEUR_BRAISE := Color("d0702e")
+const COULEUR_VIVE := Color("f0a050")
+
 var _flammes: Array[MeshInstance3D] = []
+var _support_flammes: Node3D
 var _lumiere: OmniLight3D
+var _bruit := FastNoiseLite.new()
 var _braises: MultiMesh
 var _vie_braises: Array[float] = []
 var _temps := 0.0
 
 
 func _ready() -> void:
+	_bruit.seed = 3
+	_bruit.frequency = 1.0
 	_creer_pierres()
 	_creer_buches()
 	_creer_flammes()
@@ -37,15 +47,25 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_temps += delta
-	# Plusieurs vagues mélangées pour un vacillement qui ne semble pas répétitif.
-	var v := 0.85 + sin(_temps * 13.0) * 0.08 + sin(_temps * 7.3) * 0.07 + sin(_temps * 23.0) * 0.04
+	var vent := Vent.souffle(_temps, global_position)
+	# Vacillement irrégulier : un « bruit » lent (le feu qui respire) et un rapide (les crépitements).
+	var v := 0.84 + _bruit.get_noise_1d(_temps * 1.2) * 0.16 + _bruit.get_noise_1d(_temps * 7.0 + 50.0) * 0.07
 	_lumiere.light_energy = puissance * v
+	# Plus le feu est vif, plus la lumière tire vers le jaune.
+	_lumiere.light_color = COULEUR_BRAISE.lerp(COULEUR_VIVE, clampf((v - 0.7) / 0.35, 0.0, 1.0))
+	# La lumière bouge un peu et suit les flammes couchées par le vent : les ombres dansent.
+	_lumiere.position = Vector3(
+		_bruit.get_noise_1d(_temps * 2.0 + 100.0) * 0.12 + vent.x * 0.25,
+		1.0 + v * 0.1,
+		_bruit.get_noise_1d(_temps * 2.0 + 200.0) * 0.12 + vent.z * 0.25)
+	# Les flammes se couchent dans le sens du vent.
+	_support_flammes.rotation = Vector3(vent.z * 0.3, 0.0, -vent.x * 0.3)
 	for i in _flammes.size():
 		var flamme := _flammes[i]
-		var k := v + sin(_temps * (9.0 + i * 4.0)) * 0.08
+		var k := v + _bruit.get_noise_1d(_temps * (5.0 + i * 2.0) + i * 30.0) * 0.12
 		var hauteur: float = flamme.get_meta("hauteur")
 		flamme.scale = Vector3(1.0, k, 1.0)
-		flamme.position.y = 0.2 + hauteur * k / 2.0
+		flamme.position.y = hauteur * k / 2.0
 		flamme.rotation.y = _temps * (0.8 + i)
 	_animer_braises(delta)
 
@@ -81,6 +101,10 @@ func _creer_buches() -> void:
 
 
 func _creer_flammes() -> void:
+	# Les flammes sont posées sur un support qu'on incline avec le vent.
+	_support_flammes = Node3D.new()
+	_support_flammes.position.y = 0.2
+	add_child(_support_flammes)
 	# [couleur, largeur, hauteur] : de la grande flamme orange au cœur jaune pâle.
 	for f in [[Color("d07a35"), 0.42, 1.2], [Color("f0ad55"), 0.3, 0.95], [Color("ffe0a0"), 0.16, 0.65]]:
 		var forme := CylinderMesh.new()
@@ -93,8 +117,8 @@ func _creer_flammes() -> void:
 		flamme.material_override = _materiau_brillant(f[0])
 		flamme.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		flamme.set_meta("hauteur", f[2])
-		flamme.position.y = 0.2 + f[2] / 2.0
-		add_child(flamme)
+		flamme.position.y = f[2] / 2.0
+		_support_flammes.add_child(flamme)
 		_flammes.append(flamme)
 
 
@@ -122,10 +146,12 @@ func _animer_braises(delta: float) -> void:
 			_vie_braises[i] -= 1.0
 		var v := _vie_braises[i]
 		var a := i * 2.4
+		# Plus la braise monte, plus le vent l'emporte loin.
+		var vent := Vent.souffle(_temps - v * 0.8, global_position) * (v * v * 2.2)
 		var pos := Vector3(
-			cos(a) * 0.25 + sin(_temps * 2.0 + i) * 0.2 * v,
+			cos(a) * 0.25 + sin(_temps * 2.0 + i) * 0.2 * v + vent.x,
 			0.4 + v * 3.2,
-			sin(a) * 0.25 + cos(_temps * 1.7 + i) * 0.2 * v)
+			sin(a) * 0.25 + cos(_temps * 1.7 + i) * 0.2 * v + vent.z)
 		# Les braises rapetissent en montant, comme si elles s'éteignaient.
 		var taille := 1.0 - v * 0.7
 		_braises.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * taille), pos))
