@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://cu03oc2kfeajc"
-path="res://.godot/imported/Male_Ranger_Head_Hood.gltf-0279548883983bbf8e9b65fbec8526e7.scn"
+uid="uid://cxhf5omqy6wfj"
+path="res://.godot/imported/UAL2_Standard.glb-27af949a0d86d94044d3533b07a4e703.scn"
 
 [deps]
 
-source_file="res://assets/personnage/Male_Ranger_Head_Hood.gltf"
-dest_files=["res://.godot/imported/Male_Ranger_Head_Hood.gltf-0279548883983bbf8e9b65fbec8526e7.scn"]
+source_file="res://assets/personnage/UAL2_Standard.glb"
+dest_files=["res://.godot/imported/UAL2_Standard.glb-27af949a0d86d94044d3533b07a4e703.scn"]
 
 [params]
 

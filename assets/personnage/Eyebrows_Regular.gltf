@@ -1268,7 +1268,7 @@
 		},
 		{
 			"mesh":0,
-			"name":"Male_Ranger_Head_Hood",
+			"name":"Eyebrows_Regular",
 			"skin":0
 		},
 		{
@@ -1282,7 +1282,7 @@
 	"materials":[
 		{
 			"doubleSided":true,
-			"name":"MI_Ranger",
+			"name":"MI_Hair_1",
 			"normalTexture":{
 				"index":0
 			},
@@ -1290,27 +1290,23 @@
 				"baseColorTexture":{
 					"index":1
 				},
-				"metallicRoughnessTexture":{
-					"index":2
-				}
+				"metallicFactor":0
 			}
 		}
 	],
 	"meshes":[
 		{
-			"name":"Male_Ranger_Head_Hood",
+			"name":"Cube.001",
 			"primitives":[
 				{
 					"attributes":{
 						"POSITION":0,
 						"NORMAL":1,
 						"TEXCOORD_0":2,
-						"COLOR_0":3,
-						"COLOR_1":4,
-						"JOINTS_0":5,
-						"WEIGHTS_0":6
+						"JOINTS_0":3,
+						"WEIGHTS_0":4
 					},
-					"indices":7,
+					"indices":5,
 					"material":0
 				}
 			]
@@ -1324,32 +1320,23 @@
 		{
 			"sampler":0,
 			"source":1
-		},
-		{
-			"sampler":0,
-			"source":2
 		}
 	],
 	"images":[
 		{
 			"mimeType":"image/png",
-			"name":"T_Ranger_Normal",
-			"uri":"T_Ranger_Normal.png"
+			"name":"T_Hair_1_Normal",
+			"uri":"T_Hair_1_Normal.png"
 		},
 		{
 			"mimeType":"image/png",
-			"name":"T_Ranger_BaseColor",
-			"uri":"T_Ranger_BaseColor.png"
-		},
-		{
-			"mimeType":"image/png",
-			"name":"T_Ranger_ORM",
-			"uri":"T_Ranger_ORM.png"
+			"name":"T_Hair_1_BaseColor",
+			"uri":"T_Hair_1_BaseColor.png"
 		}
 	],
 	"skins":[
 		{
-			"inverseBindMatrices":8,
+			"inverseBindMatrices":6,
 			"joints":[
 				64,
 				63,
@@ -1424,65 +1411,51 @@
 		{
 			"bufferView":0,
 			"componentType":5126,
-			"count":1240,
+			"count":646,
 			"max":[
-				0.15163061022758484,
-				1.8650403022766113,
-				0.14104419946670532
+				0.062340568751096725,
+				1.7254674434661865,
+				0.09447739273309708
 			],
 			"min":[
-				-0.15163061022758484,
-				1.5253204107284546,
-				-0.193466916680336
+				-0.062340568751096725,
+				1.6948596239089966,
+				0.0569210946559906
 			],
 			"type":"VEC3"
 		},
 		{
 			"bufferView":1,
 			"componentType":5126,
-			"count":1240,
+			"count":646,
 			"type":"VEC3"
 		},
 		{
 			"bufferView":2,
 			"componentType":5126,
-			"count":1240,
+			"count":646,
 			"type":"VEC2"
 		},
 		{
 			"bufferView":3,
 			"componentType":5121,
-			"count":1240,
-			"normalized":true,
+			"count":646,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":4,
-			"componentType":5123,
-			"count":1240,
-			"normalized":true,
+			"componentType":5126,
+			"count":646,
 			"type":"VEC4"
 		},
 		{
 			"bufferView":5,
-			"componentType":5121,
-			"count":1240,
-			"type":"VEC4"
-		},
-		{
-			"bufferView":6,
-			"componentType":5126,
-			"count":1240,
-			"type":"VEC4"
-		},
-		{
-			"bufferView":7,
 			"componentType":5123,
-			"count":6408,
+			"count":2952,
 			"type":"SCALAR"
 		},
 		{
-			"bufferView":8,
+			"bufferView":6,
 			"componentType":5126,
 			"count":65,
 			"type":"MAT4"
@@ -1491,56 +1464,44 @@
 	"bufferViews":[
 		{
 			"buffer":0,
-			"byteLength":14880,
+			"byteLength":7752,
 			"byteOffset":0,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":14880,
-			"byteOffset":14880,
+			"byteLength":7752,
+			"byteOffset":7752,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":9920,
-			"byteOffset":29760,
+			"byteLength":5168,
+			"byteOffset":15504,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":4960,
-			"byteOffset":39680,
+			"byteLength":2584,
+			"byteOffset":20672,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":9920,
-			"byteOffset":44640,
+			"byteLength":10336,
+			"byteOffset":23256,
 			"target":34962
 		},
 		{
 			"buffer":0,
-			"byteLength":4960,
-			"byteOffset":54560,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":19840,
-			"byteOffset":59520,
-			"target":34962
-		},
-		{
-			"buffer":0,
-			"byteLength":12816,
-			"byteOffset":79360,
+			"byteLength":5904,
+			"byteOffset":33592,
 			"target":34963
 		},
 		{
 			"buffer":0,
 			"byteLength":4160,
-			"byteOffset":92176
+			"byteOffset":39496
 		}
 	],
 	"samplers":[
@@ -1551,8 +1512,8 @@
 	],
 	"buffers":[
 		{
-			"byteLength":96336,
-			"uri":"Male_Ranger_Head_Hood.bin"
+			"byteLength":43656,
+			"uri":"Eyebrows_Regular.bin"
 		}
 	]
 }

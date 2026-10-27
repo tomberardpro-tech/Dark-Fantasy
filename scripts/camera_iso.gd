@@ -38,7 +38,10 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if a_suivre:
-		_cible = _cible.lerp(a_suivre.global_position, 1.0 - exp(-douceur * delta))
+		# Position « adoucie » entre deux pas de physique : la caméra suit le personnage
+		# sans à-coups, donc sans effet de flou quand il court.
+		var position_lisse := a_suivre.get_global_transform_interpolated().origin
+		_cible = _cible.lerp(position_lisse, 1.0 - exp(-douceur * delta))
 	_placer()
 
 

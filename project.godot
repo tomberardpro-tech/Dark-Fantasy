@@ -19,3 +19,7 @@ config/features=PackedStringArray("4.7", "Forward Plus")
 Controles="*res://scripts/controles.gd"
 Sauvegarde="*res://scripts/sauvegarde.gd"
 Chemin="*res://scripts/chemin.gd"
+
+[physics]
+
+common/physics_interpolation=true

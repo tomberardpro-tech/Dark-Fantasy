@@ -13,6 +13,7 @@ func _ready() -> void:
 	_ajouter("courir", [KEY_SHIFT])
 	_ajouter("roulade", [KEY_SPACE])
 	_ajouter("interagir", [KEY_E])
+	_ajouter("degainer", [KEY_R])
 
 
 func _ajouter(action: StringName, touches: Array) -> void:

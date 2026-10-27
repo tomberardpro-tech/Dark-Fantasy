@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bqnqbcfmhldi2"
-path.s3tc="res://.godot/imported/T_Ranger_Normal.png-0ee4ef23bbefaff831451e795f0db50a.s3tc.ctex"
+uid="uid://ckf3hn1ihyxr8"
+path.s3tc="res://.godot/imported/T_Hair_1_BaseColor.png-239bc6fff3ae30bf54b34d99e7bf903e.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/personnage/T_Ranger_Normal.png"
-dest_files=["res://.godot/imported/T_Ranger_Normal.png-0ee4ef23bbefaff831451e795f0db50a.s3tc.ctex"]
+source_file="res://assets/personnage/T_Hair_1_BaseColor.png"
+dest_files=["res://.godot/imported/T_Hair_1_BaseColor.png-239bc6fff3ae30bf54b34d99e7bf903e.s3tc.ctex"]
 
 [params]
 
@@ -22,12 +22,12 @@ compress/lossy_quality=0.7
 compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
-compress/normal_map=1
+compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=1
-roughness/src_normal="res://assets/personnage/T_Ranger_Normal.png"
+roughness/mode=0
+roughness/src_normal=""
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2

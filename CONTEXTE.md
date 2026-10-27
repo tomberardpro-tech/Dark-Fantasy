@@ -39,7 +39,7 @@ survivants à protéger, il reste un dieu à abattre. »
 | Mode | **Solo**. Ne rien construire pour le multijoueur (la coop est mise de côté). |
 | Monde | Monde ouvert à explorer |
 | Vue | **3D en vue isométrique, caméra fixe** (façon Diablo), **même angle que la maquette** (Tom y tient), mais **en vraie perspective** (la vue sans perspective lui semblait trop « plate ») |
-| Contrôles | ZQSD (clavier AZERTY) **ou** clic de souris pour se déplacer, Maj pour courir, Espace pour une **roulade**, E pour interagir |
+| Contrôles | ZQSD (clavier AZERTY) **ou** clic de souris pour se déplacer, Maj pour courir, Espace pour une **roulade**, E pour interagir, **R pour sortir/ranger l'épée**, épée sortie : **clic gauche = attaque** (combo de 3 coups, on se déplace alors avec ZQSD) |
 | Sauvegarde | Uniquement aux feux de camp |
 | Progression | Quêtes, expérience, arbre de compétences, nouvelles tenues |
 | Classes | Guerrier, Mage, Nécromancien, Archer (nom à trouver : Traqueur ? Rôdeur ? Veilleur ?). **Le moment du choix de la classe sera décidé plus tard.** |
@@ -108,7 +108,7 @@ Les survivants « vivent un peu » :
   palette, pour que tout reste cohérent même avec des packs différents.
 - Ambiance : **nuit bleue lisible** (clair de lune bleu, on voit bien le décor), éclairages chauds et
   contrastés autour des feux et des lanternes.
-- Le personnage au départ : un **voyageur encapuchonné** (cape sombre, capuche, tenue simple).
+- Le personnage : tenue **Paysan** (toile, simple), **sans capuche**, avec des **cheveux longs** (choix de Tom).
 - Maquettes de référence (vues et carte) : https://claude.ai/artifact/XT4fjcwino5JMEwKefJbF2
 - Références de Tom : une vidéo de jeu en 3D pixel (nuit violette, gros pixels, épée en main) et
   une image d'un village de nuit en pixel art détaillé.
@@ -133,7 +133,7 @@ Couleurs : noir, gris et rouge sang.
 - **Déjà téléchargé** : Stylized Nature MegaKit [Standard] (gratuit), dans `assets/nature/`
   (seulement les modèles utilisés ; le pack complet est dans `Téléchargements\Quaternius_Nature`).
 - **Déjà téléchargé** : Universal Base Characters, Modular Character Outfits Fantasy et
-  Universal Animation Library [Standard] (gratuits). Le héros porte la tenue **Male_Peasant** avec la capuche du Ranger (choix de Tom),
+  Universal Animation Library [Standard] (gratuits). Le héros porte la tenue **Male_Peasant**, la tête du corps de base et **Hair_Long** (choix de Tom),
   et les animations UAL1, dans `assets/personnage/` (textures réduites à 1024 px).
   Les packs complets sont dans `Téléchargements\Quaternius_Personnages`.
 - Si besoin de grain sur le sol, la roche ou le bois : textures **Kenney Retro Textures Fantasy**
