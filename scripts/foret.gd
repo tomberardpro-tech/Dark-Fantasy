@@ -8,8 +8,8 @@ extends Node3D
 @export var rayon_clairiere := 8.0
 ## Jusqu'où s'étend la forêt.
 @export var rayon_foret := 38.0
-@export var nombre_pins := 380
-@export var nombre_arbres_morts := 50
+@export var nombre_pins := 650
+@export var nombre_arbres_morts := 80
 @export var nombre_rochers := 14
 @export var nombre_herbes := 90
 ## Change ce nombre pour obtenir une autre disposition des arbres.
