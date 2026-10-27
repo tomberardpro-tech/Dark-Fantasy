@@ -7,7 +7,8 @@ uniform bool palette_active = true;
 // Force du tramage : 0 = aucun, plus grand = plus visible.
 uniform float tramage = 0.055;
 
-const vec3 PALETTE[26] = vec3[26](
+const int TAILLE_PALETTE = 30;
+const vec3 PALETTE[30] = vec3[30](
 	vec3(0.027, 0.035, 0.102), // #07091a nuit profonde
 	vec3(0.055, 0.071, 0.161), // #0e1229
 	vec3(0.086, 0.110, 0.227), // #161c3a
@@ -33,7 +34,11 @@ const vec3 PALETTE[26] = vec3[26](
 	vec3(0.941, 0.678, 0.333), // #f0ad55
 	vec3(1.000, 0.878, 0.627), // #ffe0a0
 	vec3(0.369, 0.102, 0.141), // #5e1a24 rouge de la malédiction
-	vec3(0.690, 0.188, 0.227)  // #b0303a
+	vec3(0.690, 0.188, 0.227), // #b0303a
+	vec3(0.110, 0.082, 0.090), // #1c1517 bruns sombres : la lueur du feu
+	vec3(0.200, 0.141, 0.110), // #33241c   qui s'éteint doucement dans la nuit
+	vec3(0.353, 0.227, 0.141), // #5a3a24
+	vec3(0.478, 0.290, 0.157)  // #7a4a28
 );
 
 float bayer2(vec2 a) {
@@ -53,7 +58,13 @@ void fragment() {
 		c += (bayer4(pixel) - 0.5) * tramage;
 		vec3 meilleure = PALETTE[0];
 		float ecart_min = 1e9;
-		for (int i = 0; i < 26; i++) {
+		// Une couleur chaude (éclairée par le feu) ne prend que des couleurs chaudes :
+		// la lueur passe de l'orange au brun sombre, sans traverser les violets.
+		bool chaude = c.r > c.b + 0.02;
+		for (int i = 0; i < TAILLE_PALETTE; i++) {
+			if (chaude && PALETTE[i].b > PALETTE[i].r) {
+				continue;
+			}
 			vec3 d = c - PALETTE[i];
 			float ecart = dot(d * d, vec3(0.3, 0.59, 0.11));
 			if (ecart < ecart_min) {
