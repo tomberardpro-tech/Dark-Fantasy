@@ -5,9 +5,12 @@ extends Node3D
 ## Le vent (voir vent.gd) couche les flammes et emporte les braises.
 
 ## Puissance de la lumière du feu.
-@export var puissance := 2.6
+@export var puissance := 6.0
 ## Distance éclairée par le feu (en mètres).
-@export var portee := 14.0
+@export var portee := 16.0
+## Vitesse à laquelle la lumière baisse en s'éloignant du feu : plus c'est petit,
+## plus le halo orange est large et doux (comme sur la maquette).
+@export var baisse := 1.2
 ## Nombre de braises qui s'envolent.
 @export var nombre_braises := 40
 
@@ -31,7 +34,7 @@ func _ready() -> void:
 	_lumiere.light_color = Color("e0823a")
 	_lumiere.light_energy = puissance
 	_lumiere.omni_range = portee
-	_lumiere.omni_attenuation = 1.6
+	_lumiere.omni_attenuation = baisse
 	_lumiere.shadow_enabled = true
 	_lumiere.position.y = 1.1
 	add_child(_lumiere)
