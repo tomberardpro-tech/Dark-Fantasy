@@ -27,6 +27,8 @@ extends Node3D
 @export var graine := 2026
 
 const DOSSIER := "res://assets/nature/"
+## Le fichier où est figée la place de chaque arbre, rocher et herbe.
+const FICHIER_DISPOSITION := "res://donnees/foret.json"
 const PINS := ["Pine_1", "Pine_2", "Pine_3", "Pine_4", "Pine_5"]
 const ARBRES_MORTS := ["DeadTree_1", "DeadTree_2", "DeadTree_3", "DeadTree_4", "DeadTree_5"]
 const ROCHERS := ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3"]
@@ -55,10 +57,43 @@ var _materiaux_teintes := {}
 var _au_vent: Array = []
 ## Les places déjà prises, rangées par cases de 4 m (pour éviter les chevauchements).
 var _occupe := {}
+## Tout ce qui est posé (modèle, place, taille…), pour figer la disposition dans un fichier.
+var _disposition: Array = []
 var _temps := 0.0
 
 
 func _ready() -> void:
+	# La disposition est figée : on recharge toujours la même, pour que rien ne bouge.
+	# Pour changer un élément, on modifie ce fichier (et seulement ce qui est demandé).
+	if FileAccess.file_exists(FICHIER_DISPOSITION):
+		_charger_disposition()
+	else:
+		_generer()
+		_sauver_disposition()
+
+
+## Recharge chaque arbre, rocher et herbe exactement là où il était.
+func _charger_disposition() -> void:
+	var liste: Variant = JSON.parse_string(FileAccess.get_file_as_string(FICHIER_DISPOSITION))
+	if not liste is Array:
+		push_error("Disposition de la forêt illisible : " + FICHIER_DISPOSITION)
+		return
+	for e in liste:
+		var pos := Vector3(e["x"], 0.0, e["z"])
+		if e.has("obstacle"):
+			_ajouter_obstacle(pos, e["obstacle"])
+		else:
+			_poser(e["modele"], pos, e["rotation"], e["taille"], e["souplesse"], e["decalage"])
+
+
+func _sauver_disposition() -> void:
+	var fichier := FileAccess.open(FICHIER_DISPOSITION, FileAccess.WRITE)
+	if fichier:
+		fichier.store_string(JSON.stringify(_disposition, "\t"))
+
+
+## Première création de la forêt, au hasard (utilisée seulement s'il n'y a pas de fichier).
+func _generer() -> void:
 	_rng.seed = graine
 	var autour_clairiere := func(): return _position_au_hasard(rayon_clairiere + 1.0, rayon_foret)
 	var bord_clairiere := func(): return _position_au_hasard(3.5, 14.0)
@@ -195,8 +230,15 @@ func _position_au_hasard(rayon_min: float, rayon_max: float) -> Vector3:
 ## « souplesse » : combien il plie sous le vent (0 = immobile, comme un rocher).
 func _placer(noms: Array, pos: Vector3, taille: float, souplesse := 0.0) -> void:
 	var nom: String = noms[_rng.randi_range(0, noms.size() - 1)]
-	var objet := _modele(nom).instantiate() as Node3D
 	var rotation_y := _rng.randf_range(0.0, TAU)
+	# (Même ordre de tirages qu'avant, pour retrouver exactement la même forêt.)
+	var decalage := _rng.randf_range(0.0, TAU) if souplesse > 0.0 else 0.0
+	_poser(nom, pos, rotation_y, taille, souplesse, decalage)
+
+
+## Pose un modèle précis, à un endroit précis, et le note dans la disposition.
+func _poser(nom: String, pos: Vector3, rotation_y: float, taille: float, souplesse: float, decalage: float) -> void:
+	var objet := _modele(nom).instantiate() as Node3D
 	objet.position = pos
 	objet.scale = Vector3.ONE * taille
 	objet.rotation.y = rotation_y
@@ -206,7 +248,10 @@ func _placer(noms: Array, pos: Vector3, taille: float, souplesse := 0.0) -> void
 		maillage.visibility_range_end = distance_affichage
 		maillage.visibility_range_end_margin = 5.0
 	if souplesse > 0.0:
-		_au_vent.append([objet, rotation_y, taille, souplesse, _rng.randf_range(0.0, TAU)])
+		_au_vent.append([objet, rotation_y, taille, souplesse, decalage])
+	_disposition.append({"modele": nom, "x": snappedf(pos.x, 0.001), "z": snappedf(pos.z, 0.001),
+		"rotation": snappedf(rotation_y, 0.0001), "taille": snappedf(taille, 0.0001),
+		"souplesse": souplesse, "decalage": snappedf(decalage, 0.0001)})
 
 
 func _modele(nom: String) -> PackedScene:
@@ -242,6 +287,7 @@ func _materiau_teinte(original: StandardMaterial3D) -> StandardMaterial3D:
 
 ## Un obstacle invisible autour d'un tronc ou d'un rocher, pour qu'on ne passe pas à travers.
 func _ajouter_obstacle(pos: Vector3, rayon: float) -> void:
+	_disposition.append({"obstacle": rayon, "x": snappedf(pos.x, 0.001), "z": snappedf(pos.z, 0.001)})
 	var cylindre := CylinderShape3D.new()
 	cylindre.radius = rayon
 	cylindre.height = 3.0

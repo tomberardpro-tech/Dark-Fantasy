@@ -147,9 +147,17 @@ Couleurs : noir, gris et rouge sang.
 - Tom n'aime pas (retirés) : les fougères, les buissons et grandes plantes (Bush_Common,
   Plant_1, Plant_7), les pierres plates au bord du sentier (RockPath), un sol à bosses qui
   brille par petits points (« effet miroir »), le trèfle (Clover).
-- Sol : bleu-gris sombre et lisse, seulement de grandes variations très douces, sans texture
+- Sol : terre brune sombre et lisse (plus marron près du feu, demande de Tom), seulement de
+  grandes variations très douces, sans texture
   (image de référence de Tom). Palette commune coupée par défaut pour coller à cette image
   (F1 la remet).
 - Packs déjà essayés puis retirés à la demande de Tom : Quaternius Ultimate Modular Ruins,
   Kenney Survival Kit.
 - Toujours vérifier la licence d'un pack avant de l'utiliser.
+
+## Disposition du décor : figée
+
+- **Ne jamais déplacer le décor sans que Tom le demande.** La place de chaque arbre, rocher,
+  herbe et champignon est figée dans `donnees/foret.json` (créé une fois, puis toujours rechargé).
+- Pour retirer ou ajouter quelque chose, modifier seulement les entrées concernées de ce
+  fichier, sans relancer le tirage au hasard (qui décalerait tout le reste).

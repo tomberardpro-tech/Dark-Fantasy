@@ -1,14 +1,14 @@
 shader_type spatial;
-// Le sol, comme sur l'image de référence de Tom : un bleu-gris sombre de nuit, lisse,
+// Le sol : une terre brune sombre (plus marron près du feu, plus sombre en forêt), lisse,
 // avec seulement de grandes variations très douces (pas de texture, pas de petits points).
 // Terre plus chaude autour du feu, clairière un peu plus claire, forêt plus sombre.
 // Les passages se fondent sans cercle visible.
 
-uniform vec3 terre_du_feu : source_color = vec3(0.220, 0.190, 0.180);
-uniform vec3 herbe_clairiere : source_color = vec3(0.190, 0.200, 0.300);
-uniform vec3 sol_foret : source_color = vec3(0.120, 0.130, 0.200);
+uniform vec3 terre_du_feu : source_color = vec3(0.300, 0.220, 0.160);
+uniform vec3 herbe_clairiere : source_color = vec3(0.230, 0.195, 0.185);
+uniform vec3 sol_foret : source_color = vec3(0.140, 0.125, 0.150);
 // Rayons (en mètres) où se font les passages d'une couleur à l'autre.
-uniform float fin_de_la_terre = 2.8;
+uniform float fin_de_la_terre = 4.0;
 uniform float fin_de_la_clairiere = 9.0;
 // Force des variations « peintes » du sol (0 = sol uni).
 uniform float variations = 0.15;
