@@ -1,7 +1,13 @@
 extends StaticBody3D
-## Tronc près du feu. Touche E à côté : s'asseoir ou se relever.
-## Au lancement du jeu, le personnage y est déjà assis, face au feu.
+## Tronc près d'un feu de camp. Touche E à côté : s'asseoir ou se relever.
+## S'asseoir au feu sauvegarde la partie (voir sauvegarde.gd).
+## Au lancement, le personnage est assis au dernier feu utilisé, ou au feu de départ
+## s'il n'y a pas encore de sauvegarde.
 
+## Nom unique de ce feu de camp, utilisé dans la sauvegarde.
+@export var nom_du_feu := "clairiere"
+## Est-ce le feu où commence une nouvelle partie ?
+@export var feu_de_depart := true
 ## Distance à laquelle le message « E : s'asseoir » apparaît.
 @export var distance_interaction := 1.8
 
@@ -12,7 +18,11 @@ var _interface: Node
 func _ready() -> void:
 	_joueur = get_tree().get_first_node_in_group("joueur")
 	_interface = get_tree().get_first_node_in_group("interface")
-	if _joueur and _joueur.assis_au_depart:
+	if _joueur == null:
+		return
+	var reprendre_ici := Sauvegarde.dernier_feu() == nom_du_feu
+	var nouvelle_partie: bool = not Sauvegarde.existe() and feu_de_depart and _joueur.assis_au_depart
+	if reprendre_ici or nouvelle_partie:
 		_joueur.asseoir.call_deferred(point_assise(), regard(), true)
 
 
@@ -24,6 +34,8 @@ func _process(_delta: float) -> void:
 			_joueur.se_relever()
 		elif _est_proche():
 			_joueur.asseoir(point_assise(), regard())
+			Sauvegarde.sauvegarder(nom_du_feu, point_assise())
+			_interface.notifier("Partie sauvegardée")
 	if _joueur.est_assis:
 		_interface.afficher("E : se relever")
 	elif _est_proche():
