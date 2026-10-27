@@ -145,7 +145,9 @@ Couleurs : noir, gris et rouge sang.
   MegaKit pour les objets du chemin. Packs complets dans `Téléchargements\Quaternius_Village`.
 - Tom veut de **vrais objets**, pas des cubes : utiliser les modèles des packs dès que possible.
 - Tom n'aime pas (retirés) : les fougères, les buissons et grandes plantes (Bush_Common,
-  Plant_1, Plant_7), les pierres plates au bord du sentier (RockPath).
+  Plant_1, Plant_7), les pierres plates au bord du sentier (RockPath), un sol à bosses qui
+  brille par petits points (« effet miroir »).
+- Sol : bleu-violet sombre aux variations douces, sans texture (image de référence de Tom).
 - Packs déjà essayés puis retirés à la demande de Tom : Quaternius Ultimate Modular Ruins,
   Kenney Survival Kit.
 - Toujours vérifier la licence d'un pack avant de l'utiliser.
