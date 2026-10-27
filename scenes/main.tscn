@@ -1,3 +1,96 @@
 [gd_scene format=3]
 
+[ext_resource type="Script" path="res://scripts/camera_iso.gd" id="1_camera"]
+[ext_resource type="Script" path="res://scripts/feu_de_camp.gd" id="2_feu"]
+[ext_resource type="Script" path="res://scripts/foret.gd" id="3_foret"]
+
+[sub_resource type="Environment" id="Environment_nuit"]
+background_mode = 1
+background_color = Color(0.043, 0.055, 0.122, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.227, 0.275, 0.502, 1)
+ambient_light_energy = 0.55
+glow_enabled = true
+glow_intensity = 0.7
+glow_bloom = 0.05
+fog_enabled = true
+fog_light_color = Color(0.125, 0.157, 0.302, 1)
+fog_density = 0.006
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_sol"]
+size = Vector2(120, 120)
+
+[sub_resource type="StandardMaterial3D" id="Material_sol"]
+albedo_color = Color(0.149, 0.2, 0.184, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_clairiere"]
+top_radius = 7.5
+bottom_radius = 7.5
+height = 0.02
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Material_clairiere"]
+albedo_color = Color(0.18, 0.239, 0.227, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_terre"]
+top_radius = 2.6
+bottom_radius = 2.6
+height = 0.02
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="Material_terre"]
+albedo_color = Color(0.227, 0.184, 0.161, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_tronc"]
+top_radius = 0.3
+bottom_radius = 0.32
+height = 2.6
+radial_segments = 7
+
+[sub_resource type="StandardMaterial3D" id="Material_tronc"]
+albedo_color = Color(0.29, 0.231, 0.192, 1)
+roughness = 1.0
+
 [node name="Main" type="Node3D"]
+
+[node name="Environnement" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_nuit")
+
+[node name="ClairDeLune" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.8727, -0.5236, 0)
+light_color = Color(0.56, 0.64, 0.85, 1)
+light_energy = 0.6
+shadow_enabled = true
+
+[node name="Camera" type="Camera3D" parent="."]
+current = true
+script = ExtResource("1_camera")
+
+[node name="Sol" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_sol")
+material_override = SubResource("Material_sol")
+
+[node name="Clairiere" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.01, 0)
+mesh = SubResource("CylinderMesh_clairiere")
+material_override = SubResource("Material_clairiere")
+
+[node name="TerreAutourDuFeu" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.02, 0)
+mesh = SubResource("CylinderMesh_terre")
+material_override = SubResource("Material_terre")
+
+[node name="FeuDeCamp" type="Node3D" parent="."]
+script = ExtResource("2_feu")
+
+[node name="Tronc" type="MeshInstance3D" parent="."]
+position = Vector3(-1.7, 0.3, -1.7)
+rotation = Vector3(0, 0.7854, 1.5708)
+mesh = SubResource("CylinderMesh_tronc")
+material_override = SubResource("Material_tronc")
+
+[node name="Foret" type="Node3D" parent="."]
+script = ExtResource("3_foret")
