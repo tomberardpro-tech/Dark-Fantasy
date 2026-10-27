@@ -3,7 +3,7 @@ extends Node3D
 ## Touche E à côté : on la fouille et on y trouve une vieille épée (la première arme).
 
 ## Distance à laquelle le message « E : fouiller la charrette » apparaît.
-@export var distance_interaction := 2.6
+@export var distance_interaction := 3.2
 
 var fouillee := false
 
@@ -35,62 +35,29 @@ func interagir(joueur: Node3D) -> void:
 
 
 func _construire() -> void:
-	var bois := StandardMaterial3D.new()
-	bois.albedo_color = Color("4a3b31")
-	bois.roughness = 1.0
-	var bois_sombre := StandardMaterial3D.new()
-	bois_sombre.albedo_color = Color("2a221f")
-	bois_sombre.roughness = 1.0
-	# La caisse de la charrette, couchée sur le côté.
-	var caisse := _boite(Vector3(2.2, 0.7, 1.3), bois)
-	caisse.position = Vector3(0, 0.65, 0)
-	caisse.rotation = Vector3(0.0, 0.3, 1.25)
-	add_child(caisse)
-	# Une roue encore attachée, une autre tombée par terre.
-	var roue := _roue(bois_sombre)
-	roue.position = Vector3(0.3, 1.3, 0.75)
-	roue.rotation = Vector3(PI / 2.0, 0.3, 0.0)
-	add_child(roue)
-	var roue_tombee := _roue(bois_sombre)
-	roue_tombee.position = Vector3(-1.8, 0.06, 1.3)
-	add_child(roue_tombee)
-	# Le timon et quelques caisses éparpillées.
-	var timon := _boite(Vector3(2.0, 0.1, 0.1), bois_sombre)
-	timon.position = Vector3(1.9, 0.08, -0.4)
-	timon.rotation.y = 0.5
-	add_child(timon)
-	for i in 3:
-		var petite := _boite(Vector3(0.45, 0.4, 0.45), bois)
-		petite.position = Vector3(-1.2 + i * 0.6, 0.2, -1.1 - (i % 2) * 0.4)
-		petite.rotation.y = i * 0.7
-		add_child(petite)
+	# La charrette du pack (4 m de long), couchée sur le côté.
+	var support := Node3D.new()
+	support.rotation.y = 0.3
+	add_child(support)
+	var charrette := Modeles.creer("Prop_Wagon")
+	# Le modèle va de z = -3.15 à +0.87 : on le recentre, puis on le bascule.
+	charrette.basis = Basis(Vector3.BACK, 1.45)
+	charrette.position = Vector3(0.75, 0.95, 1.14)
+	support.add_child(charrette)
+	# Son chargement, éparpillé sur le sol.
+	for o in [["Barrel", Vector3(-1.4, 0, 1.6), Vector3(PI / 2.0, 0.4, 0)],
+			["Crate_Wooden", Vector3(1.6, 0, 1.2), Vector3(0, 0.6, 0)],
+			["Crate_Wooden", Vector3(1.9, 0, -0.2), Vector3(0, 1.2, 0.15)],
+			["Bag", Vector3(-1.3, 0, -1.0), Vector3(0, 2.0, 0)]]:
+		var objet := Modeles.creer(o[0])
+		objet.position = o[1] + (Vector3(0, 0.35, 0) if o[0] == "Barrel" else Vector3.ZERO)
+		objet.rotation = o[2]
+		support.add_child(objet)
 	var forme := BoxShape3D.new()
-	forme.size = Vector3(2.3, 1.6, 1.6)
+	forme.size = Vector3(1.8, 1.8, 4.0)
 	var zone := CollisionShape3D.new()
 	zone.shape = forme
-	zone.position = Vector3(0, 0.8, 0)
-	zone.rotation.y = 0.3
+	zone.position = Vector3(0, 0.9, 0)
 	var corps := StaticBody3D.new()
 	corps.add_child(zone)
-	add_child(corps)
-
-
-func _roue(mat: Material) -> MeshInstance3D:
-	var forme := CylinderMesh.new()
-	forme.top_radius = 0.45
-	forme.bottom_radius = 0.45
-	forme.height = 0.1
-	forme.radial_segments = 10
-	var roue := MeshInstance3D.new()
-	roue.mesh = forme
-	roue.material_override = mat
-	return roue
-
-
-func _boite(taille: Vector3, mat: Material) -> MeshInstance3D:
-	var forme := BoxMesh.new()
-	forme.size = taille
-	var objet := MeshInstance3D.new()
-	objet.mesh = forme
-	objet.material_override = mat
-	return objet
+	support.add_child(corps)

@@ -71,29 +71,14 @@ func prendre_epee() -> void:
 	if a_epee:
 		return
 	a_epee = true
-	var acier := StandardMaterial3D.new()
-	acier.albedo_color = Color("8696c2")
-	acier.metallic = 0.6
-	acier.roughness = 0.5
-	var cuir := StandardMaterial3D.new()
-	cuir.albedo_color = Color("2a221f")
-	cuir.roughness = 1.0
-	var epee := Node3D.new()
+	# L'épée du Fantasy Props MegaKit, un peu rouillée (teinte sombre).
+	var epee := Modeles.creer("Sword_Bronze", Modeles.OBJETS, Color(0.6, 0.6, 0.7))
 	epee.name = "Epee"
-	# Dans le dos, en diagonale (le modèle regarde vers son +Z, le dos est vers -Z).
-	epee.position = Vector3(0.0, 1.15, -0.2)
-	epee.rotation = Vector3(0.0, 0.0, 0.6)
+	# Dans le dos, en diagonale, la poignée vers le haut
+	# (le modèle du héros regarde vers son +Z, le dos est vers -Z).
+	epee.position = Vector3(0.0, 1.0, -0.22)
+	epee.rotation = Vector3(0.0, 0.0, PI + 0.6)
 	_modele.add_child(epee)
-	for morceau in [[Vector3(0.06, 0.8, 0.015), Vector3(0, 0.3, 0), acier],
-			[Vector3(0.26, 0.04, 0.05), Vector3(0, -0.12, 0), cuir],
-			[Vector3(0.04, 0.22, 0.04), Vector3(0, -0.25, 0), cuir]]:
-		var forme := BoxMesh.new()
-		forme.size = morceau[0]
-		var piece := MeshInstance3D.new()
-		piece.mesh = forme
-		piece.material_override = morceau[2]
-		piece.position = morceau[1]
-		epee.add_child(piece)
 
 
 func _physics_process(delta: float) -> void:
