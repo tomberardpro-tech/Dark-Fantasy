@@ -15,7 +15,7 @@ extends CharacterBody3D
 @export var assise_recul := 0.35
 @export var assise_hauteur := 0.1
 ## Teinte appliquée à la tenue pour coller à la palette sombre.
-@export var teinte := Color(0.7, 0.7, 0.78)
+@export var teinte := Color(0.85, 0.85, 0.92)
 
 const ANIMATIONS := "res://assets/personnage/UAL1_Standard.glb"
 const EN_BOUCLE := ["Idle", "Walk", "Jog_Fwd", "Sprint", "Sitting_Idle"]

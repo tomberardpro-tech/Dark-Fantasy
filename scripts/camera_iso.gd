@@ -8,7 +8,7 @@ extends Camera3D
 ## D'où regarde la caméra par rapport à la cible (angle de la maquette).
 @export var direction := Vector3(-19, 20, -18)
 ## Distance entre la caméra et la cible.
-@export var distance := 42.0
+@export var distance := 34.0
 ## Vraie perspective (profondeur) ou vue « plate » sans perspective.
 @export var perspective := true
 ## Ouverture de l'objectif en perspective : petit = effet téléobjectif, grand = grand-angle.

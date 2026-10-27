@@ -13,14 +13,14 @@
 [sub_resource type="ShaderMaterial" id="Material_palette"]
 shader = ExtResource("8_palette")
 shader_parameter/palette_active = true
-shader_parameter/tramage = 0.055
+shader_parameter/tramage = 0.035
 
 [sub_resource type="Environment" id="Environment_nuit"]
 background_mode = 1
 background_color = Color(0.043, 0.055, 0.122, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.227, 0.275, 0.502, 1)
-ambient_light_energy = 0.55
+ambient_light_energy = 0.85
 glow_enabled = true
 glow_intensity = 0.7
 glow_bloom = 0.05
@@ -85,8 +85,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 stretch = true
-stretch_shrink = 2
 script = ExtResource("7_rendu")
+taille_pixels = 1
 
 [node name="Monde" type="SubViewport" parent="Rendu"]
 size = Vector2i(576, 324)
@@ -98,7 +98,7 @@ environment = SubResource("Environment_nuit")
 [node name="ClairDeLune" type="DirectionalLight3D" parent="Rendu/Monde"]
 rotation = Vector3(-0.8727, -0.5236, 0)
 light_color = Color(0.56, 0.64, 0.85, 1)
-light_energy = 0.6
+light_energy = 0.9
 shadow_enabled = true
 
 [node name="Camera" type="Camera3D" parent="Rendu/Monde" node_paths=PackedStringArray("a_suivre")]
@@ -150,6 +150,12 @@ script = ExtResource("4_joueur")
 [node name="Forme" type="CollisionShape3D" parent="Rendu/Monde/Joueur"]
 position = Vector3(0, 0.9, 0)
 shape = SubResource("Shape_joueur")
+
+[node name="LueurDeLune" type="OmniLight3D" parent="Rendu/Monde/Joueur"]
+position = Vector3(-0.6, 2.6, -0.6)
+light_color = Color(0.56, 0.64, 0.85, 1)
+light_energy = 0.8
+omni_range = 4.0
 
 [node name="Visuel" type="Node3D" parent="Rendu/Monde/Joueur"]
 

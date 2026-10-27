@@ -96,7 +96,7 @@ Les survivants « vivent un peu » :
 
 ## Direction artistique : la « 3D pixel » légère
 
-- Vraie 3D, vue isométrique, calculée en basse résolution puis agrandie sans lissage. **Effet pixel
+- Vraie 3D, vue isométrique. **Effet pixel réduit à la demande de Tom : taille 1 par défaut (F2 pour comparer), palette commune et tramage discret gardés.** Ancien réglage :
   léger** (pixels de taille 2 sur la maquette) : l'image reste détaillée avec un côté rétro.
 - Modèles low poly.
 - **Palette limitée** : bleus nuit et violets pour l'ensemble ; touches chaudes orange pour les
