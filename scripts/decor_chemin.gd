@@ -11,6 +11,7 @@ extends Node3D
 @export var fondu_depart := 7.0
 
 const COULEUR_TERRE := Color("3a2f29")
+const COULEUR_TERRE_MOUILLEE := Color("1f1813")
 const COULEUR_LANTERNE := Color("f0ad55")
 const COULEUR_MAUDITE := Color("b0303a")
 const GALETS := ["Pebble_Round_1", "Pebble_Round_2", "Pebble_Round_3", "Pebble_Round_4", "Pebble_Round_5"]
@@ -27,6 +28,7 @@ func _ready() -> void:
 	_rng.seed = 77
 	_bois = Modeles.materiau_de("Floor_WoodDark")
 	add_child(_sentier())
+	add_child(_berges_mouillees())
 	add_child(_eau())
 	_creer_berges()
 	_bloquer_le_ruisseau()
@@ -55,6 +57,18 @@ func _sentier() -> MeshInstance3D:
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.roughness = 1.0
 	return _ruban(Chemin.courbe_chemin, 0.9, 1.7, 0.03, mat, fondu_depart)
+
+
+## Une bande de terre brune plus sombre et humide de chaque côté de l'eau : la rivière
+## se fond dans la terre au lieu d'être une bande bleue posée sur le sol.
+func _berges_mouillees() -> MeshInstance3D:
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_color = COULEUR_TERRE_MOUILLEE
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mat.roughness = 1.0
+	return _ruban(Chemin.courbe_ruisseau, 1.9, 3.2, 0.035, mat, 0.0)
 
 
 ## L'eau du ruisseau : sombre, calme, avec de petites rides qui bougent et le reflet
