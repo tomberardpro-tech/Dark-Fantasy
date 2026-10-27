@@ -130,6 +130,8 @@ Couleurs : noir, gris et rouge sang.
   **Stylized Nature MegaKit** (pins, arbres morts, rochers, herbes, fougères), **Medieval Village
   MegaKit** (village), **Modular Character Outfits Fantasy** et **Universal Animation Library**
   (personnages animés), **Animal Pack** (loups).
+- **Déjà téléchargé** : Stylized Nature MegaKit [Standard] (gratuit), dans `assets/nature/`
+  (seulement les modèles utilisés ; le pack complet est dans `Téléchargements\Quaternius_Nature`).
 - Si besoin de grain sur le sol, la roche ou le bois : textures **Kenney Retro Textures Fantasy**
   ou **Screaming Brain Studios Tiny Texture Pack** (CC0).
 - Écarté : Synty POLYGON Dark Fantasy (payant).

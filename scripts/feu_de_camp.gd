@@ -1,14 +1,21 @@
 extends Node3D
-## Feu de camp en formes simples : pierres, bûches, flammes qui vacillent, braises
+## Feu de camp, animé comme sur la maquette : un cercle de galets, des bûches,
+## trois flammes qui vacillent et tournent, des braises qui montent en tourbillonnant,
 ## et une lumière orange qui tremble.
 
 ## Puissance de la lumière du feu.
-@export var puissance := 3.0
+@export var puissance := 2.6
 ## Distance éclairée par le feu (en mètres).
-@export var portee := 10.0
+@export var portee := 14.0
+## Nombre de braises qui s'envolent.
+@export var nombre_braises := 40
+
+const GALETS := ["Pebble_Round_1", "Pebble_Round_2", "Pebble_Round_3", "Pebble_Round_4", "Pebble_Round_5"]
 
 var _flammes: Array[MeshInstance3D] = []
 var _lumiere: OmniLight3D
+var _braises: MultiMesh
+var _vie_braises: Array[float] = []
 var _temps := 0.0
 
 
@@ -22,8 +29,9 @@ func _ready() -> void:
 	_lumiere.light_color = Color("e0823a")
 	_lumiere.light_energy = puissance
 	_lumiere.omni_range = portee
+	_lumiere.omni_attenuation = 1.6
 	_lumiere.shadow_enabled = true
-	_lumiere.position.y = 1.0
+	_lumiere.position.y = 1.1
 	add_child(_lumiere)
 
 
@@ -39,22 +47,21 @@ func _process(delta: float) -> void:
 		flamme.scale = Vector3(1.0, k, 1.0)
 		flamme.position.y = 0.2 + hauteur * k / 2.0
 		flamme.rotation.y = _temps * (0.8 + i)
+	_animer_braises(delta)
 
 
 func _creer_pierres() -> void:
-	var mat := _materiau(Color("5d6372"))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	for i in 9:
 		var a := TAU * i / 9.0
-		var forme := BoxMesh.new()
-		forme.size = Vector3(0.32, 0.22, 0.26)
-		var pierre := MeshInstance3D.new()
-		pierre.mesh = forme
-		pierre.material_override = mat
-		pierre.position = Vector3(cos(a) * 0.8, 0.1, sin(a) * 0.8)
-		pierre.rotation = Vector3(0.0, -a + rng.randf_range(-0.3, 0.3), rng.randf_range(-0.2, 0.2))
-		add_child(pierre)
+		var galet := (load("res://assets/nature/" + GALETS[i % GALETS.size()] + ".gltf") as PackedScene).instantiate() as Node3D
+		galet.position = Vector3(cos(a) * 0.78, 0.0, sin(a) * 0.78)
+		galet.rotation.y = rng.randf_range(0.0, TAU)
+		galet.scale = Vector3(0.75, 2.2, 0.75)
+		add_child(galet)
+		for maillage in galet.find_children("*", "MeshInstance3D", true, false):
+			maillage.material_override = _materiau(Color("5d6372"))
 
 
 func _creer_buches() -> void:
@@ -75,7 +82,7 @@ func _creer_buches() -> void:
 
 func _creer_flammes() -> void:
 	# [couleur, largeur, hauteur] : de la grande flamme orange au cœur jaune pâle.
-	for f in [[Color("d07a35"), 0.42, 1.1], [Color("f0ad55"), 0.3, 0.85], [Color("ffe0a0"), 0.15, 0.6]]:
+	for f in [[Color("d07a35"), 0.42, 1.2], [Color("f0ad55"), 0.3, 0.95], [Color("ffe0a0"), 0.16, 0.65]]:
 		var forme := CylinderMesh.new()
 		forme.top_radius = 0.0
 		forme.bottom_radius = f[1]
@@ -83,7 +90,7 @@ func _creer_flammes() -> void:
 		forme.radial_segments = 6
 		var flamme := MeshInstance3D.new()
 		flamme.mesh = forme
-		flamme.material_override = _materiau_lumineux(f[0], 3.0)
+		flamme.material_override = _materiau_brillant(f[0])
 		flamme.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		flamme.set_meta("hauteur", f[2])
 		flamme.position.y = 0.2 + f[2] / 2.0
@@ -91,25 +98,37 @@ func _creer_flammes() -> void:
 		_flammes.append(flamme)
 
 
+## Des braises qui montent jusqu'à 3,5 m en tourbillonnant, puis renaissent en bas.
 func _creer_braises() -> void:
 	var forme := BoxMesh.new()
-	forme.size = Vector3(0.05, 0.05, 0.05)
-	forme.material = _materiau_lumineux(Color("f0ad55"), 4.0)
-	var braises := CPUParticles3D.new()
-	braises.mesh = forme
-	braises.amount = 30
-	braises.lifetime = 1.6
-	braises.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
-	braises.emission_sphere_radius = 0.3
-	braises.direction = Vector3.UP
-	braises.spread = 20.0
-	braises.gravity = Vector3(0.0, 0.5, 0.0)
-	braises.initial_velocity_min = 0.6
-	braises.initial_velocity_max = 1.2
-	braises.scale_amount_min = 0.5
-	braises.scale_amount_max = 1.2
-	braises.position.y = 0.4
-	add_child(braises)
+	forme.size = Vector3(0.06, 0.06, 0.06)
+	forme.material = _materiau_brillant(Color("f0ad55"))
+	_braises = MultiMesh.new()
+	_braises.transform_format = MultiMesh.TRANSFORM_3D
+	_braises.mesh = forme
+	_braises.instance_count = nombre_braises
+	var rendu := MultiMeshInstance3D.new()
+	rendu.multimesh = _braises
+	rendu.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(rendu)
+	for i in nombre_braises:
+		_vie_braises.append(randf())
+
+
+func _animer_braises(delta: float) -> void:
+	for i in nombre_braises:
+		_vie_braises[i] += delta * (0.36 + (i % 5) * 0.06)
+		if _vie_braises[i] > 1.0:
+			_vie_braises[i] -= 1.0
+		var v := _vie_braises[i]
+		var a := i * 2.4
+		var pos := Vector3(
+			cos(a) * 0.25 + sin(_temps * 2.0 + i) * 0.2 * v,
+			0.4 + v * 3.2,
+			sin(a) * 0.25 + cos(_temps * 1.7 + i) * 0.2 * v)
+		# Les braises rapetissent en montant, comme si elles s'éteignaient.
+		var taille := 1.0 - v * 0.7
+		_braises.set_instance_transform(i, Transform3D(Basis.from_scale(Vector3.ONE * taille), pos))
 
 
 ## Un obstacle invisible pour qu'on ne marche pas dans le feu.
@@ -132,10 +151,9 @@ func _materiau(couleur: Color) -> StandardMaterial3D:
 	return mat
 
 
-func _materiau_lumineux(couleur: Color, intensite: float) -> StandardMaterial3D:
+## Couleur pleine, non touchée par les ombres : les flammes et les braises « brillent ».
+func _materiau_brillant(couleur: Color) -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color.BLACK
-	mat.emission_enabled = true
-	mat.emission = couleur
-	mat.emission_energy_multiplier = intensite
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = couleur
 	return mat
