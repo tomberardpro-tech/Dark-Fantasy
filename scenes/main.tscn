@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://scripts/interface.gd" id="6_interface"]
 [ext_resource type="Script" path="res://scripts/rendu.gd" id="7_rendu"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="8_palette"]
+[ext_resource type="PackedScene" path="res://assets/personnage/Male_Ranger.gltf" id="9_ranger"]
 
 [sub_resource type="ShaderMaterial" id="Material_palette"]
 shader = ExtResource("8_palette")
@@ -72,23 +73,6 @@ size = Vector3(2.6, 0.6, 0.6)
 [sub_resource type="CapsuleShape3D" id="Shape_joueur"]
 radius = 0.35
 height = 1.8
-
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_joueur"]
-radius = 0.35
-height = 1.8
-radial_segments = 8
-rings = 2
-
-[sub_resource type="StandardMaterial3D" id="Material_cape"]
-albedo_color = Color(0.227, 0.165, 0.322, 1)
-roughness = 1.0
-
-[sub_resource type="BoxMesh" id="BoxMesh_visage"]
-size = Vector3(0.3, 0.22, 0.12)
-
-[sub_resource type="StandardMaterial3D" id="Material_visage"]
-albedo_color = Color(0.525, 0.588, 0.761, 1)
-roughness = 1.0
 
 [node name="Main" type="Node"]
 
@@ -169,17 +153,8 @@ shape = SubResource("Shape_joueur")
 
 [node name="Visuel" type="Node3D" parent="Rendu/Monde/Joueur"]
 
-[node name="Pivot" type="Node3D" parent="Rendu/Monde/Joueur/Visuel"]
-position = Vector3(0, 0.9, 0)
-
-[node name="Corps" type="MeshInstance3D" parent="Rendu/Monde/Joueur/Visuel/Pivot"]
-mesh = SubResource("CapsuleMesh_joueur")
-material_override = SubResource("Material_cape")
-
-[node name="Visage" type="MeshInstance3D" parent="Rendu/Monde/Joueur/Visuel/Pivot"]
-position = Vector3(0, 0.55, -0.3)
-mesh = SubResource("BoxMesh_visage")
-material_override = SubResource("Material_visage")
+[node name="Modele" parent="Rendu/Monde/Joueur/Visuel" instance=ExtResource("9_ranger")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 
 [node name="Foret" type="Node3D" parent="Rendu/Monde"]
 script = ExtResource("3_foret")

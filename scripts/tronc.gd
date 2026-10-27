@@ -13,7 +13,7 @@ func _ready() -> void:
 	_joueur = get_tree().get_first_node_in_group("joueur")
 	_interface = get_tree().get_first_node_in_group("interface")
 	if _joueur and _joueur.assis_au_depart:
-		_joueur.asseoir.call_deferred(point_assise(), regard())
+		_joueur.asseoir.call_deferred(point_assise(), regard(), true)
 
 
 func _process(_delta: float) -> void:
