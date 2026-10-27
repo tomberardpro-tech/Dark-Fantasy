@@ -23,14 +23,8 @@ var _attente_roulade := 0.0
 @onready var _pivot: Node3D = $Visuel/Pivot
 
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
-		_clic_maintenu = event.pressed
-		if event.pressed:
-			_viser_la_souris()
-
-
 func _physics_process(delta: float) -> void:
+	_clic_maintenu = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -128,7 +122,11 @@ func _viser_la_souris() -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera == null:
 		return
-	var souris := get_viewport().get_mouse_position()
+	# La souris est mesurée sur la fenêtre, puis ramenée à la taille du monde en pixels.
+	var souris := get_tree().root.get_mouse_position()
+	var conteneur := get_viewport().get_parent() as SubViewportContainer
+	if conteneur:
+		souris /= conteneur.stretch_shrink
 	var point: Variant = Plane(Vector3.UP, 0.0).intersects_ray(camera.project_ray_origin(souris), camera.project_ray_normal(souris))
 	if point != null:
 		_cible_clic = point

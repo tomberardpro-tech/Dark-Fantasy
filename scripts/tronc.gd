@@ -19,21 +19,17 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if _joueur == null or _interface == null:
 		return
+	if Input.is_action_just_pressed("interagir"):
+		if _joueur.est_assis:
+			_joueur.se_relever()
+		elif _est_proche():
+			_joueur.asseoir(point_assise(), regard())
 	if _joueur.est_assis:
 		_interface.afficher("E : se relever")
 	elif _est_proche():
 		_interface.afficher("E : s'asseoir")
 	else:
 		_interface.cacher()
-
-
-func _unhandled_input(event: InputEvent) -> void:
-	if _joueur == null or not event.is_action_pressed("interagir"):
-		return
-	if _joueur.est_assis:
-		_joueur.se_relever()
-	elif _est_proche():
-		_joueur.asseoir(point_assise(), regard())
 
 
 ## L'endroit où se place le personnage assis : juste devant le tronc, côté feu.

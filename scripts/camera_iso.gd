@@ -1,6 +1,7 @@
 extends Camera3D
-## Caméra isométrique fixe (façon Diablo) : même angle que sur la maquette.
+## Caméra fixe vue de haut (façon Diablo) : même angle que sur la maquette.
 ## Elle suit doucement le personnage sans jamais tourner.
+## En perspective, ce qui est proche paraît plus grand : la scène a de la profondeur.
 
 ## Le personnage (ou l'objet) que la caméra suit.
 @export var a_suivre: Node3D
@@ -8,7 +9,11 @@ extends Camera3D
 @export var direction := Vector3(-19, 20, -18)
 ## Distance entre la caméra et la cible.
 @export var distance := 30.0
-## Taille de la zone visible : plus c'est grand, plus on voit loin (on « dézoome »).
+## Vraie perspective (profondeur) ou vue « plate » sans perspective.
+@export var perspective := true
+## Ouverture de l'objectif en perspective : petit = effet téléobjectif, grand = grand-angle.
+@export_range(10.0, 90.0) var champ_de_vision := 35.0
+## Taille de la zone visible en vue plate : plus c'est grand, plus on voit loin.
 @export var zoom := 18.0
 ## Rapidité avec laquelle la caméra rattrape le personnage.
 @export var douceur := 6.0
@@ -17,8 +22,12 @@ var _cible := Vector3.ZERO
 
 
 func _ready() -> void:
-	projection = PROJECTION_ORTHOGONAL
-	size = zoom
+	if perspective:
+		projection = PROJECTION_PERSPECTIVE
+		fov = champ_de_vision
+	else:
+		projection = PROJECTION_ORTHOGONAL
+		size = zoom
 	if a_suivre:
 		_cible = a_suivre.global_position
 	_placer()
