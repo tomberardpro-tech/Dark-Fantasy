@@ -5,22 +5,23 @@ extends Node
 ## (pour ne pas planter d'arbre au milieu).
 
 ## Les points de passage du sentier, de la clairière jusqu'à l'entrée de Bruneval.
+## Avec la caméra du jeu, le chemin part vers la droite de l'écran (choix de Tom).
 const TRACE := [
-	Vector3(5, 0, 5), Vector3(18, 0, 14), Vector3(28, 0, 30), Vector3(24, 0, 46),
-	Vector3(36, 0, 60), Vector3(52, 0, 66), Vector3(64, 0, 80), Vector3(60, 0, 98),
-	Vector3(72, 0, 112), Vector3(90, 0, 118), Vector3(104, 0, 132), Vector3(112, 0, 150),
+	Vector3(-5, 0, 5), Vector3(-14, 0, 18), Vector3(-30, 0, 28), Vector3(-46, 0, 24),
+	Vector3(-60, 0, 36), Vector3(-66, 0, 52), Vector3(-80, 0, 64), Vector3(-98, 0, 60),
+	Vector3(-112, 0, 72), Vector3(-118, 0, 90), Vector3(-132, 0, 104), Vector3(-150, 0, 112),
 ]
 ## Le ruisseau, qui croise le sentier au niveau du pont.
 const RUISSEAU := [
-	Vector3(-10, 0, 88), Vector3(2, 0, 74), Vector3(15, 0, 62), Vector3(30, 0, 53),
-	Vector3(48, 0, 48), Vector3(70, 0, 35), Vector3(95, 0, 30), Vector3(120, 0, 18),
+	Vector3(-88, 0, -10), Vector3(-74, 0, 2), Vector3(-62, 0, 15), Vector3(-53, 0, 30),
+	Vector3(-48, 0, 48), Vector3(-35, 0, 70), Vector3(-30, 0, 95), Vector3(-18, 0, 120),
 ]
 
-const RUINE := Vector3(13, 0, 34)
-const AUTEL := Vector3(72, 0, 90)
-const CHARRETTE := Vector3(99, 0, 122)
+const RUINE := Vector3(-34, 0, 13)
+const AUTEL := Vector3(-90, 0, 72)
+const CHARRETTE := Vector3(-122, 0, 99)
 ## Le centre du hameau de Bruneval (construit à l'étape 9).
-const VILLAGE := Vector3(122, 0, 166)
+const VILLAGE := Vector3(-166, 0, 122)
 
 var courbe_chemin: Curve3D
 var courbe_ruisseau: Curve3D

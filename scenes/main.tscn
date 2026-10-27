@@ -90,7 +90,7 @@ a_suivre = NodePath("../Joueur")
 [node name="Sol" type="StaticBody3D" parent="Rendu/Monde"]
 
 [node name="Apparence" type="MeshInstance3D" parent="Rendu/Monde/Sol"]
-position = Vector3(60, 0, 80)
+position = Vector3(-80, 0, 60)
 mesh = SubResource("PlaneMesh_sol")
 material_override = SubResource("Material_sol")
 
