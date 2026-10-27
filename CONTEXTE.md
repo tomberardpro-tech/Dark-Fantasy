@@ -133,8 +133,8 @@ Couleurs : noir, gris et rouge sang.
 - **Déjà téléchargé** : Stylized Nature MegaKit [Standard] (gratuit), dans `assets/nature/`
   (seulement les modèles utilisés ; le pack complet est dans `Téléchargements\Quaternius_Nature`).
 - **Déjà téléchargé** : Universal Base Characters, Modular Character Outfits Fantasy et
-  Universal Animation Library [Standard] (gratuits). Le héros utilise la tenue **Male_Ranger**
-  (avec capuche) et les animations UAL1, dans `assets/personnage/` (textures réduites à 1024 px).
+  Universal Animation Library [Standard] (gratuits). Le héros porte la tenue **Male_Peasant** avec la capuche du Ranger (choix de Tom),
+  et les animations UAL1, dans `assets/personnage/` (textures réduites à 1024 px).
   Les packs complets sont dans `Téléchargements\Quaternius_Personnages`.
 - Si besoin de grain sur le sol, la roche ou le bois : textures **Kenney Retro Textures Fantasy**
   ou **Screaming Brain Studios Tiny Texture Pack** (CC0).

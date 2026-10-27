@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://oai6s6fklqqj"
-path="res://.godot/imported/Male_Ranger.gltf-75b5e8b6c5a31962aa96390030ac15ca.scn"
+uid="uid://j1x4kabfr8bd"
+path="res://.godot/imported/Male_Peasant.gltf-10cd3d34b721fc120192d91315b90a32.scn"
 
 [deps]
 
-source_file="res://assets/personnage/Male_Ranger.gltf"
-dest_files=["res://.godot/imported/Male_Ranger.gltf-75b5e8b6c5a31962aa96390030ac15ca.scn"]
+source_file="res://assets/personnage/Male_Peasant.gltf"
+dest_files=["res://.godot/imported/Male_Peasant.gltf-10cd3d34b721fc120192d91315b90a32.scn"]
 
 [params]
 

@@ -8,7 +8,7 @@
 [ext_resource type="Script" path="res://scripts/interface.gd" id="6_interface"]
 [ext_resource type="Script" path="res://scripts/rendu.gd" id="7_rendu"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="8_palette"]
-[ext_resource type="PackedScene" path="res://assets/personnage/Male_Ranger.gltf" id="9_ranger"]
+[ext_resource type="PackedScene" path="res://assets/personnage/Male_Peasant.gltf" id="9_tenue"]
 [ext_resource type="Shader" path="res://shaders/sol.gdshader" id="10_sol"]
 [ext_resource type="Script" path="res://scripts/decor_chemin.gd" id="11_decor"]
 [ext_resource type="Script" path="res://scripts/ambiance.gd" id="12_ambiance"]
@@ -134,7 +134,7 @@ omni_range = 4.0
 
 [node name="Visuel" type="Node3D" parent="Rendu/Monde/Joueur"]
 
-[node name="Modele" parent="Rendu/Monde/Joueur/Visuel" instance=ExtResource("9_ranger")]
+[node name="Modele" parent="Rendu/Monde/Joueur/Visuel" instance=ExtResource("9_tenue")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
 
 [node name="DecorDuChemin" type="Node3D" parent="Rendu/Monde"]

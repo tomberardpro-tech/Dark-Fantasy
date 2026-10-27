@@ -1,6 +1,6 @@
 extends CharacterBody3D
-## Le voyageur encapuchonné (tenue « Ranger » de Quaternius, animée avec la
-## Universal Animation Library).
+## Le voyageur encapuchonné (tenue « Paysan » de Quaternius avec la capuche du Ranger,
+## animée avec la Universal Animation Library).
 ## ZQSD ou clic de souris pour marcher, Maj pour courir, Espace pour une roulade.
 ## Il peut s'asseoir (voir tronc.gd) et se relève dès qu'on bouge.
 
@@ -20,6 +20,7 @@ extends CharacterBody3D
 @export var teinte := Color(0.85, 0.85, 0.92)
 
 const ANIMATIONS := "res://assets/personnage/UAL1_Standard.glb"
+const CAPUCHE := "res://assets/personnage/Male_Ranger_Head_Hood.gltf"
 const EN_BOUCLE := ["Idle", "Walk", "Jog_Fwd", "Sprint", "Sitting_Idle"]
 
 var est_assis := false
@@ -41,6 +42,7 @@ var _anim: AnimationPlayer
 
 func _ready() -> void:
 	_preparer_animations()
+	_ajouter_capuche()
 	_teinter_tenue()
 	_ajouter_visage_dans_l_ombre()
 	if Sauvegarde.donnee("epee", false):
@@ -235,6 +237,18 @@ func _preparer_animations() -> void:
 	_modele.add_child(_anim)
 	_anim.root_node = NodePath("..")
 	_anim.add_animation_library("", bibliotheque)
+
+
+## La tenue Paysan n'a pas de capuche : on lui met celle du Ranger (même squelette).
+func _ajouter_capuche() -> void:
+	var squelette := _modele.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var source := (load(CAPUCHE) as PackedScene).instantiate()
+	var capuche := source.find_children("*", "MeshInstance3D", true, false)[0] as MeshInstance3D
+	capuche.get_parent().remove_child(capuche)
+	source.free()
+	capuche.name = "Capuche"
+	squelette.add_child(capuche)
+	capuche.skeleton = NodePath("..")
 
 
 func _teinter_tenue() -> void:
