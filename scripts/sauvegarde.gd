@@ -1,7 +1,7 @@
 extends Node
 ## Sauvegarde de la partie, uniquement aux feux de camp.
-## Pour commencer, on retient le dernier feu de camp où le joueur s'est assis
-## et sa position à ce moment-là.
+## On retient le dernier feu de camp où le joueur s'est assis, sa position à ce
+## moment-là, et ce qu'il a trouvé (par exemple la vieille épée).
 ## Le fichier est rangé par Godot dans le dossier des données du jeu
 ## (%APPDATA%\Godot\app_userdata\Jeu Dark Fantasy\sauvegarde.json).
 
@@ -15,12 +15,14 @@ func _ready() -> void:
 
 
 ## Enregistre la partie au feu de camp « feu » (son nom), le joueur étant à « position ».
-func sauvegarder(feu: String, position: Vector3) -> void:
+## « autres » : d'autres choses à retenir, par exemple {"epee": true}.
+func sauvegarder(feu: String, position: Vector3, autres := {}) -> void:
 	_donnees = {
 		"feu": feu,
 		"position": [position.x, position.y, position.z],
 		"date": Time.get_datetime_string_from_system(),
 	}
+	_donnees.merge(autres)
 	var fichier := FileAccess.open(FICHIER, FileAccess.WRITE)
 	if fichier:
 		fichier.store_string(JSON.stringify(_donnees, "\t"))
@@ -38,6 +40,11 @@ func charger() -> void:
 ## Le nom du dernier feu de camp utilisé, ou "" s'il n'y a pas encore de sauvegarde.
 func dernier_feu() -> String:
 	return _donnees.get("feu", "")
+
+
+## Une information sauvegardée (par exemple "epee"), ou « defaut » si elle n'existe pas.
+func donnee(cle: String, defaut: Variant = null) -> Variant:
+	return _donnees.get(cle, defaut)
 
 
 func existe() -> bool:

@@ -8,6 +8,10 @@ var _fondu: Tween
 
 
 func _ready() -> void:
+	var boussole := Control.new()
+	boussole.set_script(load("res://scripts/boussole.gd"))
+	add_child(boussole)
+
 	_annonce = Label.new()
 	_annonce.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_annonce.add_theme_font_size_override("font_size", 26)
@@ -18,8 +22,8 @@ func _ready() -> void:
 	_annonce.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_annonce.offset_left = -250.0
 	_annonce.offset_right = 250.0
-	_annonce.offset_top = 40.0
-	_annonce.offset_bottom = 80.0
+	_annonce.offset_top = 84.0
+	_annonce.offset_bottom = 124.0
 	_annonce.hide()
 
 	_message = Label.new()

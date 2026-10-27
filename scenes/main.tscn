@@ -10,6 +10,7 @@
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="8_palette"]
 [ext_resource type="PackedScene" path="res://assets/personnage/Male_Ranger.gltf" id="9_ranger"]
 [ext_resource type="Shader" path="res://shaders/sol.gdshader" id="10_sol"]
+[ext_resource type="Script" path="res://scripts/decor_chemin.gd" id="11_decor"]
 
 [sub_resource type="ShaderMaterial" id="Material_palette"]
 shader = ExtResource("8_palette")
@@ -30,7 +31,7 @@ fog_light_color = Color(0.125, 0.157, 0.302, 1)
 fog_density = 0.006
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_sol"]
-size = Vector2(120, 120)
+size = Vector2(420, 420)
 
 [sub_resource type="ShaderMaterial" id="Material_sol"]
 shader = ExtResource("10_sol")
@@ -89,6 +90,7 @@ a_suivre = NodePath("../Joueur")
 [node name="Sol" type="StaticBody3D" parent="Rendu/Monde"]
 
 [node name="Apparence" type="MeshInstance3D" parent="Rendu/Monde/Sol"]
+position = Vector3(60, 0, 80)
 mesh = SubResource("PlaneMesh_sol")
 material_override = SubResource("Material_sol")
 
@@ -131,6 +133,9 @@ omni_range = 4.0
 
 [node name="Modele" parent="Rendu/Monde/Joueur/Visuel" instance=ExtResource("9_ranger")]
 transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="DecorDuChemin" type="Node3D" parent="Rendu/Monde"]
+script = ExtResource("11_decor")
 
 [node name="Foret" type="Node3D" parent="Rendu/Monde"]
 script = ExtResource("3_foret")

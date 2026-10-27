@@ -21,6 +21,10 @@ const ANIMATIONS := "res://assets/personnage/UAL1_Standard.glb"
 const EN_BOUCLE := ["Idle", "Walk", "Jog_Fwd", "Sprint", "Sitting_Idle"]
 
 var est_assis := false
+## L'objet sur lequel il est assis (un tronc près d'un feu), ou rien.
+var siege: Node = null
+## A-t-il trouvé la vieille épée ?
+var a_epee := false
 
 var _cible_clic: Variant = null
 var _clic_maintenu := false
@@ -37,7 +41,59 @@ func _ready() -> void:
 	_preparer_animations()
 	_teinter_tenue()
 	_ajouter_visage_dans_l_ombre()
+	if Sauvegarde.donnee("epee", false):
+		prendre_epee()
 	_jouer("Idle")
+
+
+## Cherche ce qui est à portée (tronc, charrette…), affiche « E : … » et réagit à E.
+func _process(_delta: float) -> void:
+	var interface := get_tree().get_first_node_in_group("interface")
+	var cible: Node = null
+	var plus_proche := INF
+	for objet in get_tree().get_nodes_in_group("interactif"):
+		var d: float = objet.distance_pour_interagir(self)
+		if d < plus_proche:
+			plus_proche = d
+			cible = objet
+	if cible == null:
+		if interface:
+			interface.cacher()
+		return
+	if interface:
+		interface.afficher(cible.texte_interaction(self))
+	if Input.is_action_just_pressed("interagir"):
+		cible.interagir(self)
+
+
+## Le héros porte désormais la vieille épée, dans le dos.
+func prendre_epee() -> void:
+	if a_epee:
+		return
+	a_epee = true
+	var acier := StandardMaterial3D.new()
+	acier.albedo_color = Color("8696c2")
+	acier.metallic = 0.6
+	acier.roughness = 0.5
+	var cuir := StandardMaterial3D.new()
+	cuir.albedo_color = Color("2a221f")
+	cuir.roughness = 1.0
+	var epee := Node3D.new()
+	epee.name = "Epee"
+	# Dans le dos, en diagonale (le modèle regarde vers son +Z, le dos est vers -Z).
+	epee.position = Vector3(0.0, 1.15, -0.2)
+	epee.rotation = Vector3(0.0, 0.0, 0.6)
+	_modele.add_child(epee)
+	for morceau in [[Vector3(0.06, 0.8, 0.015), Vector3(0, 0.3, 0), acier],
+			[Vector3(0.26, 0.04, 0.05), Vector3(0, -0.12, 0), cuir],
+			[Vector3(0.04, 0.22, 0.04), Vector3(0, -0.25, 0), cuir]]:
+		var forme := BoxMesh.new()
+		forme.size = morceau[0]
+		var piece := MeshInstance3D.new()
+		piece.mesh = forme
+		piece.material_override = morceau[2]
+		piece.position = morceau[1]
+		epee.add_child(piece)
 
 
 func _physics_process(delta: float) -> void:
@@ -87,8 +143,9 @@ func _physics_process(delta: float) -> void:
 
 ## Assoit le personnage à un endroit précis, tourné dans une direction.
 ## « tout_de_suite » : déjà assis (au lancement du jeu), sans l'animation pour s'asseoir.
-func asseoir(point: Vector3, regard: Vector3, tout_de_suite := false) -> void:
+func asseoir(point: Vector3, regard: Vector3, tout_de_suite := false, sur: Node = null) -> void:
 	est_assis = true
+	siege = sur
 	_cible_clic = null
 	velocity = Vector3.ZERO
 	global_position = point
@@ -104,6 +161,7 @@ func asseoir(point: Vector3, regard: Vector3, tout_de_suite := false) -> void:
 
 func se_relever() -> void:
 	est_assis = false
+	siege = null
 	_modele.position = Vector3.ZERO
 	_anim.clear_queue()
 	_jouer("Idle")
