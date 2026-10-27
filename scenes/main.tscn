@@ -9,19 +9,18 @@
 [ext_resource type="Script" path="res://scripts/rendu.gd" id="7_rendu"]
 [ext_resource type="Shader" path="res://shaders/palette.gdshader" id="8_palette"]
 [ext_resource type="PackedScene" path="res://assets/personnage/Male_Ranger.gltf" id="9_ranger"]
-[ext_resource type="Script" path="res://scripts/sol.gd" id="10_sol"]
 
 [sub_resource type="ShaderMaterial" id="Material_palette"]
 shader = ExtResource("8_palette")
 shader_parameter/palette_active = true
-shader_parameter/tramage = 0.0
+shader_parameter/tramage = 0.035
 
 [sub_resource type="Environment" id="Environment_nuit"]
 background_mode = 1
 background_color = Color(0.043, 0.055, 0.122, 1)
 ambient_light_source = 2
 ambient_light_color = Color(0.227, 0.275, 0.502, 1)
-ambient_light_energy = 0.75
+ambient_light_energy = 0.85
 glow_enabled = true
 glow_intensity = 0.7
 glow_bloom = 0.05
@@ -29,7 +28,34 @@ fog_enabled = true
 fog_light_color = Color(0.125, 0.157, 0.302, 1)
 fog_density = 0.006
 
+[sub_resource type="PlaneMesh" id="PlaneMesh_sol"]
+size = Vector2(120, 120)
+
+[sub_resource type="StandardMaterial3D" id="Material_sol"]
+albedo_color = Color(0.149, 0.2, 0.184, 1)
+roughness = 1.0
+
 [sub_resource type="WorldBoundaryShape3D" id="Shape_sol"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_clairiere"]
+top_radius = 7.5
+bottom_radius = 7.5
+height = 0.02
+radial_segments = 24
+
+[sub_resource type="StandardMaterial3D" id="Material_clairiere"]
+albedo_color = Color(0.18, 0.239, 0.227, 1)
+roughness = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_terre"]
+top_radius = 2.6
+bottom_radius = 2.6
+height = 0.02
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="Material_terre"]
+albedo_color = Color(0.227, 0.184, 0.161, 1)
+roughness = 1.0
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_tronc"]
 top_radius = 0.3
@@ -83,10 +109,21 @@ a_suivre = NodePath("../Joueur")
 [node name="Sol" type="StaticBody3D" parent="Rendu/Monde"]
 
 [node name="Apparence" type="MeshInstance3D" parent="Rendu/Monde/Sol"]
-script = ExtResource("10_sol")
+mesh = SubResource("PlaneMesh_sol")
+material_override = SubResource("Material_sol")
 
 [node name="Forme" type="CollisionShape3D" parent="Rendu/Monde/Sol"]
 shape = SubResource("Shape_sol")
+
+[node name="Clairiere" type="MeshInstance3D" parent="Rendu/Monde"]
+position = Vector3(0, 0.01, 0)
+mesh = SubResource("CylinderMesh_clairiere")
+material_override = SubResource("Material_clairiere")
+
+[node name="TerreAutourDuFeu" type="MeshInstance3D" parent="Rendu/Monde"]
+position = Vector3(0, 0.02, 0)
+mesh = SubResource("CylinderMesh_terre")
+material_override = SubResource("Material_terre")
 
 [node name="FeuDeCamp" type="Node3D" parent="Rendu/Monde"]
 script = ExtResource("2_feu")
