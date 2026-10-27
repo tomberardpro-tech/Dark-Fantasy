@@ -12,8 +12,10 @@ extends CharacterBody3D
 ## Le personnage commence-t-il assis sur le tronc ?
 @export var assis_au_depart := true
 ## Réglages de la position assise : recul vers le tronc et hauteur (en mètres).
-@export var assise_recul := 0.35
-@export var assise_hauteur := 0.1
+## Mesurés sur l'animation « Sitting_Idle » : le bassin y est à 0,54 m de haut et
+## 0,33 m en arrière ; le tronc fait 0,46 m de haut, son milieu est à 0,65 m derrière.
+@export var assise_recul := 0.3
+@export var assise_hauteur := 0.04
 ## Teinte appliquée à la tenue pour coller à la palette sombre.
 @export var teinte := Color(0.85, 0.85, 0.92)
 
@@ -74,11 +76,18 @@ func prendre_epee() -> void:
 	# L'épée du Fantasy Props MegaKit, un peu rouillée (teinte sombre).
 	var epee := Modeles.creer("Sword_Bronze", Modeles.OBJETS, Color(0.6, 0.6, 0.7))
 	epee.name = "Epee"
-	# Dans le dos, en diagonale, la poignée vers le haut
-	# (le modèle du héros regarde vers son +Z, le dos est vers -Z).
-	epee.position = Vector3(0.0, 1.0, -0.22)
-	epee.rotation = Vector3(0.0, 0.0, PI + 0.6)
-	_modele.add_child(epee)
+	# Accrochée au haut du dos (os « spine_03 ») : elle suit les mouvements du corps,
+	# même pendant la roulade ou assis.
+	var squelette := _modele.find_children("*", "Skeleton3D", true, false)[0] as Skeleton3D
+	var os_dos := squelette.find_bone("spine_03")
+	var attache := BoneAttachment3D.new()
+	attache.bone_name = "spine_03"
+	squelette.add_child(attache)
+	attache.add_child(epee)
+	# Position voulue dans le repère du héros (il regarde vers +Z, le dos est vers -Z) :
+	# en diagonale dans le dos, la poignée au-dessus de l'épaule.
+	var voulue := Transform3D(Basis(Vector3.BACK, PI + 0.6), Vector3(0.0, 1.1, -0.2))
+	epee.transform = squelette.get_bone_global_rest(os_dos).affine_inverse() * voulue
 
 
 func _physics_process(delta: float) -> void:

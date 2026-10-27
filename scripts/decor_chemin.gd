@@ -115,7 +115,7 @@ func _creer_berges() -> void:
 		var cote := Vector3(-tangente.z, 0.0, tangente.x)
 		for s in [-1.0, 1.0]:
 			var pos: Vector3 = points[i] + cote * s * _rng.randf_range(1.35, 2.0) + tangente * _rng.randf_range(-0.4, 0.4)
-			if Chemin.distance_au_chemin(pos) < 2.2:
+			if Chemin.distance_au_chemin(pos) < 2.2 or pos.distance_to(Chemin.PONT) < 4.0:
 				continue
 			var galet := Modeles.creer(GALETS[_rng.randi_range(0, 4)], Modeles.NATURE, TEINTE_PIERRE)
 			galet.position = pos
@@ -180,9 +180,21 @@ func _creer_lanternes() -> void:
 		var suite := courbe.sample_baked(min(distance + 1.0, longueur))
 		var tangente := (suite - p).normalized()
 		var cote := Vector3(-tangente.z, 0, tangente.x) * cote_choisi
-		_lanterne(p + cote * 2.3, -cote)
+		var pos := p + cote * 2.3
+		# Jamais sur le pont, au bord de l'eau ou sur un lieu : on avance un peu plus loin.
+		if not _place_pour_lanterne(pos):
+			distance += 2.0
+			continue
+		_lanterne(pos, -cote)
 		cote_choisi = -cote_choisi
 		distance += ecart_lanternes
+
+
+func _place_pour_lanterne(pos: Vector3) -> bool:
+	if pos.distance_to(Chemin.PONT) < 6.0 or Chemin.distance_au_ruisseau(pos) < 3.5:
+		return false
+	return pos.distance_to(Chemin.RUINE) > 7.0 and pos.distance_to(Chemin.AUTEL) > 4.0 \
+		and pos.distance_to(Chemin.CHARRETTE) > 5.0
 
 
 ## Un poteau de bois avec une lanterne suspendue au-dessus du bord du sentier.

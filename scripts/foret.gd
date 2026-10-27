@@ -17,6 +17,10 @@ extends Node3D
 @export var nombre_arbres_morts_chemin := 120
 @export var nombre_rochers_chemin := 40
 @export var nombre_herbes_chemin := 160
+@export var nombre_arbres_tordus := 40
+@export var nombre_arbres_tordus_chemin := 90
+@export var nombre_buissons := 180
+@export var nombre_pierres_plates := 80
 ## Largeur de forêt de chaque côté du chemin (en mètres).
 @export var largeur_foret_chemin := 28.0
 ## Au-delà de cette distance de la caméra, les arbres ne sont plus dessinés (plus fluide).
@@ -29,6 +33,10 @@ const PINS := ["Pine_1", "Pine_2", "Pine_3", "Pine_4", "Pine_5"]
 const ARBRES_MORTS := ["DeadTree_1", "DeadTree_2", "DeadTree_3", "DeadTree_4", "DeadTree_5"]
 const ROCHERS := ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3"]
 const HERBES := ["Grass_Wispy_Short", "Grass_Wispy_Tall", "Grass_Common_Short"]
+const ARBRES_TORDUS := ["TwistedTree_1", "TwistedTree_2", "TwistedTree_3", "TwistedTree_4", "TwistedTree_5"]
+const BUISSONS := ["Bush_Common", "Plant_1", "Plant_7", "Plant_1_Big"]
+const PIERRES_PLATES := ["RockPath_Round_Small_1", "RockPath_Round_Small_2", "RockPath_Round_Small_3",
+	"RockPath_Square_Small_1", "RockPath_Square_Small_2", "RockPath_Square_Small_3"]
 
 ## Teinte appliquée à chaque famille de matériaux pour coller à la palette sombre.
 const TEINTES := {
@@ -36,6 +44,7 @@ const TEINTES := {
 	"Grass": Color(0.42, 0.5, 0.52),
 	"Bark": Color(0.55, 0.52, 0.55),
 	"Rocks": Color(0.55, 0.58, 0.68),
+	"PathRocks": Color(0.5, 0.52, 0.6),
 	"Mushrooms": Color(0.55, 0.5, 0.55),
 }
 
@@ -49,38 +58,52 @@ var _modeles := {}
 var _materiaux_teintes := {}
 ## Tout ce qui se balance au vent : [objet, rotation de départ, taille, souplesse, décalage].
 var _au_vent: Array = []
+## Les places déjà prises, rangées par cases de 4 m (pour éviter les chevauchements).
+var _occupe := {}
 var _temps := 0.0
 
 
 func _ready() -> void:
 	_rng.seed = graine
-	# La forêt autour de la clairière.
-	for i in nombre_pins:
-		var pos := _position_libre(func(): return _position_au_hasard(rayon_clairiere + 1.0, rayon_foret))
-		_arbre(PINS, pos, _rng.randf_range(0.5, 0.75), SOUPLESSE_PIN)
-	for i in nombre_arbres_morts:
-		var pos := _position_libre(func(): return _position_au_hasard(rayon_clairiere, rayon_foret))
-		_arbre(ARBRES_MORTS, pos, _rng.randf_range(0.32, 0.42), SOUPLESSE_ARBRE_MORT)
-	# La forêt de chaque côté du chemin, jusqu'à Bruneval.
-	for i in nombre_pins_chemin:
-		_arbre(PINS, _position_libre(_position_le_long_du_chemin), _rng.randf_range(0.5, 0.8), SOUPLESSE_PIN)
-	for i in nombre_arbres_morts_chemin:
-		_arbre(ARBRES_MORTS, _position_libre(_position_le_long_du_chemin), _rng.randf_range(0.32, 0.45), SOUPLESSE_ARBRE_MORT)
-	# Le vieil arbre mort au bord de la clairière.
-	_arbre(["DeadTree_5"], Vector3(6.0, 0.0, -4.0), 0.5, SOUPLESSE_ARBRE_MORT)
+	var autour_clairiere := func(): return _position_au_hasard(rayon_clairiere + 1.0, rayon_foret)
+	var bord_clairiere := func(): return _position_au_hasard(3.5, 14.0)
+	# Le vieil arbre mort au bord de la clairière, placé en premier pour garder sa place.
+	_arbre(["DeadTree_5"], Vector3(6.0, 0.0, -4.0), 0.5, SOUPLESSE_ARBRE_MORT, 1.2)
+	# Les rochers d'abord (ils sont gros), puis les arbres entre eux.
 	for i in nombre_rochers:
-		var pos := _position_libre(func(): return _position_au_hasard(5.0, 20.0))
-		_rocher(pos, _rng.randf_range(0.3, 0.6))
+		_rocher(_position_au_hasard(5.0, 20.0), _rng.randf_range(0.3, 0.6))
 	for i in nombre_rochers_chemin:
-		var pos := _position_libre(func(): return _position_pres_du_chemin(3.0, 9.0))
-		_rocher(pos, _rng.randf_range(0.25, 0.55))
-	# Herbes : surtout au bord de la clairière et du chemin, jamais près du feu.
+		_rocher(_position_pres_du_chemin(3.0, 9.0), _rng.randf_range(0.25, 0.55))
+	# La forêt autour de la clairière, puis de chaque côté du chemin jusqu'à Bruneval.
+	for i in nombre_pins:
+		_arbre(PINS, autour_clairiere.call(), _rng.randf_range(0.5, 0.75), SOUPLESSE_PIN, 0.9)
+	for i in nombre_arbres_morts:
+		_arbre(ARBRES_MORTS, autour_clairiere.call(), _rng.randf_range(0.32, 0.42), SOUPLESSE_ARBRE_MORT, 0.9)
+	for i in nombre_arbres_tordus:
+		_arbre(ARBRES_TORDUS, autour_clairiere.call(), _rng.randf_range(0.35, 0.5), SOUPLESSE_PIN, 1.0)
+	for i in nombre_pins_chemin:
+		_arbre(PINS, _position_le_long_du_chemin(), _rng.randf_range(0.5, 0.8), SOUPLESSE_PIN, 0.9)
+	for i in nombre_arbres_morts_chemin:
+		_arbre(ARBRES_MORTS, _position_le_long_du_chemin(), _rng.randf_range(0.32, 0.45), SOUPLESSE_ARBRE_MORT, 0.9)
+	for i in nombre_arbres_tordus_chemin:
+		_arbre(ARBRES_TORDUS, _position_le_long_du_chemin(), _rng.randf_range(0.35, 0.5), SOUPLESSE_PIN, 1.0)
+	# Buissons et plantes au pied des arbres et au bord du chemin.
+	for i in nombre_buissons:
+		_decor(BUISSONS, _position_pres_du_chemin(3.0, 14.0), _rng.randf_range(0.5, 0.8), SOUPLESSE_HERBE * 0.5, 0.7)
+	for i in nombre_buissons / 3:
+		_decor(BUISSONS, bord_clairiere.call(), _rng.randf_range(0.5, 0.8), SOUPLESSE_HERBE * 0.5, 0.7)
+	# Herbes, trèfle et champignons : au bord de la clairière et du chemin, jamais près du feu.
 	for i in nombre_herbes:
-		_placer(HERBES, _position_libre(func(): return _position_au_hasard(3.5, 14.0)), _rng.randf_range(0.5, 0.9), SOUPLESSE_HERBE)
+		_decor(HERBES, bord_clairiere.call(), _rng.randf_range(0.5, 0.9), SOUPLESSE_HERBE, 0.3)
 	for i in nombre_herbes_chemin:
-		_placer(HERBES, _position_libre(func(): return _position_pres_du_chemin(2.2, 7.0)), _rng.randf_range(0.4, 0.8), SOUPLESSE_HERBE)
-	for i in 12:
-		_placer(["Mushroom_Common"], _position_libre(func(): return _position_pres_du_chemin(3.0, 10.0)), _rng.randf_range(0.6, 1.0))
+		_decor(HERBES, _position_pres_du_chemin(2.2, 7.0), _rng.randf_range(0.4, 0.8), SOUPLESSE_HERBE, 0.3)
+	for i in nombre_herbes_chemin / 2:
+		_decor(["Clover_1", "Clover_2"], _position_pres_du_chemin(2.0, 6.0), _rng.randf_range(0.6, 1.0), 0.0, 0.3)
+	for i in 14:
+		_decor(["Mushroom_Common"], _position_pres_du_chemin(3.0, 10.0), _rng.randf_range(0.6, 1.0), 0.0, 0.3)
+	# Quelques pierres plates au bord du sentier, comme un vieux chemin pavé usé.
+	for i in nombre_pierres_plates:
+		_decor(PIERRES_PLATES, _position_pres_du_chemin(1.0, 2.0), _rng.randf_range(0.6, 0.9), 0.0, 0.4, true)
 
 
 ## Le vent penche doucement les arbres et les herbes, avec un léger balancement.
@@ -100,25 +123,37 @@ func _process(delta: float) -> void:
 		objet.basis = Basis(axe, angle) * Basis(Vector3.UP, element[1]).scaled(Vector3.ONE * element[2])
 
 
-## Cherche un emplacement libre (pas sur le chemin, dans le ruisseau, sur un lieu
-## ou dans le hameau), en tirant des points avec « tirage » jusqu'à en trouver un.
-func _position_libre(tirage: Callable) -> Vector3:
-	var pos: Vector3 = tirage.call()
-	for essai in 30:
-		if _est_libre(pos):
-			return pos
-		pos = tirage.call()
-	return pos
-
-
-func _est_libre(pos: Vector3) -> bool:
-	if Chemin.distance_au_chemin(pos) < 3.2 or Chemin.distance_au_ruisseau(pos) < 2.2:
+## Vrai si l'endroit est libre : pas sur le chemin, dans le ruisseau, sur un lieu,
+## dans le hameau, ni trop près d'un autre objet déjà posé.
+## « sur_le_bord » : autorise un objet plat tout au bord du sentier (pierres plates).
+func _est_libre(pos: Vector3, rayon: float, sur_le_bord := false) -> bool:
+	var marge_chemin := 0.9 if sur_le_bord else 2.2 + rayon
+	if Chemin.distance_au_chemin(pos) < marge_chemin or Chemin.distance_au_ruisseau(pos) < 2.4 + rayon:
 		return false
 	if pos.distance_to(Chemin.RUINE) < 6.5 or pos.distance_to(Chemin.AUTEL) < 3.5:
 		return false
-	if pos.distance_to(Chemin.CHARRETTE) < 4.0 or pos.distance_to(Chemin.PONT) < 3.5:
+	if pos.distance_to(Chemin.CHARRETTE) < 4.5 or pos.distance_to(Chemin.PONT) < 5.0:
 		return false
-	return pos.distance_to(Chemin.VILLAGE) > 24.0
+	if Vector2(pos.x, pos.z).length() < 3.2:
+		return false
+	if pos.distance_to(Chemin.VILLAGE) < 24.0:
+		return false
+	# Pas de chevauchement avec ce qui est déjà posé (rangé par cases de 4 m).
+	var case := Vector2i(floori(pos.x / 4.0), floori(pos.z / 4.0))
+	for dx in range(-1, 2):
+		for dz in range(-1, 2):
+			for autre in _occupe.get(case + Vector2i(dx, dz), []):
+				if Vector2(pos.x - autre.x, pos.z - autre.z).length() < rayon + autre.y:
+					return false
+	return true
+
+
+func _reserver(pos: Vector3, rayon: float) -> void:
+	var case := Vector2i(floori(pos.x / 4.0), floori(pos.z / 4.0))
+	if not _occupe.has(case):
+		_occupe[case] = []
+	# On range x, rayon, z dans un Vector3 (x, y = rayon, z).
+	_occupe[case].append(Vector3(pos.x, rayon, pos.z))
 
 
 ## Un point au hasard dans la bande de forêt qui longe le chemin.
@@ -137,15 +172,31 @@ func _position_pres_du_chemin(pres: float, loin: float) -> Vector3:
 	return p + cote * _rng.randf_range(pres, loin)
 
 
-## Un arbre, solide (on ne passe pas à travers son tronc).
-func _arbre(noms: Array, pos: Vector3, taille: float, souplesse: float) -> void:
+## Un arbre, solide (on ne passe pas à travers son tronc). Rien n'est posé si la place
+## est déjà prise : la forêt reste propre, sans arbres qui se rentrent dedans.
+func _arbre(noms: Array, pos: Vector3, taille: float, souplesse: float, rayon: float) -> void:
+	if not _est_libre(pos, rayon):
+		return
+	_reserver(pos, rayon)
 	_placer(noms, pos, taille, souplesse)
 	_ajouter_obstacle(pos, 0.35)
 
 
 func _rocher(pos: Vector3, taille: float) -> void:
+	var rayon := 1.5 * taille
+	if not _est_libre(pos, rayon):
+		return
+	_reserver(pos, rayon)
 	_placer(ROCHERS, pos, taille)
 	_ajouter_obstacle(pos, 1.3 * taille)
+
+
+## Un petit élément de décor (herbe, buisson, plante, pierre) sans obstacle.
+func _decor(noms: Array, pos: Vector3, taille: float, souplesse: float, rayon: float, sur_le_bord := false) -> void:
+	if not _est_libre(pos, rayon, sur_le_bord):
+		return
+	_reserver(pos, rayon)
+	_placer(noms, pos, taille, souplesse)
 
 
 ## Un point au hasard dans l'anneau entre rayon_min et rayon_max (répartition régulière).

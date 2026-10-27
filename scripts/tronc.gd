@@ -14,6 +14,7 @@ extends StaticBody3D
 
 func _ready() -> void:
 	add_to_group("interactif")
+	_habiller_d_ecorce()
 	var joueur := get_tree().get_first_node_in_group("joueur")
 	if joueur == null:
 		return
@@ -44,6 +45,19 @@ func interagir(joueur: Node3D) -> void:
 	var interface := get_tree().get_first_node_in_group("interface")
 	if interface:
 		interface.notifier("Partie sauvegardée")
+
+
+## Le tronc prend la vraie écorce des arbres morts du pack nature.
+func _habiller_d_ecorce() -> void:
+	var apparence := get_node_or_null("Apparence") as MeshInstance3D
+	if apparence == null:
+		return
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load("res://assets/nature/Bark_DeadTree.png")
+	mat.albedo_color = Color(0.55, 0.52, 0.55)
+	mat.uv1_scale = Vector3(2.0, 3.0, 1.0)
+	mat.roughness = 1.0
+	apparence.material_override = mat
 
 
 ## L'endroit où se place le personnage assis : juste devant le tronc, côté feu.
