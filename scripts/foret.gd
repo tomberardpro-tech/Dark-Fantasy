@@ -23,6 +23,8 @@ extends Node3D
 @export var largeur_foret_chemin := 28.0
 ## Au-delà de cette distance de la caméra, les arbres ne sont plus dessinés (plus fluide).
 @export var distance_affichage := 70.0
+## Combien le vent fait bouger les arbres (1 = très peu, 2,5 = bien visible).
+@export var force_vent_arbres := 2.5
 ## Change ce nombre pour obtenir une autre disposition des arbres.
 @export var graine := 2026
 
@@ -140,6 +142,10 @@ func _process(delta: float) -> void:
 		var force := Vent.force(_temps, objet.position)
 		var balancement := sin(_temps * 2.3 + element[4]) * 0.3
 		var angle: float = element[3] * force * (1.0 + balancement)
+		# Les arbres (moins souples que les herbes) bougent davantage, à la demande de Tom.
+		if element[3] < SOUPLESSE_HERBE:
+			balancement = sin(_temps * 1.6 + element[4]) * 0.5
+			angle = element[3] * force * force_vent_arbres * (1.0 + balancement)
 		objet.basis = Basis(axe, angle) * Basis(Vector3.UP, element[1]).scaled(Vector3.ONE * element[2])
 
 
