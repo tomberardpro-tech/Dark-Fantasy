@@ -82,13 +82,11 @@ func _ready() -> void:
 		_arbre(ARBRES_MORTS, _position_le_long_du_chemin(), _rng.randf_range(0.32, 0.45), SOUPLESSE_ARBRE_MORT, 0.9)
 	for i in nombre_arbres_tordus_chemin:
 		_arbre(ARBRES_TORDUS, _position_le_long_du_chemin(), _rng.randf_range(0.35, 0.5), SOUPLESSE_PIN, 1.0)
-	# Herbes, trèfle et champignons : au bord de la clairière et du chemin, jamais près du feu.
+	# Herbes et champignons : au bord de la clairière et du chemin, jamais près du feu.
 	for i in nombre_herbes:
 		_decor(HERBES, bord_clairiere.call(), _rng.randf_range(0.5, 0.9), SOUPLESSE_HERBE, 0.3)
 	for i in nombre_herbes_chemin:
 		_decor(HERBES, _position_pres_du_chemin(2.2, 7.0), _rng.randf_range(0.4, 0.8), SOUPLESSE_HERBE, 0.3)
-	for i in nombre_herbes_chemin / 2:
-		_decor(["Clover_1", "Clover_2"], _position_pres_du_chemin(2.0, 6.0), _rng.randf_range(0.6, 1.0), 0.0, 0.3)
 	for i in 14:
 		_decor(["Mushroom_Common"], _position_pres_du_chemin(3.0, 10.0), _rng.randf_range(0.6, 1.0), 0.0, 0.3)
 

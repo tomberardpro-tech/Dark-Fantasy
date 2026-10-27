@@ -15,7 +15,7 @@
 
 [sub_resource type="ShaderMaterial" id="Material_palette"]
 shader = ExtResource("8_palette")
-shader_parameter/palette_active = true
+shader_parameter/palette_active = false
 shader_parameter/tramage = 0.035
 
 [sub_resource type="Environment" id="Environment_nuit"]

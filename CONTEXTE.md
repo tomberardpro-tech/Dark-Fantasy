@@ -146,8 +146,10 @@ Couleurs : noir, gris et rouge sang.
 - Tom veut de **vrais objets**, pas des cubes : utiliser les modèles des packs dès que possible.
 - Tom n'aime pas (retirés) : les fougères, les buissons et grandes plantes (Bush_Common,
   Plant_1, Plant_7), les pierres plates au bord du sentier (RockPath), un sol à bosses qui
-  brille par petits points (« effet miroir »).
-- Sol : bleu-violet sombre aux variations douces, sans texture (image de référence de Tom).
+  brille par petits points (« effet miroir »), le trèfle (Clover).
+- Sol : bleu-gris sombre et lisse, seulement de grandes variations très douces, sans texture
+  (image de référence de Tom). Palette commune coupée par défaut pour coller à cette image
+  (F1 la remet).
 - Packs déjà essayés puis retirés à la demande de Tom : Quaternius Ultimate Modular Ruins,
   Kenney Survival Kit.
 - Toujours vérifier la licence d'un pack avant de l'utiliser.
