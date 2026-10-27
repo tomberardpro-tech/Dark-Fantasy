@@ -38,7 +38,7 @@ survivants à protéger, il reste un dieu à abattre. »
 | Genre | Dark fantasy, action-RPG |
 | Mode | **Solo**. Ne rien construire pour le multijoueur (la coop est mise de côté). |
 | Monde | Monde ouvert à explorer |
-| Vue | **3D en vue isométrique, caméra fixe** (façon Diablo) |
+| Vue | **3D en vue isométrique, caméra fixe** (façon Diablo), **même angle et même zoom que la maquette** (Tom y tient) |
 | Contrôles | ZQSD (clavier AZERTY) **ou** clic de souris pour se déplacer, Maj pour courir, Espace pour une **roulade**, E pour interagir |
 | Sauvegarde | Uniquement aux feux de camp |
 | Progression | Quêtes, expérience, arbre de compétences, nouvelles tenues |

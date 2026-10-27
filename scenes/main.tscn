@@ -3,6 +3,9 @@
 [ext_resource type="Script" path="res://scripts/camera_iso.gd" id="1_camera"]
 [ext_resource type="Script" path="res://scripts/feu_de_camp.gd" id="2_feu"]
 [ext_resource type="Script" path="res://scripts/foret.gd" id="3_foret"]
+[ext_resource type="Script" path="res://scripts/joueur.gd" id="4_joueur"]
+[ext_resource type="Script" path="res://scripts/tronc.gd" id="5_tronc"]
+[ext_resource type="Script" path="res://scripts/interface.gd" id="6_interface"]
 
 [sub_resource type="Environment" id="Environment_nuit"]
 background_mode = 1
@@ -23,6 +26,8 @@ size = Vector2(120, 120)
 [sub_resource type="StandardMaterial3D" id="Material_sol"]
 albedo_color = Color(0.149, 0.2, 0.184, 1)
 roughness = 1.0
+
+[sub_resource type="WorldBoundaryShape3D" id="Shape_sol"]
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_clairiere"]
 top_radius = 7.5
@@ -54,6 +59,30 @@ radial_segments = 7
 albedo_color = Color(0.29, 0.231, 0.192, 1)
 roughness = 1.0
 
+[sub_resource type="BoxShape3D" id="Shape_tronc"]
+size = Vector3(2.6, 0.6, 0.6)
+
+[sub_resource type="CapsuleShape3D" id="Shape_joueur"]
+radius = 0.35
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_joueur"]
+radius = 0.35
+height = 1.8
+radial_segments = 8
+rings = 2
+
+[sub_resource type="StandardMaterial3D" id="Material_cape"]
+albedo_color = Color(0.227, 0.165, 0.322, 1)
+roughness = 1.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_visage"]
+size = Vector3(0.3, 0.22, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="Material_visage"]
+albedo_color = Color(0.525, 0.588, 0.761, 1)
+roughness = 1.0
+
 [node name="Main" type="Node3D"]
 
 [node name="Environnement" type="WorldEnvironment" parent="."]
@@ -65,13 +94,19 @@ light_color = Color(0.56, 0.64, 0.85, 1)
 light_energy = 0.6
 shadow_enabled = true
 
-[node name="Camera" type="Camera3D" parent="."]
+[node name="Camera" type="Camera3D" parent="." node_paths=PackedStringArray("a_suivre")]
 current = true
 script = ExtResource("1_camera")
+a_suivre = NodePath("../Joueur")
 
-[node name="Sol" type="MeshInstance3D" parent="."]
+[node name="Sol" type="StaticBody3D" parent="."]
+
+[node name="Apparence" type="MeshInstance3D" parent="Sol"]
 mesh = SubResource("PlaneMesh_sol")
 material_override = SubResource("Material_sol")
+
+[node name="Forme" type="CollisionShape3D" parent="Sol"]
+shape = SubResource("Shape_sol")
 
 [node name="Clairiere" type="MeshInstance3D" parent="."]
 position = Vector3(0, 0.01, 0)
@@ -86,11 +121,45 @@ material_override = SubResource("Material_terre")
 [node name="FeuDeCamp" type="Node3D" parent="."]
 script = ExtResource("2_feu")
 
-[node name="Tronc" type="MeshInstance3D" parent="."]
-position = Vector3(-1.7, 0.3, -1.7)
-rotation = Vector3(0, 0.7854, 1.5708)
+[node name="Tronc" type="StaticBody3D" parent="."]
+position = Vector3(-1.7, 0, -1.7)
+rotation = Vector3(0, 0.7854, 0)
+script = ExtResource("5_tronc")
+
+[node name="Apparence" type="MeshInstance3D" parent="Tronc"]
+position = Vector3(0, 0.3, 0)
+rotation = Vector3(0, 0, 1.5708)
 mesh = SubResource("CylinderMesh_tronc")
 material_override = SubResource("Material_tronc")
 
+[node name="Forme" type="CollisionShape3D" parent="Tronc"]
+position = Vector3(0, 0.3, 0)
+shape = SubResource("Shape_tronc")
+
+[node name="Joueur" type="CharacterBody3D" parent="." groups=["joueur"]]
+position = Vector3(-1.24, 0, -1.24)
+script = ExtResource("4_joueur")
+
+[node name="Forme" type="CollisionShape3D" parent="Joueur"]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("Shape_joueur")
+
+[node name="Visuel" type="Node3D" parent="Joueur"]
+
+[node name="Pivot" type="Node3D" parent="Joueur/Visuel"]
+position = Vector3(0, 0.9, 0)
+
+[node name="Corps" type="MeshInstance3D" parent="Joueur/Visuel/Pivot"]
+mesh = SubResource("CapsuleMesh_joueur")
+material_override = SubResource("Material_cape")
+
+[node name="Visage" type="MeshInstance3D" parent="Joueur/Visuel/Pivot"]
+position = Vector3(0, 0.55, -0.3)
+mesh = SubResource("BoxMesh_visage")
+material_override = SubResource("Material_visage")
+
 [node name="Foret" type="Node3D" parent="."]
 script = ExtResource("3_foret")
+
+[node name="Interface" type="CanvasLayer" parent="." groups=["interface"]]
+script = ExtResource("6_interface")

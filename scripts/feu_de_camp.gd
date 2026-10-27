@@ -17,6 +17,7 @@ func _ready() -> void:
 	_creer_buches()
 	_creer_flammes()
 	_creer_braises()
+	_creer_obstacle()
 	_lumiere = OmniLight3D.new()
 	_lumiere.light_color = Color("e0823a")
 	_lumiere.light_energy = puissance
@@ -109,6 +110,19 @@ func _creer_braises() -> void:
 	braises.scale_amount_max = 1.2
 	braises.position.y = 0.4
 	add_child(braises)
+
+
+## Un obstacle invisible pour qu'on ne marche pas dans le feu.
+func _creer_obstacle() -> void:
+	var cylindre := CylinderShape3D.new()
+	cylindre.radius = 0.95
+	cylindre.height = 1.0
+	var zone := CollisionShape3D.new()
+	zone.shape = cylindre
+	zone.position.y = 0.5
+	var corps := StaticBody3D.new()
+	corps.add_child(zone)
+	add_child(corps)
 
 
 func _materiau(couleur: Color) -> StandardMaterial3D:

@@ -51,6 +51,7 @@ func _pin(pos: Vector3, taille: float) -> void:
 	pin.scale = Vector3.ONE * taille
 	pin.rotation.y = _rng.randf_range(0.0, TAU)
 	add_child(pin)
+	_ajouter_obstacle(pos, 0.3 * taille)
 	_ajouter_cylindre(pin, 0.15, 0.25, 1.4, Vector3(0, 0.7, 0), _mat_tronc_pin)
 	var mat := _mat_aiguilles[_rng.randi_range(0, _mat_aiguilles.size() - 1)]
 	# [largeur, hauteur, altitude] de chaque étage d'aiguilles, du bas vers le haut.
@@ -64,6 +65,7 @@ func _arbre_mort(pos: Vector3, taille: float) -> void:
 	arbre.scale = Vector3.ONE * taille
 	arbre.rotation = Vector3(_rng.randf_range(-0.08, 0.08), _rng.randf_range(0.0, TAU), _rng.randf_range(-0.08, 0.08))
 	add_child(arbre)
+	_ajouter_obstacle(pos, 0.3 * taille)
 	_ajouter_cylindre(arbre, 0.1, 0.28, 4.0, Vector3(0, 2.0, 0), _mat_bois_mort)
 	# Quelques branches nues et tordues.
 	for i in _rng.randi_range(2, 4):
@@ -84,6 +86,29 @@ func _rocher(pos: Vector3, taille: float) -> void:
 	rocher.position = pos + Vector3(0, 0.2 * taille, 0)
 	rocher.rotation = Vector3(_rng.randf_range(-0.3, 0.3), _rng.randf_range(0.0, TAU), _rng.randf_range(-0.3, 0.3))
 	add_child(rocher)
+	# Le rocher est solide : on ne peut pas passer à travers.
+	var bloc := BoxShape3D.new()
+	bloc.size = forme.size
+	var zone := CollisionShape3D.new()
+	zone.shape = bloc
+	var corps := StaticBody3D.new()
+	corps.transform = rocher.transform
+	corps.add_child(zone)
+	add_child(corps)
+
+
+## Un obstacle invisible autour d'un tronc, pour que le personnage ne traverse pas l'arbre.
+func _ajouter_obstacle(pos: Vector3, rayon: float) -> void:
+	var cylindre := CylinderShape3D.new()
+	cylindre.radius = rayon
+	cylindre.height = 3.0
+	var zone := CollisionShape3D.new()
+	zone.shape = cylindre
+	zone.position.y = 1.5
+	var corps := StaticBody3D.new()
+	corps.position = pos
+	corps.add_child(zone)
+	add_child(corps)
 
 
 func _ajouter_cylindre(parent: Node3D, haut: float, bas: float, hauteur: float, pos: Vector3, mat: Material) -> void:
