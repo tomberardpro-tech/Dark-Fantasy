@@ -1,6 +1,6 @@
 extends Node3D
 ## Forêt autour de la clairière, avec les modèles Quaternius (Stylized Nature MegaKit) :
-## pins, arbres morts, rochers, et des herbes, fougères et champignons dans la clairière.
+## pins, arbres morts, rochers, et des herbes et champignons dans la clairière.
 ## Placés au hasard, mais toujours au même endroit grâce à une « graine » fixe.
 ## Chaque modèle est assombri et teinté vers la palette du jeu (voir CONTEXTE.md).
 
@@ -19,7 +19,7 @@ const DOSSIER := "res://assets/nature/"
 const PINS := ["Pine_1", "Pine_2", "Pine_3", "Pine_4", "Pine_5"]
 const ARBRES_MORTS := ["DeadTree_1", "DeadTree_2", "DeadTree_3", "DeadTree_4", "DeadTree_5"]
 const ROCHERS := ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3"]
-const HERBES := ["Grass_Wispy_Short", "Grass_Wispy_Tall", "Grass_Common_Short", "Fern_1"]
+const HERBES := ["Grass_Wispy_Short", "Grass_Wispy_Tall", "Grass_Common_Short"]
 
 ## Teinte appliquée à chaque famille de matériaux pour coller à la palette sombre.
 const TEINTES := {
@@ -53,7 +53,7 @@ func _ready() -> void:
 		var taille := _rng.randf_range(0.3, 0.6)
 		_placer(ROCHERS, pos, taille)
 		_ajouter_obstacle(pos, 1.3 * taille)
-	# Herbes et fougères : surtout au bord de la clairière, jamais près du feu.
+	# Herbes : surtout au bord de la clairière, jamais près du feu.
 	for i in nombre_herbes:
 		_placer(HERBES, _position_au_hasard(3.5, 14.0), _rng.randf_range(0.5, 0.9))
 	for i in 6:
