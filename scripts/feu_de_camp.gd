@@ -4,9 +4,9 @@ extends Node3D
 ## et une lumière orange qui tremble.
 
 ## Puissance de la lumière du feu.
-@export var puissance := 2.6
-## Distance éclairée par le feu (en mètres).
-@export var portee := 14.0
+@export var puissance := 2.4
+## Distance éclairée par le feu (en mètres), comme sur la maquette.
+@export var portee := 18.0
 ## Nombre de braises qui s'envolent.
 @export var nombre_braises := 40
 
@@ -29,7 +29,8 @@ func _ready() -> void:
 	_lumiere.light_color = Color("e0823a")
 	_lumiere.light_energy = puissance
 	_lumiere.omni_range = portee
-	_lumiere.omni_attenuation = 1.6
+	# Baisse progressive avec la distance, comme la lumière de la maquette.
+	_lumiere.omni_attenuation = 2.0
 	_lumiere.shadow_enabled = true
 	_lumiere.position.y = 1.1
 	add_child(_lumiere)
