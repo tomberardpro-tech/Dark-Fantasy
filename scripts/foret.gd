@@ -19,8 +19,6 @@ extends Node3D
 @export var nombre_herbes_chemin := 160
 @export var nombre_arbres_tordus := 40
 @export var nombre_arbres_tordus_chemin := 90
-@export var nombre_buissons := 180
-@export var nombre_pierres_plates := 80
 ## Largeur de forêt de chaque côté du chemin (en mètres).
 @export var largeur_foret_chemin := 28.0
 ## Au-delà de cette distance de la caméra, les arbres ne sont plus dessinés (plus fluide).
@@ -34,9 +32,6 @@ const ARBRES_MORTS := ["DeadTree_1", "DeadTree_2", "DeadTree_3", "DeadTree_4", "
 const ROCHERS := ["Rock_Medium_1", "Rock_Medium_2", "Rock_Medium_3"]
 const HERBES := ["Grass_Wispy_Short", "Grass_Wispy_Tall", "Grass_Common_Short"]
 const ARBRES_TORDUS := ["TwistedTree_1", "TwistedTree_2", "TwistedTree_3", "TwistedTree_4", "TwistedTree_5"]
-const BUISSONS := ["Bush_Common", "Plant_1", "Plant_7", "Plant_1_Big"]
-const PIERRES_PLATES := ["RockPath_Round_Small_1", "RockPath_Round_Small_2", "RockPath_Round_Small_3",
-	"RockPath_Square_Small_1", "RockPath_Square_Small_2", "RockPath_Square_Small_3"]
 
 ## Teinte appliquée à chaque famille de matériaux pour coller à la palette sombre.
 const TEINTES := {
@@ -87,11 +82,6 @@ func _ready() -> void:
 		_arbre(ARBRES_MORTS, _position_le_long_du_chemin(), _rng.randf_range(0.32, 0.45), SOUPLESSE_ARBRE_MORT, 0.9)
 	for i in nombre_arbres_tordus_chemin:
 		_arbre(ARBRES_TORDUS, _position_le_long_du_chemin(), _rng.randf_range(0.35, 0.5), SOUPLESSE_PIN, 1.0)
-	# Buissons et plantes au pied des arbres et au bord du chemin.
-	for i in nombre_buissons:
-		_decor(BUISSONS, _position_pres_du_chemin(3.0, 14.0), _rng.randf_range(0.5, 0.8), SOUPLESSE_HERBE * 0.5, 0.7)
-	for i in nombre_buissons / 3:
-		_decor(BUISSONS, bord_clairiere.call(), _rng.randf_range(0.5, 0.8), SOUPLESSE_HERBE * 0.5, 0.7)
 	# Herbes, trèfle et champignons : au bord de la clairière et du chemin, jamais près du feu.
 	for i in nombre_herbes:
 		_decor(HERBES, bord_clairiere.call(), _rng.randf_range(0.5, 0.9), SOUPLESSE_HERBE, 0.3)
@@ -101,9 +91,6 @@ func _ready() -> void:
 		_decor(["Clover_1", "Clover_2"], _position_pres_du_chemin(2.0, 6.0), _rng.randf_range(0.6, 1.0), 0.0, 0.3)
 	for i in 14:
 		_decor(["Mushroom_Common"], _position_pres_du_chemin(3.0, 10.0), _rng.randf_range(0.6, 1.0), 0.0, 0.3)
-	# Quelques pierres plates au bord du sentier, comme un vieux chemin pavé usé.
-	for i in nombre_pierres_plates:
-		_decor(PIERRES_PLATES, _position_pres_du_chemin(1.0, 2.0), _rng.randf_range(0.6, 0.9), 0.0, 0.4, true)
 
 
 ## Le vent penche doucement les arbres et les herbes, avec un léger balancement.
