@@ -144,6 +144,8 @@ Couleurs : noir, gris et rouge sang.
   torches, pont, charrette, ruine, caisses, épée. Tom a accepté de reprendre le Fantasy Props
   MegaKit pour les objets du chemin. Packs complets dans `Téléchargements\Quaternius_Village`.
 - Tom veut de **vrais objets**, pas des cubes : utiliser les modèles des packs dès que possible.
+- Tom n'aime pas (retirés) : les fougères, les buissons et grandes plantes (Bush_Common,
+  Plant_1, Plant_7), les pierres plates au bord du sentier (RockPath).
 - Packs déjà essayés puis retirés à la demande de Tom : Quaternius Ultimate Modular Ruins,
   Kenney Survival Kit.
 - Toujours vérifier la licence d'un pack avant de l'utiliser.
