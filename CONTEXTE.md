@@ -139,6 +139,11 @@ Couleurs : noir, gris et rouge sang.
 - Si besoin de grain sur le sol, la roche ou le bois : textures **Kenney Retro Textures Fantasy**
   ou **Screaming Brain Studios Tiny Texture Pack** (CC0).
 - Écarté : Synty POLYGON Dark Fantasy (payant).
-- Packs déjà essayés puis retirés à la demande de Tom : Quaternius Fantasy Props MegaKit,
-  Quaternius Ultimate Modular Ruins, Kenney Survival Kit.
+- **Déjà téléchargé** : Medieval Village MegaKit et Fantasy Props MegaKit [Standard] (gratuits),
+  dans `assets/objets/` (seulement les objets utilisés, textures réduites à 1024 px) : lanternes,
+  torches, pont, charrette, ruine, caisses, épée. Tom a accepté de reprendre le Fantasy Props
+  MegaKit pour les objets du chemin. Packs complets dans `Téléchargements\Quaternius_Village`.
+- Tom veut de **vrais objets**, pas des cubes : utiliser les modèles des packs dès que possible.
+- Packs déjà essayés puis retirés à la demande de Tom : Quaternius Ultimate Modular Ruins,
+  Kenney Survival Kit.
 - Toujours vérifier la licence d'un pack avant de l'utiliser.
