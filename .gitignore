@@ -1,3 +1,5 @@
 # Fichiers générés automatiquement par Godot
 .godot/
 /android/
+# Animations Mixamo : utilisables dans le jeu, mais pas à partager en fichiers bruts
+assets/mixamo/
