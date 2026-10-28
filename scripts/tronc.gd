@@ -43,7 +43,8 @@ func interagir(joueur: Node3D) -> void:
 	joueur.asseoir(point_assise(), regard(), false, self)
 	Sauvegarde.sauvegarder(nom_du_feu, point_assise(), {"epee": joueur.a_epee})
 	var interface := get_tree().get_first_node_in_group("interface")
-	if interface:
+	# Pas de message tant que la sauvegarde sur le disque est coupée (voir sauvegarde.gd).
+	if interface and Sauvegarde.SUR_LE_DISQUE:
 		interface.notifier("Partie sauvegardée")
 
 

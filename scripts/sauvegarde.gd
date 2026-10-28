@@ -6,12 +6,20 @@ extends Node
 ## (%APPDATA%\Godot\app_userdata\Jeu Dark Fantasy\sauvegarde.json).
 
 const FICHIER := "user://sauvegarde.json"
+## Pendant la fabrication du jeu, Tom veut repartir de zéro à chaque lancement pour voir
+## ses modifications : on n'écrit ni ne relit rien sur le disque. La partie est quand même
+## retenue pendant qu'on joue (pour se réveiller au dernier feu après une mort).
+## Mettre à true pour réactiver la vraie sauvegarde.
+const SUR_LE_DISQUE := false
 
 var _donnees := {}
 
 
 func _ready() -> void:
-	charger()
+	if SUR_LE_DISQUE:
+		charger()
+	else:
+		effacer()
 
 
 ## Enregistre la partie au feu de camp « feu » (son nom), le joueur étant à « position ».
@@ -23,6 +31,8 @@ func sauvegarder(feu: String, position: Vector3, autres := {}) -> void:
 		"date": Time.get_datetime_string_from_system(),
 	}
 	_donnees.merge(autres)
+	if not SUR_LE_DISQUE:
+		return
 	var fichier := FileAccess.open(FICHIER, FileAccess.WRITE)
 	if fichier:
 		fichier.store_string(JSON.stringify(_donnees, "\t"))

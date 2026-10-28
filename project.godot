@@ -20,10 +20,10 @@ Controles="*res://scripts/controles.gd"
 Sauvegarde="*res://scripts/sauvegarde.gd"
 Chemin="*res://scripts/chemin.gd"
 
-[physics]
-
-common/physics_interpolation=true
-
 [gui]
 
 theme/custom_font="res://assets/polices/Cinzel.ttf"
+
+[physics]
+
+common/physics_interpolation=true
