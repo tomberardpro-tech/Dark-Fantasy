@@ -1,11 +1,11 @@
 extends CharacterBody3D
 ## Le héros : tenue « Paysan » de Quaternius, tête et cheveux longs du pack Universal
 ## Base Characters, animé avec les Universal Animation Library 1 et 2.
-## Commandes (façon Diablo) :
-## - clic gauche sur le sol : y aller ; clic gauche sur un ennemi : l'attaquer
-##   (l'épée sort toute seule), cliquer encore enchaîne le combo de 3 coups ;
-## - clic droit : un coup droit devant, dans la direction où l'on va ;
+## Commandes :
 ## - ZQSD pour marcher, Maj pour courir, Espace pour une roulade ;
+## - clic gauche : un coup d'épée droit devant, dans la direction où l'on court
+##   (l'épée sort toute seule) ; recliquer enchaîne le combo de 3 coups ;
+## - clic droit : un petit bond et un coup au sol qui repousse les ennemis autour ;
 ## - R pour sortir ou ranger l'épée, E pour interagir.
 ## On peut continuer à courir en frappant : seul le haut du corps donne le coup.
 ## Il a une barre de vie ; à zéro, il se réveille au dernier feu de camp.
@@ -31,6 +31,11 @@ extends CharacterBody3D
 @export var vie_max := 100.0
 ## Distance à laquelle on peut toucher un ennemi avec l'épée.
 @export var portee_epee := 2.2
+## Le bond du clic droit : sa hauteur (vitesse de départ), la portée du coup au sol
+## et ses dégâts.
+@export var force_bond := 4.2
+@export var rayon_coup_au_sol := 2.6
+@export var degats_coup_au_sol := 10.0
 
 const ANIMATIONS := "res://assets/personnage/UAL1_Standard.glb"
 const ANIMATIONS_2 := "res://assets/personnage/UAL2_Standard.glb"
@@ -47,6 +52,7 @@ const OS_DU_HAUT := ["spine_01", "spine_02", "spine_03", "neck_01", "Head",
 const ETATS := {
 	"repos": "Idle", "course": "Jog_Fwd", "sprint": "Sprint", "garde": "Sword_Idle",
 	"roulade": "Roll", "assis": "Sitting_Idle", "s_asseoir": "Sitting_Enter", "mort": "Death01",
+	"saut": "Jump",
 }
 
 ## Dégainer : on joue le début du lancer par-dessus l'épaule ; la main est derrière
@@ -78,10 +84,11 @@ var epee_sortie := false
 var vie := 100.0
 var est_mort := false
 
-var _cible_clic: Variant = null
-var _cible_ennemi: Node3D = null
 var _clic_avant := false
 var _clic_droit_avant := false
+## Le petit bond du clic droit : en l'air ou non, et depuis combien de temps.
+var _en_bond := false
+var _temps_bond := 0.0
 var _roulade_restante := 0.0
 var _direction_roulade := Vector3.ZERO
 var _attente_roulade := 0.0
@@ -93,6 +100,7 @@ var _geste_unique: AnimationNodeOneShot
 var _squelette: Skeleton3D
 var _epee_dos: Node3D
 var _epee_main: Node3D
+var _trainee: MeshInstance3D
 ## Ce que fait le haut du corps : "" (rien), "degainer", "ranger", "attaque", "touche".
 var _action := ""
 var _temps_action := 0.0
@@ -131,6 +139,11 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_temps += delta
 	_animer_cheveux(delta)
+	# La traînée de la lame pendant les coups.
+	if _trainee and _epee_main:
+		var lame := _epee_main.global_transform
+		var frappe := epee_sortie and ((_action == "attaque" and _phase == "coup") or _en_bond)
+		_trainee.suivre(lame * Vector3(0, 0.15, 0), lame * Vector3(0, 0.9, 0), frappe, delta)
 	var interface := get_tree().get_first_node_in_group("interface")
 	if est_mort:
 		return
@@ -160,20 +173,15 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
-	var clic_maintenu := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	var clic := clic_maintenu and not _clic_avant
-	_clic_avant = clic_maintenu
-	if clic and not est_assis:
-		_cliquer()
-	elif clic_maintenu and _cible_ennemi == null and not est_assis:
-		# Bouton gardé enfoncé : on suit la souris.
-		_cible_clic = _point_sous_la_souris()
-
-	# Clic droit : un coup droit devant, dans la direction où l'on va (ou vers la souris
-	# si on est immobile), même sans ennemi visé.
+	# Clic gauche : un coup d'épée (recliquer enchaîne le combo).
+	var clic := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
+	if clic and not _clic_avant and not est_assis:
+		_clic_gauche()
+	_clic_avant = clic
+	# Clic droit : un petit bond et un coup au sol qui repousse les ennemis autour.
 	var clic_droit := Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT)
 	if clic_droit and not _clic_droit_avant and not est_assis:
-		_frapper_droit_devant()
+		_bondir()
 	_clic_droit_avant = clic_droit
 
 	if Input.is_action_just_pressed("degainer") and a_epee and not est_assis and _action == "":
@@ -185,30 +193,6 @@ func _physics_process(delta: float) -> void:
 	_avancer_action(delta)
 
 	var direction := _direction_clavier()
-	if direction.length() > 0.01:
-		_cible_clic = null
-		_cible_ennemi = null
-	# Un ennemi visé : on va vers lui, puis on frappe quand il est à portée.
-	if _cible_ennemi != null:
-		if not is_instance_valid(_cible_ennemi) or not _cible_ennemi.est_vivant():
-			_cible_ennemi = null
-		else:
-			var vers := _cible_ennemi.global_position - global_position
-			vers.y = 0.0
-			if vers.length() > portee_epee * 0.85:
-				direction = vers.normalized()
-			else:
-				_regarder(vers, delta, true)
-				if _action == "":
-					_commencer_attaque()
-				_cible_ennemi = null
-	if _cible_clic != null:
-		var vers: Vector3 = _cible_clic - global_position
-		vers.y = 0.0
-		if vers.length() < 0.15:
-			_cible_clic = null
-		else:
-			direction = vers.normalized()
 
 	_attente_roulade -= delta
 	if Input.is_action_just_pressed("roulade") and _attente_roulade <= 0.0:
@@ -236,13 +220,20 @@ func _physics_process(delta: float) -> void:
 	if au_sol.length() > 0.1 and not (_action == "attaque" and direction.length() < 0.01):
 		_regarder(au_sol, delta)
 	move_and_slide()
+	# Le bond retombe : coup au sol.
+	if _en_bond:
+		_temps_bond += delta
+		if is_on_floor() and _temps_bond > 0.15:
+			_impact_au_sol()
 	_choisir_deplacement(au_sol.length())
 
 
 # --- Déplacements ---------------------------------------------------------
 
 func _choisir_deplacement(vitesse: float) -> void:
-	if _roulade_restante > 0.0:
+	if _en_bond:
+		_etat("saut")
+	elif _roulade_restante > 0.0:
 		_arbre.set("parameters/roulade_vitesse/scale", _anim.get_animation("Roll").length / duree_roulade)
 		_etat("roulade")
 	elif vitesse > 5.5:
@@ -299,8 +290,6 @@ func _commencer_roulade(direction: Vector3) -> void:
 func asseoir(point: Vector3, regard: Vector3, tout_de_suite := false, sur: Node = null) -> void:
 	est_assis = true
 	siege = sur
-	_cible_clic = null
-	_cible_ennemi = null
 	velocity = Vector3.ZERO
 	global_position = point
 	reset_physics_interpolation()
@@ -329,56 +318,66 @@ func se_relever() -> void:
 # --- Combat ---------------------------------------------------------------
 
 ## Clic gauche : sur un ennemi, on l'attaque ; sur le sol, on y va.
-func _cliquer() -> void:
-	var ennemi := _ennemi_sous_la_souris()
-	if ennemi == null:
-		_cible_ennemi = null
-		_cible_clic = _point_sous_la_souris()
-		return
-	_cible_clic = null
-	var vers := ennemi.global_position - global_position
-	vers.y = 0.0
-	if _action == "attaque":
-		# Déjà en train de frapper : ce clic enchaîne le coup suivant.
-		_clic_en_attente = true
-		if vers.length() > portee_epee:
-			_cible_ennemi = ennemi
-	else:
-		_cible_ennemi = ennemi
-
-
-func _ennemi_sous_la_souris() -> Node3D:
-	var point: Variant = _point_sous_la_souris()
-	if point == null:
-		return null
-	var meilleur: Node3D = null
-	var plus_proche := 1.4
-	for ennemi in get_tree().get_nodes_in_group("ennemi"):
-		if not ennemi.est_vivant():
-			continue
-		var d := Vector2(ennemi.global_position.x - point.x, ennemi.global_position.z - point.z).length()
-		if d < plus_proche:
-			plus_proche = d
-			meilleur = ennemi
-	return meilleur
-
-
-func _frapper_droit_devant() -> void:
+## Clic gauche : on frappe droit devant, dans la direction où l'on court
+## (ou là où l'on regarde si on est immobile). Pendant un coup, le clic enchaîne le suivant.
+func _clic_gauche() -> void:
 	if _action == "attaque":
 		_clic_en_attente = true
 		return
-	if _action != "":
+	if _action != "" or _en_bond:
 		return
 	var direction := _direction_clavier()
-	if direction.length() < 0.01:
-		var point: Variant = _point_sous_la_souris()
-		if point != null:
-			direction = point - global_position
-			direction.y = 0.0
-	if direction.length() > 0.2:
+	if direction.length() > 0.01:
 		_regarder(direction, 0.0, true)
-	_cible_ennemi = null
 	_commencer_attaque()
+
+
+## Clic droit : un petit bond rapide ; en retombant, coup au sol qui blesse et repousse
+## les ennemis autour.
+func _bondir() -> void:
+	if _en_bond or not is_on_floor() or (_action != "" and _action != "attaque"):
+		return
+	_arreter_geste()
+	if a_epee and not epee_sortie:
+		_epee_dos.visible = false
+		_epee_main.visible = true
+		epee_sortie = true
+	_en_bond = true
+	_temps_bond = 0.0
+	velocity.y = force_bond
+
+
+func _impact_au_sol() -> void:
+	_en_bond = false
+	_jouer_geste("ual2/Sword_Regular_A" if epee_sortie else "Punch_Jab", 0.0, false, false)
+	for ennemi in get_tree().get_nodes_in_group("ennemi"):
+		if ennemi.est_vivant() and ennemi.global_position.distance_to(global_position) < rayon_coup_au_sol:
+			ennemi.prendre_coup(degats_coup_au_sol, global_position, 9.0)
+	_onde_de_choc()
+
+
+## Un anneau de poussière qui s'élargit au sol, à l'endroit de l'impact.
+func _onde_de_choc() -> void:
+	var anneau := TorusMesh.new()
+	anneau.inner_radius = 0.85
+	anneau.outer_radius = 1.0
+	anneau.rings = 24
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(0.55, 0.45, 0.35, 0.7)
+	anneau.material = mat
+	var onde := MeshInstance3D.new()
+	onde.mesh = anneau
+	onde.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	onde.top_level = true
+	add_child(onde)
+	onde.global_position = global_position + Vector3(0, 0.08, 0)
+	onde.scale = Vector3(0.3, 0.15, 0.3)
+	var anim := create_tween().set_parallel()
+	anim.tween_property(onde, "scale", Vector3(rayon_coup_au_sol, 0.15, rayon_coup_au_sol), 0.35).set_ease(Tween.EASE_OUT)
+	anim.tween_property(mat, "albedo_color:a", 0.0, 0.35)
+	anim.chain().tween_callback(onde.queue_free)
 
 
 ## Premier coup : l'épée sort toute seule si elle est dans le dos.
@@ -490,8 +489,6 @@ func est_vivant() -> bool:
 ## Plus de vie : il s'écroule, puis se réveille au dernier feu de camp.
 func _mourir() -> void:
 	est_mort = true
-	_cible_clic = null
-	_cible_ennemi = null
 	_arreter_geste()
 	_etat("mort")
 	await get_tree().create_timer(3.0).timeout
@@ -524,6 +521,9 @@ func prendre_epee() -> void:
 	# La poignée (un peu sous l'origine du modèle) au creux de la main.
 	_epee_main.transform = EPEE_DANS_LA_MAIN * Transform3D(Basis(), Vector3(0.0, 0.1, 0.0))
 	_epee_main.visible = false
+	_trainee = MeshInstance3D.new()
+	_trainee.set_script(load("res://scripts/trainee.gd"))
+	add_child(_trainee)
 
 
 func _accrocher_epee(os: String) -> Node3D:
@@ -573,8 +573,9 @@ func _mettre_epee_dans_le_dos() -> void:
 ## Joue un geste du haut du corps (coup, dégainer, coup reçu…) par-dessus les déplacements.
 ## « longueur » : ne jouer que le début de l'animation ; « a_l_envers » : la jouer à l'envers.
 ## Quand le héros est immobile, tout le corps fait le geste (plus beau) ;
-## quand il court, seul le haut du corps le fait.
-func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false) -> void:
+## quand il court, seul le haut du corps le fait. « haut_en_courant » = false : tout le
+## corps fait toujours le geste (par exemple le coup au sol après le bond).
+func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false, haut_en_courant := true) -> void:
 	_geste.animation = nom
 	_geste.use_custom_timeline = longueur > 0.0
 	if longueur > 0.0:
@@ -583,7 +584,7 @@ func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false) -> void:
 		_geste.stretch_time_scale = false
 	_geste.play_mode = AnimationNodeAnimation.PLAY_MODE_BACKWARD if a_l_envers else AnimationNodeAnimation.PLAY_MODE_FORWARD
 	var en_mouvement := Vector2(velocity.x, velocity.z).length() > 0.5 or _direction_clavier().length() > 0.01
-	_geste_unique.filter_enabled = en_mouvement
+	_geste_unique.filter_enabled = en_mouvement and haut_en_courant
 	_arbre.set("parameters/geste/request", AnimationNodeOneShot.ONE_SHOT_REQUEST_FIRE)
 
 

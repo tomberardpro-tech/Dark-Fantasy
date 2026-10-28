@@ -39,7 +39,7 @@ survivants à protéger, il reste un dieu à abattre. »
 | Mode | **Solo**. Ne rien construire pour le multijoueur (la coop est mise de côté). |
 | Monde | Monde ouvert à explorer |
 | Vue | **3D en vue isométrique, caméra fixe** (façon Diablo), **même angle que la maquette** (Tom y tient), mais **en vraie perspective** (la vue sans perspective lui semblait trop « plate ») |
-| Contrôles | Façon **Diablo** : clic gauche sur le sol = y aller, clic gauche sur un ennemi = l'attaquer (l'épée sort toute seule, recliquer = combo de 3 coups), **clic droit = coup droit devant** (direction de la course). ZQSD aussi, Maj courir, Espace roulade, E interagir, R sortir/ranger l'épée. On peut **courir en frappant** (seul le haut du corps frappe). |
+| Contrôles | **Pas de déplacement à la souris.** ZQSD pour marcher, Maj courir, Espace roulade. **Clic gauche = coup d'épée** droit devant (direction de la course ; l'épée sort toute seule), recliquer = combo de 3 coups. **Clic droit = petit bond + coup au sol** qui repousse les ennemis autour. E interagir, R sortir/ranger l'épée. On peut courir en frappant. Traînée lumineuse sur la lame, chiffres de dégâts. |
 | Sauvegarde | Uniquement aux feux de camp |
 | Progression | Quêtes, expérience, arbre de compétences, nouvelles tenues |
 | Classes | Guerrier, Mage, Nécromancien, Archer (nom à trouver : Traqueur ? Rôdeur ? Veilleur ?). **Le moment du choix de la classe sera décidé plus tard.** |
@@ -166,8 +166,10 @@ Couleurs : noir, gris et rouge sang.
 
 - **Coffre** près du tronc de la clairière (Chest_Wood) : E l'ouvre, on y trouve la vieille épée.
   La **charrette** n'est plus qu'un décor.
-- **3 squelettes** (KayKit Skeletons + KayKit Character Animations, CC0) allongés juste après le
-  pont : ils se relèvent quand on approche, poursuivent et frappent. Si le héros meurt, il se
+- **3 squelettes** fabriqués os par os sur le squelette d'animation du héros (même DA, os fins,
+  orbites rougeoyantes, épée rouillée), difficulté moyenne, allongés juste après le
+  pont : ils se relèvent quand on approche, poursuivent et frappent, et s'effondrent en tas
+  d'os. Si le héros meurt, il se
   réveille assis au dernier feu de camp avec toute sa vie, et les squelettes se rendorment.
 - La ruine est remplacée par une **cabane à moitié effondrée** (pièces du Medieval Village MegaKit).
 - Le tronc pour s'asseoir est un **vrai rondin** (écorce, cernes aux bouts, moignons de branches).

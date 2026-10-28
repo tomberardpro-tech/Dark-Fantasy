@@ -3,11 +3,11 @@ extends Node3D
 ## Ils se relèvent quand le héros approche (voir squelette.gd).
 
 ## À quelle distance après le pont (le long du chemin) se trouve chaque squelette,
-## de quel côté du chemin, et avec quel modèle et quelle arme.
+## et de quel côté du chemin.
 const SQUELETTES := [
-	{"apres_le_pont": 9.0, "cote": 2.6, "modele": "Skeleton_Minion", "arme": "Skeleton_Blade"},
-	{"apres_le_pont": 13.0, "cote": -2.8, "modele": "Skeleton_Warrior", "arme": "Skeleton_Axe"},
-	{"apres_le_pont": 17.0, "cote": 2.4, "modele": "Skeleton_Rogue", "arme": "Skeleton_Blade"},
+	{"apres_le_pont": 9.0, "cote": 2.6},
+	{"apres_le_pont": 13.0, "cote": -2.8},
+	{"apres_le_pont": 17.0, "cote": 2.4},
 ]
 
 
@@ -21,7 +21,5 @@ func _ready() -> void:
 		var cote := Vector3(-tangente.z, 0.0, tangente.x)
 		var squelette := CharacterBody3D.new()
 		squelette.set_script(load("res://scripts/squelette.gd"))
-		squelette.modele = s["modele"]
-		squelette.arme = s["arme"]
 		squelette.position = p + cote * s["cote"]
 		add_child(squelette)
