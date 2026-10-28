@@ -122,7 +122,7 @@ position = Vector3(0, 0.23, 0)
 shape = SubResource("Shape_tronc")
 
 [node name="Coffre" type="Node3D" parent="Rendu/Monde"]
-position = Vector3(1.75, 0, 1.75)
+position = Vector3(2.6, 0, 2.6)
 rotation = Vector3(0, -2.356, 0)
 script = ExtResource("13_coffre")
 
