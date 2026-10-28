@@ -47,17 +47,111 @@ func interagir(joueur: Node3D) -> void:
 		interface.notifier("Partie sauvegardée")
 
 
-## Le tronc prend la vraie écorce des arbres morts du pack nature.
+## Un vrai rondin à la place du cylindre : un peu bosselé et irrégulier, plus épais d'un
+## côté, habillé de l'écorce des arbres morts du pack nature, avec les bouts coupés qui
+## montrent les cernes du bois et deux moignons de branches.
 func _habiller_d_ecorce() -> void:
 	var apparence := get_node_or_null("Apparence") as MeshInstance3D
 	if apparence == null:
 		return
-	var mat := StandardMaterial3D.new()
-	mat.albedo_texture = load("res://assets/nature/Bark_DeadTree.png")
-	mat.albedo_color = Color(0.55, 0.52, 0.55)
-	mat.uv1_scale = Vector3(2.0, 3.0, 1.0)
-	mat.roughness = 1.0
-	apparence.material_override = mat
+	var ecorce := StandardMaterial3D.new()
+	ecorce.albedo_texture = load("res://assets/nature/Bark_DeadTree.png")
+	ecorce.normal_enabled = true
+	ecorce.normal_texture = load("res://assets/nature/Bark_DeadTree_Normal.png")
+	ecorce.albedo_color = Color(0.55, 0.52, 0.55)
+	ecorce.roughness = 1.0
+	var bois_coupe := ShaderMaterial.new()
+	bois_coupe.shader = load("res://shaders/bois_coupe.gdshader")
+	apparence.mesh = _maillage_rondin(ecorce, bois_coupe)
+	apparence.material_override = null
+	# Deux moignons de branches cassées.
+	for m in [[0.45, 0.6, 0.35], [-0.7, 2.6, -0.5]]:
+		var forme := CylinderMesh.new()
+		forme.top_radius = 0.035
+		forme.bottom_radius = 0.07
+		forme.height = 0.3
+		forme.radial_segments = 6
+		forme.material = ecorce
+		var moignon := MeshInstance3D.new()
+		moignon.mesh = forme
+		var angle: float = m[1]
+		var direction := Vector3(0.0, 0.0, 0.0).direction_to(Vector3(0.0, cos(angle), sin(angle)))
+		# Le rondin est couché : son axe est le X de « Apparence » une fois tourné.
+		moignon.position = apparence.position + Vector3(m[0], 0.0, 0.0) + direction * 0.25
+		moignon.basis = Basis(Vector3.RIGHT, angle) * Basis(Vector3.FORWARD, m[2])
+		add_child(moignon)
+
+
+## Fabrique le rondin : un tube bosselé (l'écorce) fermé par deux bouts plats (le bois coupé).
+## Son axe est le Y du maillage (le nœud « Apparence » le couche à l'horizontale).
+func _maillage_rondin(ecorce: Material, bois_coupe: Material) -> ArrayMesh:
+	const LONGUEUR := 2.6
+	const TOURS := 18
+	const ANNEAUX := 14
+	var bruit := FastNoiseLite.new()
+	bruit.seed = 5
+	bruit.frequency = 0.9
+	var rayon := func(angle: float, t: float) -> float:
+		var base := lerpf(0.235, 0.205, t)
+		var p := Vector2(cos(angle), sin(angle)) * 1.5
+		return base * (1.0 + bruit.get_noise_3d(p.x, p.y, t * 4.0) * 0.12)
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for a in ANNEAUX + 1:
+		var t := float(a) / ANNEAUX
+		for k in TOURS + 1:
+			var angle := TAU * k / TOURS
+			var r: float = rayon.call(angle, t)
+			outil.set_uv(Vector2(float(k) / TOURS * 2.0, t * 3.0))
+			outil.add_vertex(Vector3(cos(angle) * r, (t - 0.5) * LONGUEUR, sin(angle) * r))
+	for a in ANNEAUX:
+		for k in TOURS:
+			var i := a * (TOURS + 1) + k
+			var j := i + TOURS + 1
+			outil.add_index(i)
+			outil.add_index(j)
+			outil.add_index(i + 1)
+			outil.add_index(i + 1)
+			outil.add_index(j)
+			outil.add_index(j + 1)
+	outil.generate_normals()
+	outil.generate_tangents()
+	var maillage := outil.commit()
+	maillage.surface_set_material(0, ecorce)
+	# Les deux bouts coupés.
+	var bouts := SurfaceTool.new()
+	bouts.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for cote in [0.0, 1.0]:
+		var y: float = (cote - 0.5) * LONGUEUR
+		var normale := Vector3(0, 1 if cote > 0.5 else -1, 0)
+		for k in TOURS:
+			var a1 := TAU * k / TOURS
+			var a2 := TAU * (k + 1) / TOURS
+			var r1: float = rayon.call(a1, cote)
+			var r2: float = rayon.call(a2, cote)
+			var points := [Vector3(0, y, 0), Vector3(cos(a1) * r1, y, sin(a1) * r1), Vector3(cos(a2) * r2, y, sin(a2) * r2)]
+			if cote < 0.5:
+				points = [points[0], points[2], points[1]]
+			for p in points:
+				bouts.set_normal(normale)
+				# UV : position sur le disque, de -1 à 1, pour dessiner les cernes.
+				bouts.set_uv(Vector2(p.x, p.z) / 0.235)
+				bouts.add_vertex(p)
+	bouts.commit(maillage)
+	maillage.surface_set_material(1, bois_coupe)
+	return maillage
+
+
+## Vrai si c'est ici que le héros doit se réveiller (dernier feu utilisé, ou feu de départ).
+func est_le_dernier_feu() -> bool:
+	if Sauvegarde.existe():
+		return Sauvegarde.dernier_feu() == nom_du_feu
+	return feu_de_depart
+
+
+## Après sa mort, le héros se réveille assis ici.
+func reveiller_au_feu(joueur: Node3D) -> void:
+	joueur.asseoir(point_assise(), regard(), true, self)
 
 
 ## L'endroit où se place le personnage assis : juste devant le tronc, côté feu.

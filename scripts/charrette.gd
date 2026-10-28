@@ -1,37 +1,10 @@
 extends Node3D
-## Une charrette renversée au bord du chemin, avec des caisses éparpillées.
-## Touche E à côté : on la fouille et on y trouve une vieille épée (la première arme).
-
-## Distance à laquelle le message « E : fouiller la charrette » apparaît.
-@export var distance_interaction := 3.2
-
-var fouillee := false
+## Une charrette renversée au bord du chemin, avec son chargement éparpillé.
+## Simple décor (l'épée se trouve maintenant dans le coffre de la clairière).
 
 
 func _ready() -> void:
-	add_to_group("interactif")
-	fouillee = Sauvegarde.donnee("epee", false)
 	_construire()
-
-
-## Utilisé par le joueur pour savoir s'il peut interagir avec la charrette.
-func distance_pour_interagir(joueur: Node3D) -> float:
-	if fouillee:
-		return INF
-	var d := joueur.global_position.distance_to(global_position)
-	return d if d < distance_interaction else INF
-
-
-func texte_interaction(_joueur: Node3D) -> String:
-	return "E : fouiller la charrette"
-
-
-func interagir(joueur: Node3D) -> void:
-	fouillee = true
-	joueur.prendre_epee()
-	var interface := get_tree().get_first_node_in_group("interface")
-	if interface:
-		interface.notifier("Vous trouvez une vieille épée")
 
 
 func _construire() -> void:

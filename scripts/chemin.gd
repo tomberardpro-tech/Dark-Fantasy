@@ -10,7 +10,7 @@ extends Node
 const TRACE := [
 	Vector3(-2, 0, 2.5), Vector3(-7, 0, 9), Vector3(-14, 0, 18), Vector3(-30, 0, 28), Vector3(-46, 0, 24),
 	Vector3(-60, 0, 36), Vector3(-66, 0, 52), Vector3(-80, 0, 64), Vector3(-98, 0, 60),
-	Vector3(-112, 0, 72), Vector3(-118, 0, 90), Vector3(-132, 0, 104),
+	Vector3(-112, 0, 72), Vector3(-118, 0, 90), Vector3(-127, 0, 99),
 ]
 ## Le ruisseau, qui croise le sentier au niveau du pont.
 const RUISSEAU := [
@@ -22,7 +22,7 @@ const RUINE := Vector3(-34, 0, 13)
 const AUTEL := Vector3(-90, 0, 72)
 const CHARRETTE := Vector3(-122, 0, 99)
 ## Le centre du hameau de Bruneval (construit à l'étape 9).
-const VILLAGE := Vector3(-146, 0, 116)
+const VILLAGE := Vector3(-137, 0, 109)
 
 var courbe_chemin: Curve3D
 var courbe_ruisseau: Curve3D

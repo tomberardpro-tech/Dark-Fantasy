@@ -236,39 +236,75 @@ func _lanterne(pos: Vector3, vers_le_chemin: Vector3) -> void:
 	_ajouter_obstacle(forme, Transform3D(Basis(), pos + Vector3(0, 1.2, 0)))
 
 
-## Quelques pans de murs de briques effondrés, couverts de lierre, et des briques tombées.
+## Une cabane de 4 m sur 4 à moitié effondrée (pièces du Medieval Village MegaKit) :
+## il manque un pan de mur et la moitié du toit, la porte est tombée, un pan de mur gît
+## au sol, et du lierre et des débris traînent. Sa porte regarde vers le chemin.
 func _creer_ruine() -> void:
-	# [position par rapport au centre, rotation, penché (pan tombé)]
+	var cabane := Node3D.new()
+	cabane.position = Chemin.RUINE
+	cabane.rotation.y = 0.69
+	add_child(cabane)
+	# Les murs font 2 m de large ; [modèle, position du milieu, tourné d'un quart de tour].
 	var murs := [
-		[Vector3(-2.0, 0, -1.5), 0.1, false],
-		[Vector3(0.6, 0, -1.3), 0.1, false],
-		[Vector3(-3.4, 0, 0.6), PI / 2.0 + 0.1, false],
-		[Vector3(2.0, 0, 1.8), -0.3, true],
+		["Wall_Plaster_Straight", Vector3(-1, 0, -2), false],
+		["Wall_Plaster_Window_Wide_Flat", Vector3(1, 0, -2), false],
+		["Wall_Plaster_Door_Flat", Vector3(-1, 0, 2), false],
+		["Wall_Plaster_WoodGrid", Vector3(-2, 0, -1), true],
+		["Wall_Plaster_Straight", Vector3(-2, 0, 1), true],
+		["Wall_Plaster_Straight", Vector3(2, 0, -1), true],
 	]
 	for m in murs:
-		var mur := Modeles.creer("Wall_UnevenBrick_Straight")
-		mur.position = Chemin.RUINE + m[0]
+		var mur := Modeles.creer(m[0])
+		mur.position = m[1]
 		if m[2]:
-			mur.basis = Basis(Vector3.UP, m[1]) * Basis(Vector3.RIGHT, -1.35)
-		else:
-			mur.basis = Basis(Vector3.UP, m[1])
-			var forme := BoxShape3D.new()
-			forme.size = Vector3(2.0, 3.0, 0.45)
-			_ajouter_obstacle(forme, Transform3D(mur.basis, mur.position + Vector3(0, 1.5, 0)))
-		add_child(mur)
-	for v in [["Prop_Vine1", Vector3(-2.0, 2.9, -1.2), 0.1], ["Prop_Vine4", Vector3(0.6, 2.4, -1.0), 0.1]]:
+			mur.rotation.y = PI / 2.0
+		cabane.add_child(mur)
+		var forme := BoxShape3D.new()
+		forme.size = Vector3(2.0, 3.0, 0.3)
+		_ajouter_obstacle(forme, cabane.transform * Transform3D(mur.basis, m[1] + Vector3(0, 1.5, 0)))
+	# Le pan de mur effondré, couché devant la cabane.
+	var tombe := Modeles.creer("Wall_Plaster_Straight")
+	tombe.position = Vector3(1.2, 0.15, 2.3)
+	tombe.basis = Basis(Vector3.UP, 0.25) * Basis(Vector3.RIGHT, PI / 2.0 - 0.12)
+	cabane.add_child(tombe)
+	# Les poteaux d'angle, dont un penché.
+	for coin in [Vector3(-2, 0, -2), Vector3(2, 0, -2), Vector3(-2, 0, 2), Vector3(2, 0, 2)]:
+		var poteau := Modeles.creer("Corner_Exterior_Wood")
+		poteau.position = coin
+		if coin == Vector3(2, 0, 2):
+			poteau.basis = Basis(Vector3.FORWARD, -0.45)
+		cabane.add_child(poteau)
+	# Le plancher, avec un trou.
+	for case in [Vector3(-1, 0.02, -1), Vector3(1, 0.02, -1), Vector3(-1, 0.02, 1)]:
+		var plancher := Modeles.creer("Floor_WoodDark")
+		plancher.position = case
+		cabane.add_child(plancher)
+	# La moitié du toit tient encore, l'autre moitié est tombée.
+	for x in [-1.0, 1.0]:
+		var toit := Modeles.creer("Roof_Wooden_2x1_Middle")
+		toit.position = Vector3(x, 2.2, -1)
+		cabane.add_child(toit)
+	var morceau := Modeles.creer("Roof_Wooden_2x1_Middle")
+	morceau.position = Vector3(0.8, 1.2, 0.6)
+	morceau.basis = Basis(Vector3.RIGHT, 0.55)
+	cabane.add_child(morceau)
+	# La porte arrachée, par terre.
+	var porte := Modeles.creer("Door_1_Flat")
+	porte.position = Vector3(-1.3, 0.08, 3.0)
+	porte.basis = Basis(Vector3.UP, 0.4) * Basis(Vector3.RIGHT, -PI / 2.0)
+	cabane.add_child(porte)
+	# Du lierre sur les murs et quelques débris.
+	for v in [["Prop_Vine1", Vector3(-1.0, 2.9, -2.2)], ["Prop_Vine4", Vector3(-2.2, 2.4, 0.8)]]:
 		var lierre := Modeles.creer(v[0], Modeles.OBJETS, TEINTE_HERBE)
-		lierre.position = Chemin.RUINE + v[1]
-		lierre.rotation.y = v[2]
-		add_child(lierre)
-	for i in 12:
-		var brique := Modeles.creer("Prop_Brick" + str(1 + i % 3))
-		brique.position = Chemin.RUINE + Vector3(_rng.randf_range(-3.0, 3.0), 0.1, _rng.randf_range(-0.5, 2.5))
-		brique.rotation = Vector3(_rng.randf_range(-0.5, 0.5), _rng.randf_range(0.0, TAU), _rng.randf_range(-0.5, 0.5))
-		add_child(brique)
-	var gravats := Modeles.creer("Vase_Rubble_Medium")
-	gravats.position = Chemin.RUINE + Vector3(-1.0, 0, 1.0)
-	add_child(gravats)
+		lierre.position = v[1]
+		cabane.add_child(lierre)
+	for d in [["Prop_Brick1", Vector3(0.4, 0.1, 2.9), 0.3], ["Prop_Brick2", Vector3(1.9, 0.1, 3.2), 1.2],
+			["Prop_Brick3", Vector3(-0.2, 0.1, 3.4), 2.0], ["Crate_Wooden", Vector3(1.0, 0.0, -0.9), 0.4],
+			["Barrel", Vector3(-1.2, 0.0, -1.1), 0.0], ["Vase_Rubble_Medium", Vector3(0.6, 0.02, 1.0), 0.8]]:
+		var objet := Modeles.creer(d[0])
+		objet.position = d[1]
+		objet.rotation.y = d[2]
+		cabane.add_child(objet)
 
 
 ## Un vieil autel de pierre brute avec un cristal rouge : premier signe de la malédiction.

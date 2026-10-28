@@ -23,3 +23,7 @@ Chemin="*res://scripts/chemin.gd"
 [physics]
 
 common/physics_interpolation=true
+
+[gui]
+
+theme/custom_font="res://assets/polices/Cinzel.ttf"

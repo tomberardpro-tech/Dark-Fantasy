@@ -1,16 +1,15 @@
 extends CanvasLayer
 ## Messages affichés en bas de l'écran, par exemple « E : s'asseoir »,
-## et notifications en haut, par exemple « Partie sauvegardée ».
+## notifications en haut (« Partie sauvegardée ») et la barre de vie en bas à gauche.
 
 var _message: Label
 var _annonce: Label
 var _fondu: Tween
+var _barre_vie: ProgressBar
 
 
 func _ready() -> void:
-	var boussole := Control.new()
-	boussole.set_script(load("res://scripts/boussole.gd"))
-	add_child(boussole)
+	_creer_barre_de_vie()
 
 	_annonce = Label.new()
 	_annonce.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -22,8 +21,8 @@ func _ready() -> void:
 	_annonce.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_annonce.offset_left = -250.0
 	_annonce.offset_right = 250.0
-	_annonce.offset_top = 84.0
-	_annonce.offset_bottom = 124.0
+	_annonce.offset_top = 40.0
+	_annonce.offset_bottom = 80.0
 	_annonce.hide()
 
 	_message = Label.new()
@@ -39,6 +38,35 @@ func _ready() -> void:
 	_message.offset_top = -70.0
 	_message.offset_bottom = -40.0
 	_message.hide()
+
+
+## Une petite barre de vie discrète, en bas à gauche.
+func _creer_barre_de_vie() -> void:
+	_barre_vie = ProgressBar.new()
+	_barre_vie.show_percentage = false
+	_barre_vie.max_value = 100.0
+	_barre_vie.value = 100.0
+	_barre_vie.custom_minimum_size = Vector2(180, 10)
+	var fond := StyleBoxFlat.new()
+	fond.bg_color = Color(0.027, 0.035, 0.102, 0.75)
+	fond.border_color = Color("3f4c7e")
+	fond.set_border_width_all(1)
+	var plein := StyleBoxFlat.new()
+	plein.bg_color = Color("b0303a")
+	_barre_vie.add_theme_stylebox_override("background", fond)
+	_barre_vie.add_theme_stylebox_override("fill", plein)
+	add_child(_barre_vie)
+	_barre_vie.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+	_barre_vie.offset_left = 24.0
+	_barre_vie.offset_right = 204.0
+	_barre_vie.offset_top = -36.0
+	_barre_vie.offset_bottom = -26.0
+
+
+## Met à jour la barre de vie (vie actuelle et maximum).
+func vie(actuelle: float, maximum: float) -> void:
+	_barre_vie.max_value = maximum
+	_barre_vie.value = actuelle
 
 
 ## Un message qui apparaît en haut de l'écran puis s'efface doucement

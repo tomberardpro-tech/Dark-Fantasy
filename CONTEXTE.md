@@ -39,13 +39,13 @@ survivants à protéger, il reste un dieu à abattre. »
 | Mode | **Solo**. Ne rien construire pour le multijoueur (la coop est mise de côté). |
 | Monde | Monde ouvert à explorer |
 | Vue | **3D en vue isométrique, caméra fixe** (façon Diablo), **même angle que la maquette** (Tom y tient), mais **en vraie perspective** (la vue sans perspective lui semblait trop « plate ») |
-| Contrôles | ZQSD (clavier AZERTY) **ou** clic de souris pour se déplacer, Maj pour courir, Espace pour une **roulade**, E pour interagir, **R pour sortir/ranger l'épée**, épée sortie : **clic gauche = attaque** (combo de 3 coups, on se déplace alors avec ZQSD) |
+| Contrôles | Façon **Diablo** : clic gauche sur le sol = y aller, clic gauche sur un ennemi = l'attaquer (l'épée sort toute seule, recliquer = combo de 3 coups), **clic droit = coup droit devant** (direction de la course). ZQSD aussi, Maj courir, Espace roulade, E interagir, R sortir/ranger l'épée. On peut **courir en frappant** (seul le haut du corps frappe). |
 | Sauvegarde | Uniquement aux feux de camp |
 | Progression | Quêtes, expérience, arbre de compétences, nouvelles tenues |
 | Classes | Guerrier, Mage, Nécromancien, Archer (nom à trouver : Traqueur ? Rôdeur ? Veilleur ?). **Le moment du choix de la classe sera décidé plus tard.** |
 | Objectif final | Vaincre 5 boss, récupérer leurs 5 reliques, ouvrir la Grande Porte des Dieux, vaincre le dieu |
 | Moteur | **Godot 4, dernière version stable** |
-| Écran | Rien à l'écran pour l'instant (pas de barre de vie), sauf les messages d'action (« E : s'asseoir ») et une **petite boussole** en haut qui indique où aller |
+| Écran | Une **petite barre de vie** en bas à gauche, les messages d'action (« E : … ») et les annonces. Plus de boussole (retirée à la demande de Tom). Police **Cinzel** (OFL) pour tous les textes. |
 
 ## Le monde
 
@@ -161,3 +161,17 @@ Couleurs : noir, gris et rouge sang.
   herbe et champignon est figée dans `donnees/foret.json` (créé une fois, puis toujours rechargé).
 - Pour retirer ou ajouter quelque chose, modifier seulement les entrées concernées de ce
   fichier, sans relancer le tirage au hasard (qui décalerait tout le reste).
+
+## Ajouts récents (zone de départ)
+
+- **Coffre** près du tronc de la clairière (Chest_Wood) : E l'ouvre, on y trouve la vieille épée.
+  La **charrette** n'est plus qu'un décor.
+- **3 squelettes** (KayKit Skeletons + KayKit Character Animations, CC0) allongés juste après le
+  pont : ils se relèvent quand on approche, poursuivent et frappent. Si le héros meurt, il se
+  réveille assis au dernier feu de camp avec toute sa vie, et les squelettes se rendorment.
+- La ruine est remplacée par une **cabane à moitié effondrée** (pièces du Medieval Village MegaKit).
+- Le tronc pour s'asseoir est un **vrai rondin** (écorce, cernes aux bouts, moignons de branches).
+- **Cheveux longs noirs** qui bougent avec les mouvements et le vent.
+- **Musique** douce dans la clairière : « Lament for a Warrior's Soul » (RandomMind, CC0), qui
+  s'éteint en s'éloignant du feu.
+- L'entrée de Bruneval est un peu plus proche (chemin d'environ 44 s de marche).

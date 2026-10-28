@@ -548,20 +548,6 @@
 	{
 		"decalage": 0.0,
 		"modele": "Rock_Medium_1",
-		"rotation": 4.762,
-		"souplesse": 0.0,
-		"taille": 0.3123,
-		"x": -126.597,
-		"z": 89.641
-	},
-	{
-		"obstacle": 0.406005066633225,
-		"x": -126.597,
-		"z": 89.641
-	},
-	{
-		"decalage": 0.0,
-		"modele": "Rock_Medium_1",
 		"rotation": 3.8623,
 		"souplesse": 0.0,
 		"taille": 0.3953,
@@ -600,20 +586,6 @@
 		"obstacle": 0.475437244772911,
 		"x": -113.607,
 		"z": 90.188
-	},
-	{
-		"decalage": 0.0,
-		"modele": "Rock_Medium_2",
-		"rotation": 2.1097,
-		"souplesse": 0.0,
-		"taille": 0.4719,
-		"x": -116.368,
-		"z": 98.894
-	},
-	{
-		"obstacle": 0.613527554273605,
-		"x": -116.368,
-		"z": 98.894
 	},
 	{
 		"decalage": 0.0,
@@ -6118,20 +6090,6 @@
 		"z": 79.729
 	},
 	{
-		"decalage": 1.0012,
-		"modele": "Pine_5",
-		"rotation": 3.8795,
-		"souplesse": 0.03,
-		"taille": 0.639,
-		"x": -117.621,
-		"z": 107.127
-	},
-	{
-		"obstacle": 0.35,
-		"x": -117.621,
-		"z": 107.127
-	},
-	{
 		"decalage": 6.2444,
 		"modele": "Pine_1",
 		"rotation": 2.8904,
@@ -6144,20 +6102,6 @@
 		"obstacle": 0.35,
 		"x": -45.326,
 		"z": 33.032
-	},
-	{
-		"decalage": 2.1767,
-		"modele": "Pine_3",
-		"rotation": 4.5913,
-		"souplesse": 0.03,
-		"taille": 0.5305,
-		"x": -115.352,
-		"z": 119.128
-	},
-	{
-		"obstacle": 0.35,
-		"x": -115.352,
-		"z": 119.128
 	},
 	{
 		"decalage": 4.9319,
@@ -6412,20 +6356,6 @@
 		"z": 91.095
 	},
 	{
-		"decalage": 1.5231,
-		"modele": "Pine_4",
-		"rotation": 2.6221,
-		"souplesse": 0.03,
-		"taille": 0.7917,
-		"x": -141.472,
-		"z": 88.993
-	},
-	{
-		"obstacle": 0.35,
-		"x": -141.472,
-		"z": 88.993
-	},
-	{
 		"decalage": 2.9874,
 		"modele": "Pine_2",
 		"rotation": 6.0019,
@@ -6634,20 +6564,6 @@
 		"obstacle": 0.35,
 		"x": -118.782,
 		"z": 55.931
-	},
-	{
-		"decalage": 5.8059,
-		"modele": "Pine_3",
-		"rotation": 5.7055,
-		"souplesse": 0.03,
-		"taille": 0.6381,
-		"x": -138.246,
-		"z": 90.751
-	},
-	{
-		"obstacle": 0.35,
-		"x": -138.246,
-		"z": 90.751
 	},
 	{
 		"decalage": 1.3398,
@@ -6874,20 +6790,6 @@
 		"z": 82.447
 	},
 	{
-		"decalage": 0.7252,
-		"modele": "Pine_5",
-		"rotation": 1.7971,
-		"souplesse": 0.03,
-		"taille": 0.6804,
-		"x": -120.869,
-		"z": 105.107
-	},
-	{
-		"obstacle": 0.35,
-		"x": -120.869,
-		"z": 105.107
-	},
-	{
 		"decalage": 5.9755,
 		"modele": "Pine_5",
 		"rotation": 2.6804,
@@ -7070,20 +6972,6 @@
 		"z": 80.324
 	},
 	{
-		"decalage": 5.7037,
-		"modele": "Pine_5",
-		"rotation": 6.0516,
-		"souplesse": 0.03,
-		"taille": 0.5908,
-		"x": -131.35,
-		"z": 89.817
-	},
-	{
-		"obstacle": 0.35,
-		"x": -131.35,
-		"z": 89.817
-	},
-	{
 		"decalage": 2.7255,
 		"modele": "Pine_3",
 		"rotation": 3.9453,
@@ -7138,20 +7026,6 @@
 		"obstacle": 0.35,
 		"x": -106.731,
 		"z": 80.926
-	},
-	{
-		"decalage": 2.69,
-		"modele": "Pine_4",
-		"rotation": 1.0097,
-		"souplesse": 0.03,
-		"taille": 0.6242,
-		"x": -142.51,
-		"z": 90.582
-	},
-	{
-		"obstacle": 0.35,
-		"x": -142.51,
-		"z": 90.582
 	},
 	{
 		"decalage": 0.3058,
@@ -8078,20 +7952,6 @@
 		"z": 75.887
 	},
 	{
-		"decalage": 2.367,
-		"modele": "Pine_4",
-		"rotation": 5.336,
-		"souplesse": 0.03,
-		"taille": 0.7803,
-		"x": -119.436,
-		"z": 102.792
-	},
-	{
-		"obstacle": 0.35,
-		"x": -119.436,
-		"z": 102.792
-	},
-	{
 		"decalage": 2.8296,
 		"modele": "Pine_1",
 		"rotation": 5.3276,
@@ -8120,20 +7980,6 @@
 		"z": 39.985
 	},
 	{
-		"decalage": 0.8595,
-		"modele": "Pine_1",
-		"rotation": 2.7251,
-		"souplesse": 0.03,
-		"taille": 0.7763,
-		"x": -117.363,
-		"z": 112.845
-	},
-	{
-		"obstacle": 0.35,
-		"x": -117.363,
-		"z": 112.845
-	},
-	{
 		"decalage": 0.8409,
 		"modele": "Pine_1",
 		"rotation": 0.5509,
@@ -8160,34 +8006,6 @@
 		"obstacle": 0.35,
 		"x": -57.189,
 		"z": 44.37
-	},
-	{
-		"decalage": 1.6888,
-		"modele": "Pine_5",
-		"rotation": 6.2374,
-		"souplesse": 0.03,
-		"taille": 0.7027,
-		"x": -138.8,
-		"z": 86.754
-	},
-	{
-		"obstacle": 0.35,
-		"x": -138.8,
-		"z": 86.754
-	},
-	{
-		"decalage": 1.9081,
-		"modele": "Pine_5",
-		"rotation": 4.0343,
-		"souplesse": 0.03,
-		"taille": 0.7807,
-		"x": -123.763,
-		"z": 89.498
-	},
-	{
-		"obstacle": 0.35,
-		"x": -123.763,
-		"z": 89.498
 	},
 	{
 		"decalage": 5.928,
@@ -8596,20 +8414,6 @@
 		"z": 40.514
 	},
 	{
-		"decalage": 5.2411,
-		"modele": "Pine_3",
-		"rotation": 0.9597,
-		"souplesse": 0.03,
-		"taille": 0.7619,
-		"x": -120.762,
-		"z": 111.315
-	},
-	{
-		"obstacle": 0.35,
-		"x": -120.762,
-		"z": 111.315
-	},
-	{
 		"decalage": 3.6409,
 		"modele": "Pine_4",
 		"rotation": 1.5786,
@@ -8692,20 +8496,6 @@
 		"obstacle": 0.35,
 		"x": -69.748,
 		"z": 27.942
-	},
-	{
-		"decalage": 5.2679,
-		"modele": "Pine_2",
-		"rotation": 5.3908,
-		"souplesse": 0.03,
-		"taille": 0.754,
-		"x": -114.761,
-		"z": 117.03
-	},
-	{
-		"obstacle": 0.35,
-		"x": -114.761,
-		"z": 117.03
 	},
 	{
 		"decalage": 2.1624,
@@ -8832,20 +8622,6 @@
 		"obstacle": 0.35,
 		"x": -2.233,
 		"z": 35.795
-	},
-	{
-		"decalage": 0.6502,
-		"modele": "Pine_4",
-		"rotation": 0.0278,
-		"souplesse": 0.03,
-		"taille": 0.7732,
-		"x": -119.401,
-		"z": 113.911
-	},
-	{
-		"obstacle": 0.35,
-		"x": -119.401,
-		"z": 113.911
 	},
 	{
 		"decalage": 2.5424,
@@ -9226,20 +9002,6 @@
 		"z": 95.416
 	},
 	{
-		"decalage": 2.9796,
-		"modele": "Pine_3",
-		"rotation": 1.4168,
-		"souplesse": 0.03,
-		"taille": 0.5927,
-		"x": -128.914,
-		"z": 89.668
-	},
-	{
-		"obstacle": 0.35,
-		"x": -128.914,
-		"z": 89.668
-	},
-	{
 		"decalage": 3.9135,
 		"modele": "Pine_1",
 		"rotation": 3.0749,
@@ -9406,20 +9168,6 @@
 		"obstacle": 0.35,
 		"x": -100.004,
 		"z": 73.835
-	},
-	{
-		"decalage": 3.7696,
-		"modele": "Pine_5",
-		"rotation": 2.535,
-		"souplesse": 0.03,
-		"taille": 0.6784,
-		"x": -135.067,
-		"z": 94.043
-	},
-	{
-		"obstacle": 0.35,
-		"x": -135.067,
-		"z": 94.043
 	},
 	{
 		"decalage": 2.1505,
@@ -10052,20 +9800,6 @@
 		"z": 83.278
 	},
 	{
-		"decalage": 3.3249,
-		"modele": "Pine_2",
-		"rotation": 4.8672,
-		"souplesse": 0.03,
-		"taille": 0.6698,
-		"x": -133.665,
-		"z": 89.918
-	},
-	{
-		"obstacle": 0.35,
-		"x": -133.665,
-		"z": 89.918
-	},
-	{
 		"decalage": 3.9824,
 		"modele": "Pine_3",
 		"rotation": 1.3016,
@@ -10106,20 +9840,6 @@
 		"obstacle": 0.35,
 		"x": -67.624,
 		"z": 41.588
-	},
-	{
-		"decalage": 2.6712,
-		"modele": "Pine_1",
-		"rotation": 4.371,
-		"souplesse": 0.03,
-		"taille": 0.5125,
-		"x": -134.37,
-		"z": 86.34
-	},
-	{
-		"obstacle": 0.35,
-		"x": -134.37,
-		"z": 86.34
 	},
 	{
 		"decalage": 2.785,
@@ -10176,20 +9896,6 @@
 		"obstacle": 0.35,
 		"x": -86.246,
 		"z": 43.335
-	},
-	{
-		"decalage": 5.7584,
-		"modele": "Pine_1",
-		"rotation": 1.2173,
-		"souplesse": 0.03,
-		"taille": 0.7752,
-		"x": -118.759,
-		"z": 117.699
-	},
-	{
-		"obstacle": 0.35,
-		"x": -118.759,
-		"z": 117.699
 	},
 	{
 		"decalage": 3.0667,
@@ -10274,20 +9980,6 @@
 		"obstacle": 0.35,
 		"x": -19.382,
 		"z": 34.409
-	},
-	{
-		"decalage": 5.4758,
-		"modele": "Pine_1",
-		"rotation": 3.2639,
-		"souplesse": 0.03,
-		"taille": 0.7058,
-		"x": -125.78,
-		"z": 88.488
-	},
-	{
-		"obstacle": 0.35,
-		"x": -125.78,
-		"z": 88.488
 	},
 	{
 		"decalage": 5.4457,
@@ -11662,20 +11354,6 @@
 		"z": 2.863
 	},
 	{
-		"decalage": 0.8876,
-		"modele": "Pine_5",
-		"rotation": 2.5382,
-		"souplesse": 0.03,
-		"taille": 0.7105,
-		"x": -122.953,
-		"z": 108.611
-	},
-	{
-		"obstacle": 0.35,
-		"x": -122.953,
-		"z": 108.611
-	},
-	{
 		"decalage": 1.3049,
 		"modele": "Pine_3",
 		"rotation": 1.2397,
@@ -12124,20 +11802,6 @@
 		"z": 80.868
 	},
 	{
-		"decalage": 2.2884,
-		"modele": "Pine_4",
-		"rotation": 3.9013,
-		"souplesse": 0.03,
-		"taille": 0.5024,
-		"x": -131.443,
-		"z": 86.906
-	},
-	{
-		"obstacle": 0.35,
-		"x": -131.443,
-		"z": 86.906
-	},
-	{
 		"decalage": 3.5873,
 		"modele": "Pine_4",
 		"rotation": 3.3257,
@@ -12334,20 +11998,6 @@
 		"z": 81.904
 	},
 	{
-		"decalage": 1.405,
-		"modele": "Pine_2",
-		"rotation": 0.0768,
-		"souplesse": 0.03,
-		"taille": 0.7814,
-		"x": -116.945,
-		"z": 116.347
-	},
-	{
-		"obstacle": 0.35,
-		"x": -116.945,
-		"z": 116.347
-	},
-	{
 		"decalage": 0.7124,
 		"modele": "Pine_5",
 		"rotation": 0.1511,
@@ -12374,20 +12024,6 @@
 		"obstacle": 0.35,
 		"x": -36.205,
 		"z": 40.896
-	},
-	{
-		"decalage": 0.3498,
-		"modele": "Pine_1",
-		"rotation": 2.0858,
-		"souplesse": 0.03,
-		"taille": 0.5295,
-		"x": -121.135,
-		"z": 114.471
-	},
-	{
-		"obstacle": 0.35,
-		"x": -121.135,
-		"z": 114.471
 	},
 	{
 		"decalage": 0.0781,
@@ -12418,20 +12054,6 @@
 		"z": 23.682
 	},
 	{
-		"decalage": 0.4792,
-		"modele": "DeadTree_2",
-		"rotation": 5.8056,
-		"souplesse": 0.015,
-		"taille": 0.3907,
-		"x": -132.287,
-		"z": 94.172
-	},
-	{
-		"obstacle": 0.35,
-		"x": -132.287,
-		"z": 94.172
-	},
-	{
 		"decalage": 5.0709,
 		"modele": "DeadTree_4",
 		"rotation": 4.6268,
@@ -12458,34 +12080,6 @@
 		"obstacle": 0.35,
 		"x": -80.579,
 		"z": 34.966
-	},
-	{
-		"decalage": 0.6391,
-		"modele": "DeadTree_2",
-		"rotation": 2.9813,
-		"souplesse": 0.015,
-		"taille": 0.3358,
-		"x": -115.669,
-		"z": 103.104
-	},
-	{
-		"obstacle": 0.35,
-		"x": -115.669,
-		"z": 103.104
-	},
-	{
-		"decalage": 3.3548,
-		"modele": "DeadTree_3",
-		"rotation": 2.8958,
-		"souplesse": 0.015,
-		"taille": 0.3905,
-		"x": -115.087,
-		"z": 107.489
-	},
-	{
-		"obstacle": 0.35,
-		"x": -115.087,
-		"z": 107.489
 	},
 	{
 		"decalage": 0.4818,
@@ -12614,20 +12208,6 @@
 		"z": 47.984
 	},
 	{
-		"decalage": 2.365,
-		"modele": "DeadTree_1",
-		"rotation": 2.5526,
-		"souplesse": 0.015,
-		"taille": 0.324,
-		"x": -118.389,
-		"z": 109.688
-	},
-	{
-		"obstacle": 0.35,
-		"x": -118.389,
-		"z": 109.688
-	},
-	{
 		"decalage": 2.1163,
 		"modele": "DeadTree_2",
 		"rotation": 5.232,
@@ -12668,20 +12248,6 @@
 		"obstacle": 0.35,
 		"x": -79.365,
 		"z": 31.712
-	},
-	{
-		"decalage": 1.3861,
-		"modele": "DeadTree_1",
-		"rotation": 3.1098,
-		"souplesse": 0.015,
-		"taille": 0.4241,
-		"x": -132.224,
-		"z": 91.409
-	},
-	{
-		"obstacle": 0.35,
-		"x": -132.224,
-		"z": 91.409
 	},
 	{
 		"decalage": 4.1728,
@@ -13006,20 +12572,6 @@
 		"z": 44.551
 	},
 	{
-		"decalage": 2.1057,
-		"modele": "TwistedTree_2",
-		"rotation": 6.1302,
-		"souplesse": 0.03,
-		"taille": 0.3796,
-		"x": -145.307,
-		"z": 87.407
-	},
-	{
-		"obstacle": 0.35,
-		"x": -145.307,
-		"z": 87.407
-	},
-	{
 		"decalage": 3.8878,
 		"modele": "TwistedTree_1",
 		"rotation": 2.5015,
@@ -13088,20 +12640,6 @@
 		"obstacle": 0.35,
 		"x": -60.934,
 		"z": 55.538
-	},
-	{
-		"decalage": 3.5984,
-		"modele": "TwistedTree_2",
-		"rotation": 5.6216,
-		"souplesse": 0.03,
-		"taille": 0.42,
-		"x": -127.511,
-		"z": 93.36
-	},
-	{
-		"obstacle": 0.35,
-		"x": -127.511,
-		"z": 93.36
 	},
 	{
 		"decalage": 5.3199,
@@ -13771,15 +13309,6 @@
 		"z": 14.308
 	},
 	{
-		"decalage": 3.3192,
-		"modele": "Grass_Common_Short",
-		"rotation": 4.3827,
-		"souplesse": 0.14,
-		"taille": 0.7837,
-		"x": -117.688,
-		"z": 95.055
-	},
-	{
 		"decalage": 4.0557,
 		"modele": "Grass_Wispy_Short",
 		"rotation": 2.1595,
@@ -13796,15 +13325,6 @@
 		"taille": 0.6611,
 		"x": -61.957,
 		"z": 56.608
-	},
-	{
-		"decalage": 5.9503,
-		"modele": "Grass_Wispy_Tall",
-		"rotation": 5.965,
-		"souplesse": 0.14,
-		"taille": 0.7235,
-		"x": -124.368,
-		"z": 94.001
 	},
 	{
 		"decalage": 1.9756,
@@ -14005,15 +13525,6 @@
 		"z": 82.697
 	},
 	{
-		"decalage": 1.5238,
-		"modele": "Grass_Wispy_Tall",
-		"rotation": 2.374,
-		"souplesse": 0.14,
-		"taille": 0.4767,
-		"x": -132.333,
-		"z": 96.221
-	},
-	{
 		"decalage": 0.2373,
 		"modele": "Grass_Wispy_Short",
 		"rotation": 0.412,
@@ -14021,15 +13532,6 @@
 		"taille": 0.7442,
 		"x": -82.849,
 		"z": 59.635
-	},
-	{
-		"decalage": 0.2156,
-		"modele": "Grass_Common_Short",
-		"rotation": 6.043,
-		"souplesse": 0.14,
-		"taille": 0.4508,
-		"x": -125.698,
-		"z": 93.332
 	},
 	{
 		"decalage": 5.6458,
@@ -14347,15 +13849,6 @@
 		"z": 68.91
 	},
 	{
-		"decalage": 2.9005,
-		"modele": "Grass_Wispy_Short",
-		"rotation": 4.215,
-		"souplesse": 0.14,
-		"taille": 0.7355,
-		"x": -127.132,
-		"z": 95.527
-	},
-	{
 		"decalage": 4.2306,
 		"modele": "Grass_Wispy_Short",
 		"rotation": 1.6565,
@@ -14399,15 +13892,6 @@
 		"taille": 0.5079,
 		"x": -94.057,
 		"z": 63.417
-	},
-	{
-		"decalage": 4.9781,
-		"modele": "Grass_Wispy_Tall",
-		"rotation": 4.0223,
-		"souplesse": 0.14,
-		"taille": 0.5339,
-		"x": -129.048,
-		"z": 96.466
 	},
 	{
 		"decalage": 0.8728,

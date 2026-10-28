@@ -12,6 +12,9 @@
 [ext_resource type="Shader" path="res://shaders/sol.gdshader" id="10_sol"]
 [ext_resource type="Script" path="res://scripts/decor_chemin.gd" id="11_decor"]
 [ext_resource type="Script" path="res://scripts/ambiance.gd" id="12_ambiance"]
+[ext_resource type="Script" path="res://scripts/coffre.gd" id="13_coffre"]
+[ext_resource type="Script" path="res://scripts/groupe_squelettes.gd" id="14_squelettes"]
+[ext_resource type="Script" path="res://scripts/musique.gd" id="15_musique"]
 
 [sub_resource type="ShaderMaterial" id="Material_palette"]
 shader = ExtResource("8_palette")
@@ -118,6 +121,11 @@ material_override = SubResource("Material_tronc")
 position = Vector3(0, 0.23, 0)
 shape = SubResource("Shape_tronc")
 
+[node name="Coffre" type="Node3D" parent="Rendu/Monde"]
+position = Vector3(1.6, 0, -3.1)
+rotation = Vector3(0, -0.84, 0)
+script = ExtResource("13_coffre")
+
 [node name="Joueur" type="CharacterBody3D" parent="Rendu/Monde" groups=["joueur"]]
 position = Vector3(-1.24, 0, -1.24)
 script = ExtResource("4_joueur")
@@ -145,6 +153,12 @@ script = ExtResource("12_ambiance")
 
 [node name="Foret" type="Node3D" parent="Rendu/Monde"]
 script = ExtResource("3_foret")
+
+[node name="Squelettes" type="Node3D" parent="Rendu/Monde"]
+script = ExtResource("14_squelettes")
+
+[node name="Musique" type="Node" parent="."]
+script = ExtResource("15_musique")
 
 [node name="Interface" type="CanvasLayer" parent="." groups=["interface"]]
 script = ExtResource("6_interface")
