@@ -49,7 +49,7 @@ func interagir(joueur: Node3D) -> void:
 
 ## Un vrai rondin à la place du cylindre : un peu bosselé et irrégulier, plus épais d'un
 ## côté, habillé de l'écorce des arbres morts du pack nature, avec les bouts coupés qui
-## montrent les cernes du bois et deux moignons de branches.
+## montrent les cernes du bois.
 func _habiller_d_ecorce() -> void:
 	var apparence := get_node_or_null("Apparence") as MeshInstance3D
 	if apparence == null:
@@ -64,22 +64,6 @@ func _habiller_d_ecorce() -> void:
 	bois_coupe.shader = load("res://shaders/bois_coupe.gdshader")
 	apparence.mesh = _maillage_rondin(ecorce, bois_coupe)
 	apparence.material_override = null
-	# Deux moignons de branches cassées.
-	for m in [[0.45, 0.6, 0.35], [-0.7, 2.6, -0.5]]:
-		var forme := CylinderMesh.new()
-		forme.top_radius = 0.035
-		forme.bottom_radius = 0.07
-		forme.height = 0.3
-		forme.radial_segments = 6
-		forme.material = ecorce
-		var moignon := MeshInstance3D.new()
-		moignon.mesh = forme
-		var angle: float = m[1]
-		var direction := Vector3(0.0, 0.0, 0.0).direction_to(Vector3(0.0, cos(angle), sin(angle)))
-		# Le rondin est couché : son axe est le X de « Apparence » une fois tourné.
-		moignon.position = apparence.position + Vector3(m[0], 0.0, 0.0) + direction * 0.25
-		moignon.basis = Basis(Vector3.RIGHT, angle) * Basis(Vector3.FORWARD, m[2])
-		add_child(moignon)
 
 
 ## Fabrique le rondin : un tube bosselé (l'écorce) fermé par deux bouts plats (le bois coupé).

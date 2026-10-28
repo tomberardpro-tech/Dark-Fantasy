@@ -4,7 +4,7 @@ extends CharacterBody3D
 ## Commandes :
 ## - ZQSD pour marcher, Maj pour courir, Espace pour une roulade ;
 ## - clic gauche : un coup d'épée droit devant, dans la direction où l'on court
-##   (l'épée sort toute seule) ; recliquer enchaîne le combo de 3 coups ;
+##   (l'épée sort toute seule) ; recliquer donne un deuxième coup, différent ;
 ## - clic droit : un petit bond et un coup au sol qui repousse les ennemis autour ;
 ## - R pour sortir ou ranger l'épée, E pour interagir.
 ## On peut continuer à courir en frappant : seul le haut du corps donne le coup.
@@ -33,7 +33,7 @@ extends CharacterBody3D
 @export var portee_epee := 2.2
 ## Le bond du clic droit : sa hauteur (vitesse de départ), la portée du coup au sol
 ## et ses dégâts.
-@export var force_bond := 4.2
+@export var force_bond := 3.4
 @export var rayon_coup_au_sol := 2.6
 @export var degats_coup_au_sol := 10.0
 
@@ -69,8 +69,11 @@ const EPEE_DANS_LA_MAIN := Transform3D(
 const COUPS := [
 	{"anim": "ual2/Sword_Regular_A", "duree": 0.43, "touche": 0.22, "degats": 10.0, "retour": "ual2/Sword_Regular_A_Rec", "duree_retour": 0.97},
 	{"anim": "ual2/Sword_Regular_B", "duree": 0.53, "touche": 0.28, "degats": 12.0, "retour": "ual2/Sword_Regular_B_Rec", "duree_retour": 1.03},
-	{"anim": "ual2/Sword_Regular_C", "duree": 2.0, "touche": 0.55, "degats": 20.0, "retour": "", "duree_retour": 0.0},
 ]
+## Le bond du clic droit : un passage du « combo lourd » où l'épée est levée puis abattue.
+const ANIM_COUP_AU_SOL := "ual2/Sword_Heavy_Combo"
+const DEBUT_COUP_AU_SOL := 2.1
+const DUREE_COUP_AU_SOL := 1.3
 ## Sans épée : un coup de poing.
 const COUP_DE_POING := {"anim": "Punch_Jab", "duree": 0.6, "touche": 0.25, "degats": 4.0, "retour": "", "duree_retour": 0.0}
 
@@ -232,7 +235,8 @@ func _physics_process(delta: float) -> void:
 
 func _choisir_deplacement(vitesse: float) -> void:
 	if _en_bond:
-		_etat("saut")
+		# Pendant le bond, le geste du coup au sol fait bouger tout le corps.
+		_etat("garde" if epee_sortie else "repos")
 	elif _roulade_restante > 0.0:
 		_arbre.set("parameters/roulade_vitesse/scale", _anim.get_animation("Roll").length / duree_roulade)
 		_etat("roulade")
@@ -344,12 +348,18 @@ func _bondir() -> void:
 		epee_sortie = true
 	_en_bond = true
 	_temps_bond = 0.0
+	_action = "bond"
 	velocity.y = force_bond
+	# Tout le corps joue le moment du « combo lourd » où le héros lève l'épée au-dessus de
+	# sa tête puis l'abat jusqu'au sol (mesuré : la main touche presque le sol 0,65 s après
+	# le début de ce passage, à peu près quand le bond retombe).
+	_jouer_geste(ANIM_COUP_AU_SOL, DUREE_COUP_AU_SOL, false, false, DEBUT_COUP_AU_SOL)
 
 
 func _impact_au_sol() -> void:
 	_en_bond = false
-	_jouer_geste("ual2/Sword_Regular_A" if epee_sortie else "Punch_Jab", 0.0, false, false)
+	# Le héros finit son geste, puis il est libre.
+	get_tree().create_timer(0.45).timeout.connect(func(): if _action == "bond": _action = "")
 	for ennemi in get_tree().get_nodes_in_group("ennemi"):
 		if ennemi.est_vivant() and ennemi.global_position.distance_to(global_position) < rayon_coup_au_sol:
 			ennemi.prendre_coup(degats_coup_au_sol, global_position, 9.0)
@@ -513,9 +523,10 @@ func prendre_epee() -> void:
 	# L'épée du Fantasy Props MegaKit, un peu rouillée (teinte sombre), en deux exemplaires :
 	# un dans le dos, un dans la main. On n'en montre qu'un à la fois.
 	_epee_dos = _accrocher_epee("spine_03")
-	# Dans le dos, en diagonale, la poignée au-dessus de l'épaule droite
-	# (le héros regarde vers son +Z, le dos est vers -Z).
-	var dans_le_dos := Transform3D(Basis(Vector3.BACK, PI + 0.6), Vector3(0.0, 1.1, -0.2))
+	# Plaquée contre le dos, en diagonale : la poignée au-dessus de l'épaule droite, la pointe
+	# vers la hanche gauche. Le héros regarde vers son +Z, sa droite est vers -X, et le dos de
+	# sa chemise est à 13,5 cm derrière la colonne (mesuré) : la lame est posée juste contre.
+	var dans_le_dos := Transform3D(Basis(Vector3.BACK, PI + 0.5), Vector3(-0.08, 1.48, -0.175))
 	_epee_dos.transform = _squelette.get_bone_global_rest(_squelette.find_bone("spine_03")).affine_inverse() * dans_le_dos
 	_epee_main = _accrocher_epee("hand_r")
 	# La poignée (un peu sous l'origine du modèle) au creux de la main.
@@ -575,11 +586,11 @@ func _mettre_epee_dans_le_dos() -> void:
 ## Quand le héros est immobile, tout le corps fait le geste (plus beau) ;
 ## quand il court, seul le haut du corps le fait. « haut_en_courant » = false : tout le
 ## corps fait toujours le geste (par exemple le coup au sol après le bond).
-func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false, haut_en_courant := true) -> void:
+func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false, haut_en_courant := true, debut := 0.0) -> void:
 	_geste.animation = nom
 	_geste.use_custom_timeline = longueur > 0.0
 	if longueur > 0.0:
-		_geste.start_offset = 0.0
+		_geste.start_offset = debut
 		_geste.timeline_length = longueur
 		_geste.stretch_time_scale = false
 	_geste.play_mode = AnimationNodeAnimation.PLAY_MODE_BACKWARD if a_l_envers else AnimationNodeAnimation.PLAY_MODE_FORWARD

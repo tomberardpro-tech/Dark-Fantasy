@@ -32,9 +32,9 @@ glow_intensity = 0.7
 glow_bloom = 0.05
 fog_enabled = true
 fog_light_color = Color(0.125, 0.157, 0.302, 1)
-fog_density = 0.012
+fog_density = 0.009
 fog_height = 0.8
-fog_height_density = 0.5
+fog_height_density = 0.35
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_sol"]
 size = Vector2(420, 420)
@@ -122,8 +122,8 @@ position = Vector3(0, 0.23, 0)
 shape = SubResource("Shape_tronc")
 
 [node name="Coffre" type="Node3D" parent="Rendu/Monde"]
-position = Vector3(1.6, 0, -3.1)
-rotation = Vector3(0, -0.84, 0)
+position = Vector3(1.75, 0, 1.75)
+rotation = Vector3(0, -2.356, 0)
 script = ExtResource("13_coffre")
 
 [node name="Joueur" type="CharacterBody3D" parent="Rendu/Monde" groups=["joueur"]]
