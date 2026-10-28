@@ -7,7 +7,7 @@ extends Node
 ## À partir de cette distance, on ne l'entend plus.
 @export var distance_silence := 45.0
 ## Volume maximum (en décibels : 0 = normal, plus négatif = plus doux).
-@export var volume_max_db := -8.0
+@export var volume_max_db := -15.0
 @export var centre := Vector3.ZERO
 
 const FICHIER := "res://assets/musique/Lament_for_a_Warriors_Soul.mp3"
