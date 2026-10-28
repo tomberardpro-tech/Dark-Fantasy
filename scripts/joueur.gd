@@ -19,6 +19,8 @@ extends CharacterBody3D
 @export var assise_hauteur := 0.04
 ## Teinte appliquée à la tenue pour coller à la palette sombre.
 @export var teinte := Color(0.85, 0.85, 0.92)
+## Couleur des cheveux et des sourcils (noirs).
+@export var couleur_cheveux := Color(0.12, 0.11, 0.13)
 
 const ANIMATIONS := "res://assets/personnage/UAL1_Standard.glb"
 const ANIMATIONS_2 := "res://assets/personnage/UAL2_Standard.glb"
@@ -473,9 +475,11 @@ func _garder_seulement_la_tete(maillage: MeshInstance3D) -> void:
 
 func _teinter_tenue() -> void:
 	for maillage in _modele.find_children("*", "MeshInstance3D", true, false):
+		# Cheveux et sourcils noirs (demande de Tom), le reste teinté vers la palette.
+		var couleur := couleur_cheveux if maillage.name in ["Hair_Long", "Eyebrows"] else teinte
 		for i in maillage.mesh.get_surface_count():
 			var mat := maillage.mesh.surface_get_material(i) as StandardMaterial3D
 			if mat:
 				var copie := mat.duplicate() as StandardMaterial3D
-				copie.albedo_color = mat.albedo_color * teinte
+				copie.albedo_color = mat.albedo_color * couleur
 				maillage.set_surface_override_material(i, copie)

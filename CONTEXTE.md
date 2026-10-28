@@ -108,7 +108,7 @@ Les survivants « vivent un peu » :
   palette, pour que tout reste cohérent même avec des packs différents.
 - Ambiance : **nuit bleue lisible** (clair de lune bleu, on voit bien le décor), éclairages chauds et
   contrastés autour des feux et des lanternes.
-- Le personnage : tenue **Paysan** (toile, simple), **sans capuche**, avec des **cheveux longs** (choix de Tom).
+- Le personnage : tenue **Paysan** (toile, simple), **sans capuche**, avec des **cheveux longs noirs** (choix de Tom).
 - Maquettes de référence (vues et carte) : https://claude.ai/artifact/XT4fjcwino5JMEwKefJbF2
 - Références de Tom : une vidéo de jeu en 3D pixel (nuit violette, gros pixels, épée en main) et
   une image d'un village de nuit en pixel art détaillé.
