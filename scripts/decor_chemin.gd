@@ -220,6 +220,9 @@ func _berges_mouillees() -> MeshInstance3D:
 func _eau() -> MeshInstance3D:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/eau.gdshader")
+	# Les textures de rides (fabriquées dans le jeu, sans couture : assets/eau).
+	mat.set_shader_parameter("vagues_larges", load("res://assets/eau/vagues_larges.png"))
+	mat.set_shader_parameter("vagues_fines", load("res://assets/eau/vagues_fines.png"))
 	return _ruban(Chemin.courbe_ruisseau, 1.3, 1.8, 0.04, mat, 0.0)
 
 

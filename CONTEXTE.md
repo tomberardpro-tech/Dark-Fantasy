@@ -176,7 +176,7 @@ Couleurs : noir, gris et rouge sang.
 - **Cheveux longs noirs** qui bougent avec les mouvements et le vent.
 - **Musique** douce : « Lament for a Warrior's Soul » (RandomMind, CC0), partout au même volume,
   en boucle sans trou.
-- **Carte refaite (maquette validée par Tom)** : le chemin part juste derrière le coffre et monte presque tout droit vers le haut de l'écran jusqu'à Bruneval (environ 130 m). Dans l'ordre : cabane à gauche, ruisseau qui traverse l'écran de gauche à droite avec le pont, squelettes, autel à droite, charrette à gauche, Bruneval. La clairière n'a pas bougé ; la forêt du chemin a été replantée puis figée. Le ruisseau a une vraie matière (courant, reflets, mousse aux berges).
+- **Carte refaite (maquette validée par Tom)** : le chemin part juste derrière le coffre et monte presque tout droit vers le haut de l'écran jusqu'à Bruneval (environ 130 m). Dans l'ordre : cabane à gauche, ruisseau qui traverse l'écran de gauche à droite avec le pont, squelettes, autel à droite, charrette à gauche, Bruneval. La clairière n'a pas bougé ; la forêt du chemin a été replantée puis figée. L'eau du ruisseau est **sombre et calme** (choix de Tom) : deux textures de rides sans couture (`assets/eau`, fabriquées par `outils/fabriquer_textures_eau.gd` ; ambientCG et Poly Haven n'ont pas de texture d'eau) glissent l'une sur l'autre, reflets de lune qui ondulent, un soupçon d'écume aux berges.
 - **Coffre** : il tremble, le couvercle se soulève lentement, une lueur dorée et une poussière
   brillante s'en échappent, puis l'épée s'élève en tournant avant de rejoindre le dos du héros.
 - **Poings** (sans épée) : trois coups qui s'enchaînent en recliquant (direct gauche, direct
