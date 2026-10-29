@@ -9,6 +9,14 @@ var _barre_vie: ProgressBar
 ## La lettre affichée en grand (créée la première fois qu'on en lit une).
 var _lettre: Control
 var _ouverte_a := -1
+## La bulle de dialogue, les répliques en cours et le personnage qui parle.
+const LETTRES_PAR_SECONDE := 45.0
+var _bulle: PanelContainer
+var _repliques: Array[String] = []
+var _numero := 0
+var _interlocuteur: Node
+var _lettres := 0.0
+var _bulle_ouverte_a := -1
 
 
 func _ready() -> void:
@@ -97,6 +105,94 @@ func notifier(texte: String) -> void:
 	_fondu.tween_callback(_annonce.hide)
 
 
+## Une conversation : une bulle en bas de l'écran avec le nom et la réplique, qui s'écrit
+## lettre par lettre. E : affiche tout de suite la réplique entière, puis passe à la
+## suivante ; après la dernière, la bulle se ferme et le personnage reprend son activité.
+func parler(nom: String, repliques: Array[String], interlocuteur: Node) -> void:
+	if _bulle == null:
+		_creer_bulle()
+	_repliques = repliques
+	_numero = 0
+	_interlocuteur = interlocuteur
+	_bulle.get_node("%Nom").text = nom
+	_montrer_replique()
+	_bulle.show()
+	_bulle.modulate.a = 0.0
+	create_tween().tween_property(_bulle, "modulate:a", 1.0, 0.2)
+	_bulle_ouverte_a = Engine.get_process_frames()
+	_message.hide()
+
+
+func dialogue_ouvert() -> bool:
+	return _bulle != null and _bulle.visible
+
+
+func _montrer_replique() -> void:
+	var texte := _bulle.get_node("%Texte") as Label
+	texte.text = _repliques[_numero]
+	texte.visible_ratio = 0.0
+	_lettres = 0.0
+
+
+func _avancer_dialogue(delta: float) -> void:
+	var texte := _bulle.get_node("%Texte") as Label
+	var total := texte.get_total_character_count()
+	if texte.visible_characters >= 0 and texte.visible_characters < total:
+		_lettres += delta * LETTRES_PAR_SECONDE
+		texte.visible_characters = mini(int(_lettres), total)
+		if texte.visible_characters >= total:
+			texte.visible_characters = -1
+	if Engine.get_process_frames() == _bulle_ouverte_a or not Input.is_action_just_pressed("interagir"):
+		return
+	if texte.visible_characters != -1:
+		texte.visible_characters = -1
+	elif _numero + 1 < _repliques.size():
+		_numero += 1
+		_montrer_replique()
+	else:
+		_bulle.hide()
+		if is_instance_valid(_interlocuteur) and _interlocuteur.has_method("fin_de_dialogue"):
+			_interlocuteur.fin_de_dialogue()
+
+
+func _creer_bulle() -> void:
+	_bulle = PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.03, 0.035, 0.07, 0.86)
+	style.border_color = Color("5a4630")
+	style.set_border_width_all(1)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(18)
+	_bulle.add_theme_stylebox_override("panel", style)
+	add_child(_bulle)
+	_bulle.set_anchors_and_offsets_preset(Control.PRESET_CENTER_BOTTOM)
+	_bulle.offset_left = -330.0
+	_bulle.offset_right = 330.0
+	_bulle.offset_top = -170.0
+	_bulle.offset_bottom = -40.0
+	var colonne := VBoxContainer.new()
+	colonne.add_theme_constant_override("separation", 8)
+	_bulle.add_child(colonne)
+	var serif := SystemFont.new()
+	serif.font_names = PackedStringArray(["Georgia", "Times New Roman", "serif"])
+	for partie in [["Nom", 18, Color("d8b46a")], ["Texte", 17, Color("d7dbe6")], ["Suite", 12, Color(0.75, 0.78, 0.85, 0.5)]]:
+		var etiquette := Label.new()
+		etiquette.name = partie[0]
+		etiquette.unique_name_in_owner = true
+		etiquette.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		etiquette.custom_minimum_size.x = 620
+		etiquette.add_theme_font_size_override("font_size", partie[1])
+		etiquette.add_theme_color_override("font_color", partie[2])
+		if partie[0] == "Texte":
+			etiquette.add_theme_font_override("font", serif)
+			etiquette.custom_minimum_size.y = 52
+		if partie[0] == "Suite":
+			etiquette.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+			etiquette.text = "E : continuer"
+		colonne.add_child(etiquette)
+		etiquette.owner = _bulle
+
+
 ## On découvre un lieu : son nom apparaît en grand au milieu de l'écran, entre deux
 ## traits, puis s'efface lentement.
 func annoncer_lieu(nom: String) -> void:
@@ -141,7 +237,10 @@ func lettre_ouverte() -> bool:
 	return _lettre != null and _lettre.visible
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if dialogue_ouvert():
+		_avancer_dialogue(delta)
+		return
 	if not lettre_ouverte() or Engine.get_process_frames() == _ouverte_a:
 		return
 	if Input.is_action_just_pressed("interagir") or Input.is_action_just_pressed("ui_cancel"):

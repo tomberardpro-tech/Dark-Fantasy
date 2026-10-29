@@ -221,3 +221,13 @@ Couleurs : noir, gris et rouge sang.
   place. Limite invisible le long de la clairière. « Bruneval » apparaît en y entrant.
 - **Préférence de Tom : du naturel** (pas de cercle parfait, variété), mais pour Bruneval il a
   choisi la disposition plus régulière de la deuxième maquette : toujours montrer une maquette.
+- **Survivants** (étape 10, `scripts/survivant.gd`, placés dans `bruneval.gd`) : tenues du pack
+  Modular Character Outfits, tête du corps de base, coiffures et couleurs propres à chacun.
+  **Bran** (rôdeur à capuche) garde l'entrée, torche à la main ; **Hugo** (barbe grise) assis
+  sur le banc du feu ; **Élise** (chignons) fait l'aller-retour entre le puits et l'abri de
+  l'est en portant de l'eau ; **Osric** tient son étal (range de temps en temps) ; **Maren**
+  (rôdeuse à capuche) attend bras croisés devant l'auberge. **Aldric** (destinataire de la
+  lettre) est un autre homme, parti chercher sa fille, jamais revenu. E près d'un survivant :
+  bulle de dialogue en bas (nom doré, texte qui s'écrit lettre par lettre ; E pour tout
+  afficher puis continuer), le héros ne bouge plus pendant la conversation, le survivant se
+  tourne vers lui et parle avec les mains. Répliques proposées par Claude, **à valider par Tom**.

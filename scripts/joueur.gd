@@ -197,6 +197,10 @@ func _process(delta: float) -> void:
 	var interface := get_tree().get_first_node_in_group("interface")
 	if est_mort:
 		return
+	# Pendant une conversation, c'est la bulle qui réagit à E.
+	if interface and interface.dialogue_ouvert():
+		interface.cacher()
+		return
 	var cible: Node = null
 	var plus_proche := INF
 	for objet in get_tree().get_nodes_in_group("interactif"):
@@ -217,10 +221,14 @@ func _process(delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity += get_gravity() * delta
-	if est_mort:
+	var interface := get_tree().get_first_node_in_group("interface")
+	var en_dialogue: bool = interface != null and interface.dialogue_ouvert()
+	if est_mort or en_dialogue:
 		velocity.x = 0.0
 		velocity.z = 0.0
 		move_and_slide()
+		if en_dialogue:
+			_choisir_deplacement(0.0)
 		return
 
 	# Clic gauche : un coup d'épée (recliquer enchaîne le combo).

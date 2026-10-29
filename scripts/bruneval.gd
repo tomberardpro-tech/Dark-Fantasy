@@ -32,6 +32,7 @@ func _ready() -> void:
 	_creer_feu()
 	_creer_puits(5.6, 3.3)
 	_creer_etal(-7.4, -5.7)
+	_creer_survivants()
 
 
 ## La lueur de la forge vacille.
@@ -323,6 +324,74 @@ func _creer_etal(x: float, y: float) -> void:
 		objet.position = pos + Basis(Vector3.UP, etal.rotation.y) * o[1]
 		objet.rotation.y = _rng.randf_range(0.0, TAU)
 		add_child(objet)
+
+
+# --- Les survivants -------------------------------------------------------------------
+
+## Les cinq survivants (étape 10), leurs tenues, leur activité et leurs répliques
+## (proposées par Claude, à valider par Tom : on peut les changer ici).
+func _creer_survivants() -> void:
+	_survivant({"nom": "Bran", "tenue": "Male_Ranger", "teinte": Color(0.42, 0.48, 0.45), "activite": "garde",
+		"ou": Chemin.bruneval(2.4, -19.0), "regard": Chemin.bruneval(2.4, -30.0),
+		"repliques": [
+			"Halte. … Tu as la peau froide, mais tu respires. Ça me suffit.",
+			"Je garde l'entrée. Les os remontent de la terre, et ici la nuit ne finit plus.",
+			"Va te réchauffer au feu. Le vieux Hugo te fera une place.",
+		]})
+	_survivant({"nom": "Hugo", "tenue": "Male_Peasant", "teinte": Color(0.5, 0.42, 0.36), "activite": "assis",
+		"coiffures": ["Hair_Buzzed", "Hair_Beard"], "cheveux": Color(0.62, 0.6, 0.58),
+		"ou": Chemin.bruneval(-2.8, -2.9), "regard": Chemin.VILLAGE,
+		"repliques": [
+			"Assieds-toi, l'ami. Le feu est la dernière chose qui ne nous ment pas.",
+			"Tu ne te souviens de rien ? Alors tu es comme nous : on a tous oublié à quoi ressemblait le jour.",
+			"On dit qu'un dieu nous a tourné le dos. Moi, je crois qu'il nous a regardés trop longtemps.",
+		]})
+	_survivant({"nom": "Élise", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.42, 0.46, 0.55), "activite": "porte_eau",
+		"coiffures": ["Hair_Buns"], "cheveux": Color(0.35, 0.24, 0.16),
+		"ou": Chemin.bruneval(6.8, 1.8), "aller_vers": Chemin.bruneval(15.0, -6.8), "regard": Chemin.bruneval(15.0, -6.8),
+		"repliques": [
+			"Pardon, je n'ai pas le temps… Il faut de l'eau pour le médecin.",
+			"L'eau du puits a un goût de fer depuis trois jours. Personne ne veut savoir pourquoi.",
+		]})
+	_survivant({"nom": "Osric", "tenue": "Male_Peasant", "teinte": Color(0.6, 0.48, 0.3), "activite": "etal",
+		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.2, 0.15, 0.12),
+		"ou": Chemin.bruneval(-7.9, -4.6), "regard": Chemin.bruneval(-5.0, -10.0),
+		"repliques": [
+			"Des pommes, des carottes, de la corde. Le reste, je ne le vends plus.",
+			"L'or ne vaut plus rien, l'ami. Ramène-moi plutôt quelque chose qui brille encore.",
+			"Si tu sors du hameau, garde ton épée près de toi. Les morts ne marchandent pas.",
+		]})
+	_survivant({"nom": "Maren", "tenue": "Female_Ranger", "femme": true, "teinte": Color(0.4, 0.36, 0.46), "activite": "bras_croises",
+		"ou": Chemin.bruneval(3.6, 11.4), "regard": Chemin.VILLAGE,
+		"repliques": [
+			"… Tu viens de la forêt. Tu as vu l'autel rouge, n'est-ce pas ?",
+			"J'ai laissé une lettre dans la cabane, sur la route. Pour Aldric.",
+			"Il est parti chercher sa fille avant que les routes se ferment. Il n'est jamais revenu.",
+			"Ce dieu n'a pas fini. Tant qu'il restera quelqu'un à protéger, il restera un dieu à abattre.",
+		]})
+
+
+func _survivant(d: Dictionary) -> void:
+	var s := Node3D.new()
+	s.set_script(load("res://scripts/survivant.gd"))
+	s.name = d["nom"]
+	s.nom = d["nom"]
+	s.tenue = d["tenue"]
+	s.femme = d.get("femme", false)
+	s.teinte = d["teinte"]
+	s.activite = d["activite"]
+	var coiffures: Array[String] = []
+	coiffures.assign(d.get("coiffures", []))
+	s.coiffures = coiffures
+	s.couleur_cheveux = d.get("cheveux", Color(0.25, 0.22, 0.2))
+	var repliques: Array[String] = []
+	repliques.assign(d["repliques"])
+	s.repliques = repliques
+	s.position = d["ou"]
+	s.aller_vers = d.get("aller_vers", d["ou"])
+	add_child(s)
+	var vers: Vector3 = d["regard"] - s.position
+	s.get_child(0).rotation.y = atan2(vers.x, vers.z)
 
 
 # --- Outils -------------------------------------------------------------------------
