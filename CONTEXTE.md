@@ -203,7 +203,8 @@ Couleurs : noir, gris et rouge sang.
   tintement, boucles feu / ruisseau / vent). Variantes au hasard sans répétition, petites
   variations de hauteur et de volume, écoute depuis le héros. **Mixage** : canaux Musique,
   Bruitages (compresseur + légère réverbération de sous-bois) et Ambiance, limiteur général.
-  On entend : coups d'épée et de poing, saut et impact, dégainer/rengainer, pas (terre, bois du
+  **Coupés pour l'instant à la demande de Tom (seule la musique joue)** : `BRUITAGES_ACTIFS`
+  dans `scripts/sons.gd`. On entend : coups d'épée et de poing, saut et impact, dégainer/rengainer, pas (terre, bois du
   pont, eau), coups reçus, squelettes (os, râle, effondrement), coffre, lettre, feu, eau, vent.
 - **Squelettes enterrés** : ils jaillissent de terre (gerbe de mottes, grondement) quand on
   approche, en laissant un trou.

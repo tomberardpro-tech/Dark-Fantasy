@@ -146,6 +146,9 @@ func boucle_partout(nom: String, volume := 0.0) -> AudioStreamPlayer:
 const VOLUME_MUSIQUE := 0.0
 const VOLUME_BRUITAGES := -5.0
 const VOLUME_AMBIANCE := -2.0
+## Bruitages et ambiance coupés à la demande de Tom (seule la musique joue pour l'instant).
+## Mettre « true » pour les remettre.
+const BRUITAGES_ACTIFS := false
 
 
 func _preparer_mixage() -> void:
@@ -167,6 +170,8 @@ func _preparer_mixage() -> void:
 	var limiteur := AudioEffectHardLimiter.new()
 	limiteur.ceiling_db = -1.0
 	AudioServer.add_bus_effect(0, limiteur)
+	for canal in ["Bruitages", "Ambiance"]:
+		AudioServer.set_bus_mute(AudioServer.get_bus_index(canal), not BRUITAGES_ACTIFS)
 
 
 func _canal(nom: String, volume: float, effets: Array) -> void:
