@@ -8,7 +8,7 @@ extends Control
 @export var destination := Vector3.ZERO
 @export var nom := "Bruneval"
 ## En dessous de cette distance (en mètres), on est arrivé.
-@export var distance_arrivee := 16.0
+@export var distance_arrivee := 18.0
 
 const COULEUR := Color(0.76, 0.8, 0.9, 0.7)
 const COULEUR_ORNEMENT := Color(0.55, 0.42, 0.28, 0.65)

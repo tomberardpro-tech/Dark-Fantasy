@@ -54,6 +54,10 @@ func _ready() -> void:
 	var abri := Node3D.new()
 	abri.set_script(load("res://scripts/abri_ecrivain.gd"))
 	add_child(abri)
+	var hameau := Node3D.new()
+	hameau.name = "Bruneval"
+	hameau.set_script(load("res://scripts/bruneval.gd"))
+	add_child(hameau)
 
 
 ## La lueur rouge de l'autel palpite lentement : la malédiction n'est pas loin.
@@ -317,7 +321,9 @@ func _creer_bordures() -> void:
 			var p := courbe.sample_baked(d)
 			var tangente := (courbe.sample_baked(min(d + 1.0, longueur)) - courbe.sample_baked(max(d - 1.0, 0.0))).normalized()
 			var bord: Vector3 = p + Vector3(-tangente.z, 0, tangente.x) * cote * distance_bordure
-			if Vector2(bord.x, bord.z).length() > RAYON_CLAIRIERE - 1.0:
+			if Chemin.dans_bruneval(bord, 3.0):
+				avant = Vector3.INF
+			elif Vector2(bord.x, bord.z).length() > RAYON_CLAIRIERE - 1.0:
 				if avant != Vector3.INF:
 					_mur_invisible(avant, bord)
 				avant = bord
@@ -326,6 +332,14 @@ func _creer_bordures() -> void:
 	for i in morceaux:
 		var a := Vector3.RIGHT.rotated(Vector3.UP, TAU * i / morceaux) * RAYON_CLAIRIERE
 		var b := Vector3.RIGHT.rotated(Vector3.UP, TAU * (i + 1) / morceaux) * RAYON_CLAIRIERE
+		if Chemin.distance_au_chemin((a + b) / 2.0) > distance_bordure - 1.0:
+			_mur_invisible(a, b)
+	# Autour de Bruneval : la limite suit le bord irrégulier de la clairière, cachée dans
+	# les arbres, ouverte seulement là où arrive le chemin.
+	morceaux = 72
+	for i in morceaux:
+		var a := Chemin.bord_bruneval(TAU * i / morceaux, 6.0)
+		var b := Chemin.bord_bruneval(TAU * (i + 1) / morceaux, 6.0)
 		if Chemin.distance_au_chemin((a + b) / 2.0) > distance_bordure - 1.0:
 			_mur_invisible(a, b)
 
@@ -442,7 +456,8 @@ func _creer_lanternes() -> void:
 	var longueur := courbe.get_baked_length()
 	var cote_choisi := 1.0
 	var distance := 8.0
-	while distance < longueur - 6.0:
+	var fin_lanternes := courbe.get_closest_offset(Chemin.ENTREE) - 6.0
+	while distance < fin_lanternes:
 		var p := courbe.sample_baked(distance)
 		var suite := courbe.sample_baked(min(distance + 1.0, longueur))
 		var tangente := (suite - p).normalized()
@@ -587,12 +602,13 @@ func _creer_autel() -> void:
 	_ajouter_obstacle(forme, Transform3D(Basis(), Chemin.AUTEL + Vector3(0, 1, 0)))
 
 
-## Deux torches sur des poteaux marquent l'arrivée à Bruneval, au bout du chemin.
+## Deux torches sur des poteaux marquent l'arrivée à Bruneval, à l'entrée du hameau.
 func _creer_torches_entree() -> void:
 	var courbe := Chemin.courbe_chemin
 	var longueur := courbe.get_baked_length()
-	var fin := courbe.sample_baked(longueur)
-	var tangente := (fin - courbe.sample_baked(longueur - 1.0)).normalized()
+	var a_l_entree := courbe.get_closest_offset(Chemin.ENTREE)
+	var fin := courbe.sample_baked(a_l_entree)
+	var tangente := (fin - courbe.sample_baked(a_l_entree - 1.0)).normalized()
 	var cote := Vector3(-tangente.z, 0, tangente.x)
 	for s in [-1.0, 1.0]:
 		var pos: Vector3 = fin + cote * s * 2.4

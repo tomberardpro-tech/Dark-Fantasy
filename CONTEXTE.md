@@ -209,3 +209,16 @@ Couleurs : noir, gris et rouge sang.
   approche, en laissant un trou.
 - Le chemin part juste derrière le coffre, étroit et en dégradé sur 4 m.
 - Arbres tordus au feuillage rouge retirés ; trous de la forêt comblés jusqu'aux limites.
+- **Bruneval construit** (étape 9, d'après la maquette « naturelle » validée par Tom ; pas de
+  palissade, la forêt l'entoure) : `scripts/bruneval.gd`, positions données « comme à
+  l'écran » via `Chemin.bruneval(x, y)`. Clairière au bord irrégulier, le chemin serpente
+  jusqu'à la place (terre boueuse, flaques, feu de camp, banc du vieux Hugo), puits fabriqué
+  (margelle de pierre, poteaux, seau, corde). Maisons tournées vers la place avec un petit écart :
+  **auberge** à étage (lanterne, cheminée) au fond à gauche, **forge** en briques (cheminée,
+  foyer rougeoyant, enclume, râtelier d'armes, tas de bois) à gauche, **médecin** à droite, un
+  **abri** près du chemin et un **abri du fond** entre les arbres. Fenêtres éclairées (parfois
+  volets ouverts), lierre, tonneaux et caisses au hasard. **Étal d'Osric** au bord du chemin,
+  **potager** clôturé, **charrette**, rochers. Bosquets, ceinture de sapins serrée et quelques
+  arbres isolés dans le hameau ; limite invisible le long du bord. Le nom « Bruneval » apparaît
+  en entrant dans la clairière.
+- **Préférence de Tom : tout doit être naturel** (pas de symétrie, ni de cercle parfait).

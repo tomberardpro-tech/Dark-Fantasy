@@ -163,7 +163,7 @@ func _est_libre(pos: Vector3, rayon: float, sur_le_bord := false) -> bool:
 		return false
 	if Vector2(pos.x, pos.z).length() < 3.2:
 		return false
-	if pos.distance_to(Chemin.VILLAGE) < 24.0:
+	if Chemin.dans_bruneval(pos, 1.5):
 		return false
 	# Pas de chevauchement avec ce qui est déjà posé (rangé par cases de 4 m).
 	var case := Vector2i(floori(pos.x / 4.0), floori(pos.z / 4.0))
