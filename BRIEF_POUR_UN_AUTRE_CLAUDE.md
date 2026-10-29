@@ -177,3 +177,15 @@ Il n'y a **pas de puits** ni de **pont** tout faits : on les fabrique à la main
   environ 54 × 42 m.
 - Reste dans la palette : nuit bleue, orange pour les lumières, rouge seulement pour la malédiction.
 - Propose **2 ou 3 variantes** si Tom hésite, puis demande-lui laquelle il préfère.
+
+## 10. Ce que Tom veut pour la suite du village (décisions récentes)
+
+- Le village sera **retravaillé** à partir de ta maquette.
+- **Boutiques** : on pourra **acheter des armes et des armures** chez le forgeron, et **des
+  potions** chez le médecin. D'autres commerces sont possibles.
+- **Les habitants** seront des personnages « lambda », sauf un : **le chef du village**. On
+  **entre dans sa maison** (une pièce à part), et une **icône de quête** flotte au-dessus de lui.
+  Prévois donc sa maison sur le plan, bien visible.
+- Tom veut de **vrais petits bâtiments caractéristiques** (forge avec son atelier ouvert,
+  boutique du médecin…), pris dans des packs gratuits, plutôt que des maisons toutes pareilles.
+  Le forgeron et le médecin doivent se reconnaître au premier coup d'œil.

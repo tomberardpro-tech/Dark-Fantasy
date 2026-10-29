@@ -232,3 +232,11 @@ Couleurs : noir, gris et rouge sang.
   bulle de dialogue en bas (nom doré, texte qui s'écrit lettre par lettre ; E pour tout
   afficher puis continuer), le héros ne bouge plus pendant la conversation, le survivant se
   tourne vers lui et parle avec les mains. Répliques proposées par Claude, **à valider par Tom**.
+- **Objectif à terme pour Bruneval (décision de Tom)** : le village sera retravaillé d'après une
+  nouvelle maquette. On pourra **acheter des armes et des armures** (forgeron) et **des potions**
+  (médecin), etc. Les autres habitants seront des **personnages « lambda »**, sauf **le chef du
+  village** : on entre dans **sa maison** (pièce à part), et une **icône de quête** flotte
+  au-dessus de lui. Tom veut de **vrais petits bâtiments** (forge, médecin…) tirés de packs plutôt
+  que des maisons modulaires identiques. Pistes (gratuites, CC0, à valider avant de télécharger) :
+  KayKit Medieval Hexagon Pack (forge, taverne, puits, marché…), Quaternius LowPoly Medieval
+  Village Pack (2020).
