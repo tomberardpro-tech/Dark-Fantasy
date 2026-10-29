@@ -74,6 +74,27 @@ const COUPS := [
 const ANIM_COUP_AU_SOL := "ual2/Sword_Heavy_Combo"
 const DEBUT_COUP_AU_SOL := 2.1
 const DUREE_COUP_AU_SOL := 1.3
+
+## Les gestes d'épée de Mixamo (pack « Sword and Shield »), convertis pour le héros par
+## outils/convertir_mixamo.gd. Ce fichier n'est pas sur GitHub (droits Mixamo) : sans lui,
+## le héros garde les coups ci-dessus.
+const MIXAMO := "res://assets/mixamo/epee_heros.res"
+## Chaque coup ne joue qu'un passage de l'animation (« debut », « longueur », en temps de
+## l'animation), un peu accéléré (« vitesse »). Les autres temps sont en vraies secondes :
+## mesurés sur la main (l'impact = quand elle va le plus vite). Le retour en garde est la
+## fin de la même animation.
+const COUPS_MIXAMO := [
+	# Coup en diagonale, de l'épaule droite vers l'avant (impact à 0,60 s de l'animation).
+	{"anim": "mixamo/slash", "debut": 0.2, "longueur": 1.3, "vitesse": 1.3, "touche": 0.31, "duree": 0.54, "degats": 10.0, "retour": "", "duree_retour": 0.46},
+	# Revers, de la gauche vers l'avant (impact à 0,83 s).
+	{"anim": "mixamo/slash_3", "debut": 0.3, "longueur": 1.37, "vitesse": 1.3, "touche": 0.41, "duree": 0.62, "degats": 12.0, "retour": "", "duree_retour": 0.44},
+]
+## Le bond : le héros saute, l'épée au-dessus de la tête, et l'abat au sol (impact à
+## 1,17 s de l'animation, soit 0,70 s après le clic). Le saut est dans l'animation.
+const BOND_MIXAMO := {"anim": "mixamo/attack", "debut": 0.3, "longueur": 1.9, "vitesse": 1.25, "touche": 0.7}
+## Pendant un coup ou un bond, le héros avance un peu (mètres par seconde).
+const ELAN_COUP := 1.6
+const ELAN_BOND := 3.0
 ## Sans épée : un coup de poing.
 const COUP_DE_POING := {"anim": "Punch_Jab", "duree": 0.6, "touche": 0.25, "degats": 4.0, "retour": "", "duree_retour": 0.0}
 
@@ -114,6 +135,10 @@ var _phase := ""
 var _a_touche := false
 var _clic_en_attente := false
 var _coup_actuel: Dictionary = {}
+## Les coups et le bond utilisés : ceux de Mixamo s'ils sont là, sinon les anciens.
+var _coups: Array = COUPS
+var _bond: Dictionary = {}
+var _geste_vitesse: AnimationNodeTimeScale
 ## Les cheveux longs (leur matériau reçoit chaque image la position de la tête).
 var _cheveux: ShaderMaterial
 var _os_tete := -1
@@ -216,6 +241,16 @@ func _physics_process(delta: float) -> void:
 		var vitesse := vitesse_course if Input.is_action_pressed("courir") else vitesse_marche
 		velocity.x = direction.x * vitesse + _recul.x
 		velocity.z = direction.z * vitesse + _recul.z
+		# Sur place, le coup (avant qu'il touche) et le bond emportent le héros vers l'avant.
+		if direction.length() < 0.01:
+			var elan := 0.0
+			if _en_bond:
+				elan = ELAN_BOND
+			elif _action == "attaque" and _phase == "coup" and not _a_touche and not _bond.is_empty():
+				elan = ELAN_COUP
+			var devant := -_visuel.global_basis.z
+			velocity.x += devant.x * elan
+			velocity.z += devant.z * elan
 	_recul = _recul.lerp(Vector3.ZERO, 1.0 - exp(-10.0 * delta))
 
 	var au_sol := Vector3(velocity.x, 0.0, velocity.z)
@@ -223,10 +258,13 @@ func _physics_process(delta: float) -> void:
 	if au_sol.length() > 0.1 and not (_action == "attaque" and direction.length() < 0.01):
 		_regarder(au_sol, delta)
 	move_and_slide()
-	# Le bond retombe : coup au sol.
+	# Le bond retombe : coup au sol (avec Mixamo, au moment où l'épée frappe le sol).
 	if _en_bond:
 		_temps_bond += delta
-		if is_on_floor() and _temps_bond > 0.15:
+		if _bond.is_empty():
+			if is_on_floor() and _temps_bond > 0.15:
+				_impact_au_sol()
+		elif _temps_bond >= _bond["touche"]:
 			_impact_au_sol()
 	_choisir_deplacement(au_sol.length())
 
@@ -349,6 +387,10 @@ func _bondir() -> void:
 	_en_bond = true
 	_temps_bond = 0.0
 	_action = "bond"
+	if not _bond.is_empty():
+		# Le saut est dans l'animation Mixamo : le corps ne quitte pas le sol pour le jeu.
+		_jouer_geste(_bond["anim"], _bond["longueur"], false, false, _bond["debut"], _bond["vitesse"])
+		return
 	velocity.y = force_bond
 	# Tout le corps joue le moment du « combo lourd » où le héros lève l'épée au-dessus de
 	# sa tête puis l'abat jusqu'au sol (mesuré : la main touche presque le sol 0,65 s après
@@ -405,7 +447,7 @@ func _commencer_attaque() -> void:
 
 func _lancer_coup(numero: int) -> void:
 	_coup = numero
-	_lancer(COUPS[numero])
+	_lancer(_coups[numero])
 
 
 func _lancer(coup: Dictionary) -> void:
@@ -415,7 +457,7 @@ func _lancer(coup: Dictionary) -> void:
 	_temps_action = 0.0
 	_a_touche = false
 	_clic_en_attente = false
-	_jouer_geste(coup["anim"])
+	_jouer_geste(coup["anim"], coup.get("longueur", 0.0), false, true, coup.get("debut", 0.0), coup.get("vitesse", 1.0))
 
 
 ## Le temps passe pour le geste en cours : le coup touche, puis on enchaîne ou on revient
@@ -430,17 +472,19 @@ func _avancer_action(delta: float) -> void:
 			_toucher_les_ennemis(_coup_actuel["degats"])
 		if _temps_action >= _coup_actuel["duree"]:
 			var suivant := _coup + 1
-			if epee_sortie and _clic_en_attente and suivant < COUPS.size() and _coup_actuel != COUP_DE_POING:
+			if epee_sortie and _clic_en_attente and suivant < _coups.size() and _coup_actuel != COUP_DE_POING:
 				_lancer_coup(suivant)
-			elif _coup_actuel["retour"] != "":
+			elif _coup_actuel["duree_retour"] > 0.0:
 				_phase = "retour"
 				_temps_action = 0.0
-				_jouer_geste(_coup_actuel["retour"])
+				# Sans animation de retour à part, la fin du geste en cours sert de retour.
+				if _coup_actuel["retour"] != "":
+					_jouer_geste(_coup_actuel["retour"])
 			else:
 				_fin_attaque()
 	elif _phase == "retour":
 		# Un clic pendant le retour en garde enchaîne tout de suite le coup suivant.
-		if _clic_en_attente and _coup + 1 < COUPS.size():
+		if _clic_en_attente and _coup + 1 < _coups.size():
 			_lancer_coup(_coup + 1)
 		elif _temps_action >= _coup_actuel["duree_retour"]:
 			_fin_attaque()
@@ -586,8 +630,10 @@ func _mettre_epee_dans_le_dos() -> void:
 ## Quand le héros est immobile, tout le corps fait le geste (plus beau) ;
 ## quand il court, seul le haut du corps le fait. « haut_en_courant » = false : tout le
 ## corps fait toujours le geste (par exemple le coup au sol après le bond).
-func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false, haut_en_courant := true, debut := 0.0) -> void:
+## « vitesse » : plus de 1 accélère le geste.
+func _jouer_geste(nom: String, longueur := 0.0, a_l_envers := false, haut_en_courant := true, debut := 0.0, vitesse := 1.0) -> void:
 	_geste.animation = nom
+	_arbre.set("parameters/geste_vitesse/scale", vitesse)
 	_geste.use_custom_timeline = longueur > 0.0
 	if longueur > 0.0:
 		_geste.start_offset = debut
@@ -619,6 +665,10 @@ func _preparer_animations() -> void:
 		bibliotheque.get_animation(nom).loop_mode = Animation.LOOP_LINEAR
 	_anim.add_animation_library("", bibliotheque)
 	_anim.add_animation_library("ual2", _bibliotheque(ANIMATIONS_2))
+	if ResourceLoader.exists(MIXAMO):
+		_anim.add_animation_library("mixamo", load(MIXAMO))
+		_coups = COUPS_MIXAMO
+		_bond = BOND_MIXAMO
 
 	var racine := AnimationNodeBlendTree.new()
 	var deplacement := AnimationNodeTransition.new()
@@ -645,8 +695,11 @@ func _preparer_animations() -> void:
 	racine.add_node("geste", _geste_unique)
 	_geste = AnimationNodeAnimation.new()
 	racine.add_node("geste_anim", _geste)
+	_geste_vitesse = AnimationNodeTimeScale.new()
+	racine.add_node("geste_vitesse", _geste_vitesse)
+	racine.connect_node("geste_vitesse", 0, "geste_anim")
 	racine.connect_node("geste", 0, "deplacement")
-	racine.connect_node("geste", 1, "geste_anim")
+	racine.connect_node("geste", 1, "geste_vitesse")
 	racine.connect_node("output", 0, "geste")
 
 	_arbre = AnimationTree.new()
