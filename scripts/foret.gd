@@ -17,8 +17,9 @@ extends Node3D
 @export var nombre_arbres_morts_chemin := 120
 @export var nombre_rochers_chemin := 40
 @export var nombre_herbes_chemin := 160
-@export var nombre_arbres_tordus := 40
-@export var nombre_arbres_tordus_chemin := 90
+## Les arbres tordus (feuillage rouge) sont retirés à la demande de Tom.
+@export var nombre_arbres_tordus := 0
+@export var nombre_arbres_tordus_chemin := 0
 ## Largeur de forêt de chaque côté du chemin (en mètres).
 @export var largeur_foret_chemin := 28.0
 ## Au-delà de cette distance de la caméra, les arbres ne sont plus dessinés (plus fluide).

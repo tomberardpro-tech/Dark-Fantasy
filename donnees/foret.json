@@ -4942,160 +4942,6 @@
 		"z": 9.839
 	},
 	{
-		"decalage": 1.6702,
-		"modele": "TwistedTree_1",
-		"rotation": 3.9363,
-		"souplesse": 0.03,
-		"taille": 0.4124,
-		"x": 5.99,
-		"z": -22.009
-	},
-	{
-		"obstacle": 0.35,
-		"x": 5.99,
-		"z": -22.009
-	},
-	{
-		"decalage": 3.3101,
-		"modele": "TwistedTree_5",
-		"rotation": 2.5151,
-		"souplesse": 0.03,
-		"taille": 0.4055,
-		"x": -19.806,
-		"z": -0.71
-	},
-	{
-		"obstacle": 0.35,
-		"x": -19.806,
-		"z": -0.71
-	},
-	{
-		"decalage": 0.4521,
-		"modele": "TwistedTree_3",
-		"rotation": 5.1536,
-		"souplesse": 0.03,
-		"taille": 0.3532,
-		"x": -6.164,
-		"z": -15.456
-	},
-	{
-		"obstacle": 0.35,
-		"x": -6.164,
-		"z": -15.456
-	},
-	{
-		"decalage": 4.2144,
-		"modele": "TwistedTree_4",
-		"rotation": 0.2716,
-		"souplesse": 0.03,
-		"taille": 0.3718,
-		"x": 18.294,
-		"z": -2.947
-	},
-	{
-		"obstacle": 0.35,
-		"x": 18.294,
-		"z": -2.947
-	},
-	{
-		"decalage": 5.1297,
-		"modele": "TwistedTree_4",
-		"rotation": 3.3536,
-		"souplesse": 0.03,
-		"taille": 0.3732,
-		"x": 15.142,
-		"z": 22.345
-	},
-	{
-		"obstacle": 0.35,
-		"x": 15.142,
-		"z": 22.345
-	},
-	{
-		"decalage": 4.462,
-		"modele": "TwistedTree_2",
-		"rotation": 4.4735,
-		"souplesse": 0.03,
-		"taille": 0.4948,
-		"x": 35.325,
-		"z": -13.956
-	},
-	{
-		"obstacle": 0.35,
-		"x": 35.325,
-		"z": -13.956
-	},
-	{
-		"decalage": 5.1601,
-		"modele": "TwistedTree_3",
-		"rotation": 3.9195,
-		"souplesse": 0.03,
-		"taille": 0.4025,
-		"x": 19.245,
-		"z": 3.22
-	},
-	{
-		"obstacle": 0.35,
-		"x": 19.245,
-		"z": 3.22
-	},
-	{
-		"decalage": 0.8104,
-		"modele": "TwistedTree_2",
-		"rotation": 5.1534,
-		"souplesse": 0.03,
-		"taille": 0.4228,
-		"x": 36.38,
-		"z": -5.799
-	},
-	{
-		"obstacle": 0.35,
-		"x": 36.38,
-		"z": -5.799
-	},
-	{
-		"decalage": 4.6961,
-		"modele": "TwistedTree_5",
-		"rotation": 4.7354,
-		"souplesse": 0.03,
-		"taille": 0.4843,
-		"x": 5.355,
-		"z": -18.718
-	},
-	{
-		"obstacle": 0.35,
-		"x": 5.355,
-		"z": -18.718
-	},
-	{
-		"decalage": 3.0029,
-		"modele": "TwistedTree_3",
-		"rotation": 2.1598,
-		"souplesse": 0.03,
-		"taille": 0.4553,
-		"x": -17.738,
-		"z": 4.362
-	},
-	{
-		"obstacle": 0.35,
-		"x": -17.738,
-		"z": 4.362
-	},
-	{
-		"decalage": 6.1146,
-		"modele": "TwistedTree_3",
-		"rotation": 3.5833,
-		"souplesse": 0.03,
-		"taille": 0.4472,
-		"x": -37.28,
-		"z": 2.568
-	},
-	{
-		"obstacle": 0.35,
-		"x": -37.28,
-		"z": 2.568
-	},
-	{
 		"decalage": 1.8331,
 		"modele": "Pine_4",
 		"rotation": 1.4218,
@@ -5612,20 +5458,6 @@
 		"obstacle": 0.35,
 		"x": 3.135,
 		"z": 18.511
-	},
-	{
-		"decalage": 4.1474,
-		"modele": "TwistedTree_3",
-		"rotation": 3.9558,
-		"souplesse": 0.03,
-		"taille": 0.4199,
-		"x": -13.706,
-		"z": 34.463
-	},
-	{
-		"obstacle": 0.35,
-		"x": -13.706,
-		"z": 34.463
 	},
 	{
 		"decalage": 2.9645,
@@ -6371,20 +6203,6 @@
 		"z": 9.578
 	},
 	{
-		"decalage": 3.7043,
-		"modele": "TwistedTree_5",
-		"rotation": 6.2323,
-		"souplesse": 0.03,
-		"taille": 0.3574,
-		"x": -35.637,
-		"z": 8.424
-	},
-	{
-		"obstacle": 0.35,
-		"x": -35.637,
-		"z": 8.424
-	},
-	{
 		"decalage": 4.4272,
 		"modele": "Pine_2",
 		"rotation": 1.4883,
@@ -6439,20 +6257,6 @@
 		"obstacle": 0.35,
 		"x": -34.738,
 		"z": 10.523
-	},
-	{
-		"decalage": 1.4633,
-		"modele": "TwistedTree_4",
-		"rotation": 5.3414,
-		"souplesse": 0.03,
-		"taille": 0.4145,
-		"x": -32.037,
-		"z": 17.34
-	},
-	{
-		"obstacle": 0.35,
-		"x": -32.037,
-		"z": 17.34
 	},
 	{
 		"decalage": 3.4228,
@@ -6511,20 +6315,6 @@
 		"z": 15.426
 	},
 	{
-		"decalage": 2.2555,
-		"modele": "TwistedTree_5",
-		"rotation": 1.1482,
-		"souplesse": 0.03,
-		"taille": 0.4209,
-		"x": -30.084,
-		"z": 16.063
-	},
-	{
-		"obstacle": 0.35,
-		"x": -30.084,
-		"z": 16.063
-	},
-	{
 		"decalage": 5.4171,
 		"modele": "Pine_4",
 		"rotation": 4.0953,
@@ -6553,20 +6343,6 @@
 		"z": 15.342
 	},
 	{
-		"decalage": 2.8099,
-		"modele": "TwistedTree_1",
-		"rotation": 4.033,
-		"souplesse": 0.03,
-		"taille": 0.3908,
-		"x": -19.964,
-		"z": 23.804
-	},
-	{
-		"obstacle": 0.35,
-		"x": -19.964,
-		"z": 23.804
-	},
-	{
 		"decalage": 2.6204,
 		"modele": "Pine_1",
 		"rotation": 4.2522,
@@ -6593,20 +6369,6 @@
 		"obstacle": 0.35,
 		"x": -18.412,
 		"z": 19.718
-	},
-	{
-		"decalage": 4.2449,
-		"modele": "TwistedTree_3",
-		"rotation": 1.51,
-		"souplesse": 0.03,
-		"taille": 0.492,
-		"x": -22.727,
-		"z": 23.99
-	},
-	{
-		"obstacle": 0.35,
-		"x": -22.727,
-		"z": 23.99
 	},
 	{
 		"decalage": 3.6886,
@@ -6649,20 +6411,6 @@
 		"obstacle": 0.35,
 		"x": -11.066,
 		"z": 18.973
-	},
-	{
-		"decalage": 3.0984,
-		"modele": "TwistedTree_4",
-		"rotation": 5.9116,
-		"souplesse": 0.03,
-		"taille": 0.3847,
-		"x": -25.834,
-		"z": 27.114
-	},
-	{
-		"obstacle": 0.35,
-		"x": -25.834,
-		"z": 27.114
 	},
 	{
 		"decalage": 3.7781,
@@ -6817,20 +6565,6 @@
 		"obstacle": 0.35,
 		"x": -17.697,
 		"z": 25.59
-	},
-	{
-		"decalage": 3.318,
-		"modele": "TwistedTree_2",
-		"rotation": 1.8091,
-		"souplesse": 0.03,
-		"taille": 0.4048,
-		"x": -31.957,
-		"z": 7.383
-	},
-	{
-		"obstacle": 0.35,
-		"x": -31.957,
-		"z": 7.383
 	},
 	{
 		"decalage": 1.7032,
@@ -11187,132 +10921,6 @@
 		"z": 53.886
 	},
 	{
-		"decalage": 3.0403,
-		"modele": "TwistedTree_5",
-		"rotation": 3.5702,
-		"souplesse": 0.03,
-		"taille": 0.4969,
-		"x": 72.871,
-		"z": 95.883
-	},
-	{
-		"obstacle": 0.35,
-		"x": 72.871,
-		"z": 95.883
-	},
-	{
-		"decalage": 2.7537,
-		"modele": "TwistedTree_1",
-		"rotation": 1.9386,
-		"souplesse": 0.03,
-		"taille": 0.4033,
-		"x": 53.159,
-		"z": 64.192
-	},
-	{
-		"obstacle": 0.35,
-		"x": 53.159,
-		"z": 64.192
-	},
-	{
-		"decalage": 0.9437,
-		"modele": "TwistedTree_4",
-		"rotation": 4.9373,
-		"souplesse": 0.03,
-		"taille": 0.3807,
-		"x": 60.598,
-		"z": 90.793
-	},
-	{
-		"obstacle": 0.35,
-		"x": 60.598,
-		"z": 90.793
-	},
-	{
-		"decalage": 0.2165,
-		"modele": "TwistedTree_3",
-		"rotation": 1.5442,
-		"souplesse": 0.03,
-		"taille": 0.3569,
-		"x": 71.23,
-		"z": 103.156
-	},
-	{
-		"obstacle": 0.35,
-		"x": 71.23,
-		"z": 103.156
-	},
-	{
-		"decalage": 5.4436,
-		"modele": "TwistedTree_5",
-		"rotation": 1.2515,
-		"souplesse": 0.03,
-		"taille": 0.414,
-		"x": 82.898,
-		"z": 38.964
-	},
-	{
-		"obstacle": 0.35,
-		"x": 82.898,
-		"z": 38.964
-	},
-	{
-		"decalage": 5.0669,
-		"modele": "TwistedTree_4",
-		"rotation": 6.2739,
-		"souplesse": 0.03,
-		"taille": 0.4205,
-		"x": 33.221,
-		"z": 71.169
-	},
-	{
-		"obstacle": 0.35,
-		"x": 33.221,
-		"z": 71.169
-	},
-	{
-		"decalage": 2.4177,
-		"modele": "TwistedTree_3",
-		"rotation": 3.8561,
-		"souplesse": 0.03,
-		"taille": 0.4655,
-		"x": 1.254,
-		"z": 28.749
-	},
-	{
-		"obstacle": 0.35,
-		"x": 1.254,
-		"z": 28.749
-	},
-	{
-		"decalage": 2.0132,
-		"modele": "TwistedTree_2",
-		"rotation": 3.7802,
-		"souplesse": 0.03,
-		"taille": 0.4945,
-		"x": 63.606,
-		"z": 34.331
-	},
-	{
-		"obstacle": 0.35,
-		"x": 63.606,
-		"z": 34.331
-	},
-	{
-		"decalage": 3.357,
-		"modele": "TwistedTree_2",
-		"rotation": 5.6111,
-		"souplesse": 0.03,
-		"taille": 0.367,
-		"x": 58.089,
-		"z": 88.265
-	},
-	{
-		"obstacle": 0.35,
-		"x": 58.089,
-		"z": 88.265
-	},
-	{
 		"decalage": 1.3891,
 		"modele": "Grass_Wispy_Short",
 		"rotation": 5.126,
@@ -11851,20 +11459,6 @@
 		"z": 59.644
 	},
 	{
-		"decalage": 1.6991,
-		"modele": "TwistedTree_2",
-		"rotation": 2.6422,
-		"souplesse": 0.03,
-		"taille": 0.3965,
-		"x": 46.844,
-		"z": 52.897
-	},
-	{
-		"obstacle": 0.35,
-		"x": 46.844,
-		"z": 52.897
-	},
-	{
 		"decalage": 3.0618,
 		"modele": "Pine_2",
 		"rotation": 1.3768,
@@ -11877,20 +11471,6 @@
 		"obstacle": 0.35,
 		"x": 71.648,
 		"z": 71.444
-	},
-	{
-		"decalage": 2.7048,
-		"modele": "TwistedTree_4",
-		"rotation": 1.6303,
-		"souplesse": 0.03,
-		"taille": 0.4258,
-		"x": 54.431,
-		"z": 55.764
-	},
-	{
-		"obstacle": 0.35,
-		"x": 54.431,
-		"z": 55.764
 	},
 	{
 		"decalage": 6.0131,
@@ -12145,20 +11725,6 @@
 		"z": 50.664
 	},
 	{
-		"decalage": 2.6702,
-		"modele": "TwistedTree_5",
-		"rotation": 1.8096,
-		"souplesse": 0.03,
-		"taille": 0.3804,
-		"x": 68.25,
-		"z": 74.202
-	},
-	{
-		"obstacle": 0.35,
-		"x": 68.25,
-		"z": 74.202
-	},
-	{
 		"decalage": 0.1183,
 		"modele": "Pine_5",
 		"rotation": 4.5785,
@@ -12285,20 +11851,6 @@
 		"z": 27.268
 	},
 	{
-		"decalage": 3.3051,
-		"modele": "TwistedTree_1",
-		"rotation": 0.058,
-		"souplesse": 0.03,
-		"taille": 0.4474,
-		"x": 29.791,
-		"z": 43.983
-	},
-	{
-		"obstacle": 0.35,
-		"x": 29.791,
-		"z": 43.983
-	},
-	{
 		"decalage": 2.012,
 		"modele": "DeadTree_3",
 		"rotation": 2.4758,
@@ -12341,20 +11893,6 @@
 		"z": 40.322
 	},
 	{
-		"decalage": 5.478,
-		"modele": "TwistedTree_4",
-		"rotation": 0.8066,
-		"souplesse": 0.03,
-		"taille": 0.4009,
-		"x": 31.093,
-		"z": 45.869
-	},
-	{
-		"obstacle": 0.35,
-		"x": 31.093,
-		"z": 45.869
-	},
-	{
 		"decalage": 5.9379,
 		"modele": "Pine_5",
 		"rotation": 4.4624,
@@ -12383,20 +11921,6 @@
 		"z": 73.489
 	},
 	{
-		"decalage": 2.4852,
-		"modele": "TwistedTree_5",
-		"rotation": 1.7062,
-		"souplesse": 0.03,
-		"taille": 0.4477,
-		"x": 41.083,
-		"z": 52.434
-	},
-	{
-		"obstacle": 0.35,
-		"x": 41.083,
-		"z": 52.434
-	},
-	{
 		"decalage": 3.3841,
 		"modele": "Pine_3",
 		"rotation": 0.0975,
@@ -12423,20 +11947,6 @@
 		"obstacle": 0.35,
 		"x": 37.668,
 		"z": 52.956
-	},
-	{
-		"decalage": 5.7426,
-		"modele": "TwistedTree_5",
-		"rotation": 6.2372,
-		"souplesse": 0.03,
-		"taille": 0.4425,
-		"x": 43.157,
-		"z": 52.118
-	},
-	{
-		"obstacle": 0.35,
-		"x": 43.157,
-		"z": 52.118
 	},
 	{
 		"decalage": 6.1482,
@@ -12649,20 +12159,6 @@
 		"z": 74.028
 	},
 	{
-		"decalage": 5.4919,
-		"modele": "TwistedTree_3",
-		"rotation": 6.2476,
-		"souplesse": 0.03,
-		"taille": 0.4625,
-		"x": 50.327,
-		"z": 42.465
-	},
-	{
-		"obstacle": 0.35,
-		"x": 50.327,
-		"z": 42.465
-	},
-	{
 		"decalage": 2.2601,
 		"modele": "Pine_1",
 		"rotation": 2.7997,
@@ -12717,20 +12213,6 @@
 		"obstacle": 0.35,
 		"x": 40.029,
 		"z": 34.463
-	},
-	{
-		"decalage": 3.6473,
-		"modele": "TwistedTree_1",
-		"rotation": 0.9388,
-		"souplesse": 0.03,
-		"taille": 0.3904,
-		"x": 57.279,
-		"z": 66.957
-	},
-	{
-		"obstacle": 0.35,
-		"x": 57.279,
-		"z": 66.957
 	},
 	{
 		"decalage": 5.6928,
@@ -12901,20 +12383,6 @@
 		"z": 49.821
 	},
 	{
-		"decalage": 4.6285,
-		"modele": "TwistedTree_4",
-		"rotation": 6.1464,
-		"souplesse": 0.03,
-		"taille": 0.3579,
-		"x": 70.45,
-		"z": 55.462
-	},
-	{
-		"obstacle": 0.35,
-		"x": 70.45,
-		"z": 55.462
-	},
-	{
 		"decalage": 1.7852,
 		"modele": "Pine_5",
 		"rotation": 6.2198,
@@ -13067,20 +12535,6 @@
 		"obstacle": 0.35,
 		"x": 14.515,
 		"z": 18.554
-	},
-	{
-		"decalage": 1.0726,
-		"modele": "TwistedTree_5",
-		"rotation": 3.6881,
-		"souplesse": 0.03,
-		"taille": 0.4126,
-		"x": 73.937,
-		"z": 72.215
-	},
-	{
-		"obstacle": 0.35,
-		"x": 73.937,
-		"z": 72.215
 	},
 	{
 		"decalage": 6.2783,
