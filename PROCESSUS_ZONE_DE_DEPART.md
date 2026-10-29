@@ -83,7 +83,7 @@ Le contexte complet du jeu est dans `CONTEXTE.md`.
 - Une petite boussole en haut de l'écran indique la direction du hameau.
 - **Tom valide quand** le trajet est agréable et qu'on ne se perd pas.
 
-### Étape 9 : le hameau de Bruneval
+### Étape 9 : le hameau de Bruneval — validée par Tom
 
 - 4 à 6 abris de fortune rafistolés tournés vers une place, une palissade rafistolée avec une
   entrée et des torches là où arrive le chemin, le puits, l'étal d'Osric sous son auvent, des
