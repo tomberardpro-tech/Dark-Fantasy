@@ -176,4 +176,4 @@ Couleurs : noir, gris et rouge sang.
 - **Cheveux longs noirs** qui bougent avec les mouvements et le vent.
 - **Musique** douce dans la clairière : « Lament for a Warrior's Soul » (RandomMind, CC0), qui
   s'éteint en s'éloignant du feu.
-- L'entrée de Bruneval est un peu plus proche (chemin d'environ 44 s de marche).
+- **Carte refaite (maquette validée par Tom)** : le chemin part juste derrière le coffre et monte presque tout droit vers le haut de l'écran jusqu'à Bruneval (environ 130 m). Dans l'ordre : cabane à gauche, ruisseau qui traverse l'écran de gauche à droite avec le pont, squelettes, autel à droite, charrette à gauche, Bruneval. La clairière n'a pas bougé ; la forêt du chemin a été replantée puis figée. Le ruisseau a une vraie matière (courant, reflets, mousse aux berges).

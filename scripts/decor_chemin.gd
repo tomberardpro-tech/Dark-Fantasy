@@ -42,6 +42,7 @@ func _ready() -> void:
 	var charrette := Node3D.new()
 	charrette.set_script(load("res://scripts/charrette.gd"))
 	charrette.position = Chemin.CHARRETTE
+	charrette.rotation.y = Chemin.ROTATION_CHARRETTE
 	add_child(charrette)
 
 
@@ -370,7 +371,7 @@ func _lanterne(pos: Vector3, vers_le_chemin: Vector3) -> void:
 func _creer_ruine() -> void:
 	var cabane := Node3D.new()
 	cabane.position = Chemin.RUINE
-	cabane.rotation.y = 0.69
+	cabane.rotation.y = Chemin.ROTATION_RUINE
 	add_child(cabane)
 	# Les murs font 2 m de large ; [modèle, position du milieu, tourné d'un quart de tour].
 	var murs := [

@@ -4,25 +4,32 @@ extends Node
 ## Les autres scripts lui demandent par exemple « suis-je loin du chemin ? »
 ## (pour ne pas planter d'arbre au milieu).
 
-## Les points de passage du sentier, de la clairière jusqu'à l'entrée de Bruneval.
-## Avec la caméra du jeu, le chemin part vers la droite de l'écran (choix de Tom).
-## Il commence tout près du feu, pour sortir de la clairière en douceur.
+## Les points de passage du sentier, de la clairière jusqu'à l'entrée de Bruneval
+## (environ 125 m). Avec la caméra du jeu, le chemin monte presque tout droit vers le
+## haut de l'écran (choix de Tom, d'après la maquette) : il part juste derrière le coffre.
+## Repère : le haut de l'écran est la direction (0,73 ; 0 ; 0,69) du monde, la droite
+## de l'écran (-0,69 ; 0 ; 0,73).
 const TRACE := [
-	Vector3(-2, 0, 2.5), Vector3(-7, 0, 9), Vector3(-14, 0, 18), Vector3(-30, 0, 28), Vector3(-46, 0, 24),
-	Vector3(-60, 0, 36), Vector3(-66, 0, 52), Vector3(-80, 0, 64), Vector3(-98, 0, 60),
-	Vector3(-112, 0, 72), Vector3(-118, 0, 90), Vector3(-127, 0, 99),
+	Vector3(3.67, 0, 4.85), Vector3(13.07, 0, 12.38), Vector3(25.98, 0, 19.11), Vector3(30.61, 0, 33.13),
+	Vector3(37.98, 0, 44.25), Vector3(47.99, 0, 48.22), Vector3(59.46, 0, 53.57), Vector3(65.42, 0, 64.73),
+	Vector3(78.29, 0, 70.04), Vector3(85.67, 0, 81.16), Vector3(92.93, 0, 88.04),
 ]
-## Le ruisseau, qui croise le sentier au niveau du pont.
+## Le ruisseau, qui traverse l'écran de gauche à droite et croise le sentier au pont.
 const RUISSEAU := [
-	Vector3(-88, 0, -10), Vector3(-74, 0, 2), Vector3(-62, 0, 15), Vector3(-53, 0, 30),
-	Vector3(-48, 0, 48), Vector3(-35, 0, 70), Vector3(-30, 0, 95), Vector3(-18, 0, 120),
+	Vector3(88.04, 0, -40.58), Vector3(80.63, 0, -26.94), Vector3(68.7, 0, 3.1), Vector3(50.25, 0, 26.94),
+	Vector3(37.98, 0, 44.25), Vector3(25.11, 0, 65.11), Vector3(0.84, 0, 83.45), Vector3(-10.54, 0, 107.1),
+	Vector3(-28.66, 0, 117.5),
 ]
 
-const RUINE := Vector3(-34, 0, 13)
-const AUTEL := Vector3(-90, 0, 72)
-const CHARRETTE := Vector3(-122, 0, 99)
+## La cabane, à gauche du chemin avant le pont ; sa porte regarde le chemin.
+const RUINE := Vector3(30.03, 0, 11.92)
+const ROTATION_RUINE := -0.51
+## L'autel, à droite du chemin ; la charrette, à gauche juste avant le village.
+const AUTEL := Vector3(58.54, 0, 71.99)
+const CHARRETTE := Vector3(88.96, 0, 71.88)
+const ROTATION_CHARRETTE := 1.6
 ## Le centre du hameau de Bruneval (construit à l'étape 9).
-const VILLAGE := Vector3(-137, 0, 109)
+const VILLAGE := Vector3(103.1, 0, 97.67)
 
 var courbe_chemin: Curve3D
 var courbe_ruisseau: Curve3D
@@ -36,7 +43,7 @@ var _points_ruisseau: PackedVector3Array
 ## Le sentier serpente de part et d'autre du tracé (en mètres), comme un vrai chemin
 ## qui contourne les arbres ; mais il reste droit au départ, au pont, près des lieux et
 ## à l'arrivée.
-const SERPENTE := 1.8
+const SERPENTE := 1.0
 ## Demi-largeur moyenne du sentier (en mètres) ; elle varie le long du chemin.
 const DEMI_LARGEUR := 0.9
 
