@@ -1,10 +1,10 @@
 extends Node3D
-## Le hameau de Bruneval, d'après la maquette « naturelle » validée par Tom : des maisons
-## posées sans symétrie dans une clairière, chacune tournée vers la place (avec un petit
-## écart), une place de terre boueuse avec le feu et le puits, l'étal d'Osric, la forge et
-## son tas de bois, un potager, une charrette, des rochers. Pas de palissade : la forêt
-## l'entoure (voir foret.json). Pièces du Medieval Village MegaKit et du Fantasy Props
-## MegaKit (Quaternius).
+## Le hameau de Bruneval, d'après la maquette choisie par Tom : les maisons en arc autour
+## d'une place de terre boueuse (feu de camp, banc, puits), façades éclairées vers la caméra,
+## légèrement tournées vers la place ; l'auberge à étage au fond, la forge en briques à
+## gauche, le médecin à droite, deux abris devant, l'étal d'Osric. Pas de palissade : une
+## ceinture de sapins entoure la clairière (voir foret.json). Pièces du Medieval Village
+## MegaKit et du Fantasy Props MegaKit (Quaternius).
 ##
 ## Les positions sont celles de la maquette (x vers la droite de l'écran, y vers le haut),
 ## converties par Chemin.bruneval().
@@ -20,26 +20,18 @@ var _temps := 0.0
 func _ready() -> void:
 	_rng.seed = 1848
 	_creer_place()
-	# [x, y, largeur, profondeur, étages, murs en briques, nom]
-	_maison(-4.0, 13.5, 6, 10, 2, false, "Auberge")
-	_maison(-17.5, 0.5, 4, 6, 1, true, "Forge")
-	_maison(15.5, 7.0, 6, 6, 1, false, "Médecin")
-	_maison(11.0, -12.0, 4, 4, 1, false, "Abri")
-	_maison(18.0, 16.5, 4, 4, 1, false, "Abri du fond")
-	_creer_forge(-17.5, 0.5)
+	# Comme sur la maquette choisie par Tom : les maisons en arc autour de la place, façades
+	# éclairées vers la caméra. [x, y, largeur, longueur de façade, étages, briques, nom,
+	# rotation vers la place (0 = face à la caméra, 1 = face au feu)]
+	_maison(0.0, 15.2, 6, 10, 2, false, "Auberge", 0.0)
+	_maison(-19.3, 3.1, 4, 8, 1, true, "Forge", 0.3)
+	_maison(20.2, 3.8, 6, 8, 1, false, "Médecin", 0.3)
+	_maison(-17.1, -8.7, 4, 6, 1, false, "Abri", 0.25)
+	_maison(17.1, -9.1, 4, 6, 1, false, "Abri de l'est", 0.25)
+	_creer_forge(-19.3, 3.1)
 	_creer_feu()
-	_creer_puits(6.2, 2.6)
-	_creer_etal(-6.0, -9.5)
-	_creer_tas_de_bois(-13.4, -4.2)
-	_creer_potager(22.2, -1.5)
-	_creer_charrette(-11.0, -13.0)
-	for r in [[-20.0, -9.0, 1.2], [9.0, -18.0, 0.8], [22.0, 4.0, 1.0], [-9.0, 18.0, 0.9], [3.5, -6.0, 0.5]]:
-		var rocher := Modeles.creer("Rock_Medium_" + str(_rng.randi_range(1, 3)), Modeles.NATURE, TEINTE_PIERRE)
-		rocher.position = Chemin.bruneval(r[0], r[1]) - Vector3(0, 0.1, 0)
-		rocher.rotation.y = _rng.randf_range(0.0, TAU)
-		rocher.scale = Vector3.ONE * r[2] * 0.32
-		add_child(rocher)
-		_obstacle_rond(rocher.position, r[2] * 0.45)
+	_creer_puits(5.6, 3.3)
+	_creer_etal(-7.4, -5.7)
 
 
 ## La lueur de la forge vacille.
@@ -51,7 +43,7 @@ func _process(delta: float) -> void:
 
 # --- La place -------------------------------------------------------------------
 
-## La place : une tache de terre boueuse aux bords irréguliers (même matière que le chemin,
+## La place : un ovale de terre boueuse (même matière que le chemin,
 ## avec ses flaques), autour du feu.
 func _creer_place() -> void:
 	var mat := ShaderMaterial.new()
@@ -59,14 +51,14 @@ func _creer_place() -> void:
 	var outil := SurfaceTool.new()
 	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var tours := 40
-	var centre := Chemin.bruneval(1.0, 1.0) + Vector3(0, 0.025, 0)
+	var centre := Chemin.VILLAGE + Vector3(0, 0.025, 0)
 	# Pour chaque tranche : un triangle du centre au bord, puis le fondu vers l'extérieur.
 	for i in tours:
 		var points := []
 		for k in [0, 1]:
 			var t: float = TAU * (i + k) / tours
-			var r := 1.0 + 0.22 * sin(t * 2.0 + 0.5) + 0.12 * sin(t * 5.0)
-			points.append(Chemin.bruneval(1.0 + 8.5 * r * sin(t), 1.0 + 6.5 * r * cos(t)) + Vector3(0, 0.025, 0))
+			var r := 1.0 + 0.07 * sin(t * 3.0 + 0.5)
+			points.append(Chemin.bruneval(9.0 * r * sin(t), 7.0 * r * cos(t)) + Vector3(0, 0.025, 0))
 		var a: Vector3 = points[0]
 		var b: Vector3 = points[1]
 		var a2 := centre + (a - centre) * 1.9
@@ -88,7 +80,7 @@ func _creer_feu() -> void:
 	feu.set_script(load("res://scripts/feu_de_camp.gd"))
 	feu.puissance = 4.5
 	feu.portee = 14.0
-	feu.position = Chemin.bruneval(0.5, -0.6)
+	feu.position = Chemin.VILLAGE
 	add_child(feu)
 	# Le banc du vieux Hugo, tourné vers le feu.
 	var banc := Modeles.creer("Bench")
@@ -104,17 +96,22 @@ func _creer_feu() -> void:
 
 ## Une maison de « largeur » × « profondeur » mètres (multiples de 2), d'un ou deux étages,
 ## en plâtre ou en briques. Sa façade (avec la porte, sous le pignon) regarde la place.
-func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, briques: bool, nom: String) -> void:
+func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, briques: bool, nom: String, vers_place := 0.0) -> void:
 	var maison := Node3D.new()
 	maison.name = nom
 	maison.position = Chemin.bruneval(x, y)
-	maison.rotation.y = _vers(maison.position, Chemin.bruneval(1.0, 0.5)) + _rng.randf_range(-0.18, 0.18)
+	# La façade (le long côté, en +X) regarde la caméra, un peu tournée vers la place
+	# selon « vers_place » (0 = droit face à la caméra).
+	var vers_camera := -Chemin.HAUT_ECRAN
+	var vers_le_feu := (Chemin.VILLAGE - maison.position).normalized()
+	var facade := vers_camera.lerp(vers_le_feu, vers_place).normalized()
+	maison.rotation.y = atan2(-facade.z, facade.x)
 	add_child(maison)
 	var prefixe := "Wall_UnevenBrick_" if briques else "Wall_Plaster_"
 	var murs_pleins := ["Wall_UnevenBrick_Straight"] if briques else ["Wall_Plaster_Straight", "Wall_Plaster_WoodGrid"]
 	var demi_l := largeur / 2.0
 	var demi_p := profondeur / 2.0
-	var porte := _rng.randi_range(0, largeur / 2 - 1)
+	var porte := _rng.randi_range(0, profondeur / 2 - 1)
 	for etage in etages:
 		var h := etage * 3.0
 		# Les quatre côtés : [nombre de pans, position du pan, rotation].
@@ -131,9 +128,9 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 					3: pos = Vector3(-demi_l, h, long); angle = -PI / 2.0
 				var modele: String = murs_pleins[_rng.randi_range(0, murs_pleins.size() - 1)]
 				var fenetre := false
-				if cote == 0 and etage == 0 and i == porte:
+				if cote == 1 and etage == 0 and i == porte:
 					modele = prefixe + "Door_Flat"
-				elif cote != 2 and _rng.randf() < 0.55:
+				elif (cote == 1 and _rng.randf() < 0.8) or (cote % 2 == 0 and _rng.randf() < 0.5):
 					modele = prefixe + "Window_Wide_Flat"
 					fenetre = true
 				var mur := Modeles.creer(modele)
@@ -163,28 +160,30 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 		maison.add_child(pignon)
 	if nom == "Auberge" or nom == "Forge":
 		var cheminee := Modeles.creer("Prop_Chimney")
-		cheminee.position = Vector3(demi_l - 0.9, haut + 0.4, -demi_p + 1.2)
+		cheminee.position = Vector3(-demi_l + 0.9, haut + 0.4, demi_p - 1.2)
 		maison.add_child(cheminee)
 	# Une lanterne au-dessus de la porte de l'auberge.
 	if nom == "Auberge":
 		var lanterne := Modeles.creer("Lantern_Wall")
-		lanterne.position = Vector3(-demi_l + 1.0 + porte * 2.0 + 1.0, 2.6, demi_p + 0.1)
+		lanterne.position = Vector3(demi_l + 0.1, 2.6, demi_p - 1.0 - porte * 2.0 + 1.3)
+		lanterne.rotation.y = PI / 2.0
 		maison.add_child(lanterne)
 		var lumiere := OmniLight3D.new()
 		lumiere.light_color = COULEUR_FENETRE
 		lumiere.light_energy = 1.0
 		lumiere.omni_range = 6.0
-		lumiere.position = lanterne.position + Vector3(0, -0.2, 0.6)
+		lumiere.position = lanterne.position + Vector3(0.6, -0.2, 0)
 		maison.add_child(lumiere)
 	# Un peu de lierre, des tonneaux ou des caisses contre les murs (au hasard).
 	if _rng.randf() < 0.6:
 		var lierre := Modeles.creer(["Prop_Vine1", "Prop_Vine4"][_rng.randi_range(0, 1)], Modeles.OBJETS, Color(0.42, 0.5, 0.52))
-		lierre.position = Vector3(_rng.randf_range(-demi_l + 0.8, demi_l - 0.8), haut - 0.2, -demi_p - 0.2)
+		lierre.position = Vector3(-demi_l - 0.2, haut - 0.2, _rng.randf_range(-demi_p + 0.8, demi_p - 0.8))
+		lierre.rotation.y = -PI / 2.0
 		maison.add_child(lierre)
 	for k in _rng.randi_range(1, 3):
 		var objet := Modeles.creer(["Barrel", "Crate_Wooden", "Prop_Crate"][_rng.randi_range(0, 2)])
 		var cote := -1.0 if _rng.randf() < 0.5 else 1.0
-		objet.position = Vector3(cote * (demi_l + 0.5), 0, _rng.randf_range(-demi_p + 0.8, demi_p - 0.8))
+		objet.position = Vector3(_rng.randf_range(-demi_l + 0.6, demi_l - 0.6), 0, cote * (demi_p + 0.5))
 		objet.rotation.y = _rng.randf_range(0.0, TAU)
 		maison.add_child(objet)
 	# On ne traverse pas les murs.
@@ -231,7 +230,7 @@ func _fenetre_allumee(maison: Node3D, pos: Vector3, angle: float) -> void:
 
 func _creer_forge(x: float, y: float) -> void:
 	var devant := Chemin.bruneval(x, y)
-	var vers_place := (Chemin.bruneval(1.0, 0.5) - devant).normalized()
+	var vers_place := (Chemin.VILLAGE - devant).normalized()
 	var cote := Vector3(-vers_place.z, 0, vers_place.x)
 	var enclume := Modeles.creer("Anvil")
 	enclume.position = devant + vers_place * 4.3 + cote * 1.4
@@ -324,73 +323,6 @@ func _creer_etal(x: float, y: float) -> void:
 		objet.position = pos + Basis(Vector3.UP, etal.rotation.y) * o[1]
 		objet.rotation.y = _rng.randf_range(0.0, TAU)
 		add_child(objet)
-
-
-## Un tas de bûches à côté de la forge.
-func _creer_tas_de_bois(x: float, y: float) -> void:
-	var pos := Chemin.bruneval(x, y)
-	var ecorce := StandardMaterial3D.new()
-	ecorce.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
-	ecorce.albedo_color = Color(0.5, 0.42, 0.38)
-	ecorce.roughness = 1.0
-	var sens := Vector3(1, 0, 0).rotated(Vector3.UP, _rng.randf_range(0.0, PI))
-	var cote := sens.cross(Vector3.UP)
-	var rangees := [[0.0, 4], [0.24, 3], [0.46, 2]]
-	for r in rangees:
-		for i in r[1]:
-			var decal: float = (i - (r[1] - 1) / 2.0) * 0.25
-			var centre: Vector3 = pos + cote * decal + Vector3(0, 0.12 + r[0], 0) + sens * _rng.randf_range(-0.1, 0.1)
-			add_child(_poutre(centre - sens * 0.6, centre + sens * 0.6, 0.11, ecorce))
-	_obstacle_rond(pos, 0.7)
-
-
-## Un petit potager clôturé avec des rangs de légumes.
-func _creer_potager(x: float, y: float) -> void:
-	var centre := Chemin.bruneval(x, y)
-	var angle := _rng.randf_range(-0.3, 0.3)
-	var tourne := Basis(Vector3.UP, atan2(Chemin.HAUT_ECRAN.x, Chemin.HAUT_ECRAN.z) + angle)
-	var terre := MeshInstance3D.new()
-	var plan := BoxMesh.new()
-	plan.size = Vector3(4.6, 0.04, 3.0)
-	terre.mesh = plan
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color("241c15")
-	mat.roughness = 1.0
-	terre.material_override = mat
-	terre.basis = tourne
-	terre.position = centre + Vector3(0, 0.02, 0)
-	add_child(terre)
-	for rang in 4:
-		for k in 6:
-			var pousse := Modeles.creer("Grass_Common_Short", Modeles.NATURE, Color(0.4, 0.55, 0.38))
-			pousse.position = centre + tourne * Vector3(-1.9 + k * 0.75, 0.04, -1.1 + rang * 0.72)
-			pousse.scale = Vector3.ONE * _rng.randf_range(0.35, 0.5)
-			add_child(pousse)
-	for i in 3:
-		var barriere := Modeles.creer("Prop_WoodenFence_Single")
-		barriere.basis = tourne
-		barriere.position = centre + tourne * Vector3(-1.6 + i * 1.6, 0, -1.7)
-		add_child(barriere)
-	var caisse := Modeles.creer("FarmCrate_Carrot")
-	caisse.position = centre + tourne * Vector3(2.8, 0, 0.6)
-	add_child(caisse)
-	var forme := BoxShape3D.new()
-	forme.size = Vector3(4.6, 1.0, 3.2)
-	_obstacle(forme, Transform3D(tourne, centre + Vector3(0, 0.5, 0)))
-
-
-func _creer_charrette(x: float, y: float) -> void:
-	var pos := Chemin.bruneval(x, y)
-	var charrette := Modeles.creer("Prop_Wagon")
-	charrette.position = pos
-	charrette.rotation.y = _rng.randf_range(0.0, TAU)
-	add_child(charrette)
-	var forme := BoxShape3D.new()
-	forme.size = Vector3(1.8, 1.6, 4.0)
-	_obstacle(forme, Transform3D(Basis(Vector3.UP, charrette.rotation.y), pos + charrette.basis * Vector3(0, 0.8, -1.15)))
-	var tonneau := Modeles.creer("Barrel_Apples")
-	tonneau.position = pos + charrette.basis * Vector3(1.4, 0, 0.6)
-	add_child(tonneau)
 
 
 # --- Outils -------------------------------------------------------------------------

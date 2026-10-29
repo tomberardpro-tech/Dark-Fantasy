@@ -13,8 +13,8 @@ const TRACE := [
 	Vector3(3.99, 0, 3.78), Vector3(7.99, 0, 7.57), Vector3(13.07, 0, 12.38), Vector3(25.98, 0, 19.11), Vector3(30.61, 0, 33.13),
 	Vector3(37.98, 0, 44.25), Vector3(47.99, 0, 48.22), Vector3(59.46, 0, 53.57), Vector3(65.42, 0, 64.73),
 	Vector3(78.29, 0, 70.04), Vector3(85.67, 0, 81.16), Vector3(92.93, 0, 88.04),
-	# Dans le hameau : le chemin serpente jusqu'à la place.
-	Vector3(98.41, 0, 94.61), Vector3(104.49, 0, 96.92), Vector3(106.36, 0, 100.76),
+	# Dans le hameau : le chemin va tout droit jusqu'à la place.
+	Vector3(99.1, 0, 93.88), Vector3(104.18, 0, 98.7),
 ]
 ## Le ruisseau, qui traverse l'écran de gauche à droite et croise le sentier au pont.
 const RUISSEAU := [
@@ -36,7 +36,7 @@ const ABRI := Vector3(73.6, 0, 79.36)
 const ROTATION_ABRI := -2.33
 ## L'entrée de Bruneval (deux torches), et le centre de sa place (le feu).
 const ENTREE := Vector3(92.93, 0, 88.04)
-const VILLAGE := Vector3(107.03, 0, 102.09)
+const VILLAGE := Vector3(107.81, 0, 102.14)
 ## Le hameau est dessiné « comme à l'écran » (voir la maquette) : x vers la droite de
 ## l'écran, y vers le haut, en mètres, à partir de ce point.
 const ORIGINE_BRUNEVAL := Vector3(107.81, 0, 102.14)
@@ -153,17 +153,15 @@ func bruneval(x: float, y: float) -> Vector3:
 	return ORIGINE_BRUNEVAL + DROITE_ECRAN * x + HAUT_ECRAN * y
 
 
-## Le bord de la clairière de Bruneval, irrégulier (comme sur la maquette), à l'angle « t ».
+## Le bord de la clairière de Bruneval : un ovale (comme sur la maquette choisie par Tom),
+## à l'angle « t », éventuellement repoussé de « marge » mètres.
 func bord_bruneval(t: float, marge := 0.0) -> Vector3:
-	var r := 1.0 + 0.18 * sin(t * 3.0 + 1.0) + 0.1 * sin(t * 7.0)
-	return bruneval((25.0 * r + marge) * sin(t) + 1.5, 1.0 - (19.0 * r + marge) * cos(t))
+	return bruneval((27.0 + marge) * sin(t), 1.3 - (21.0 + marge) * cos(t))
 
 
 ## Vrai si ce point est dans la clairière de Bruneval (avec une marge en mètres).
 func dans_bruneval(p: Vector3, marge := 0.0) -> bool:
 	var local := p - ORIGINE_BRUNEVAL
-	var x := local.dot(DROITE_ECRAN) - 1.5
-	var y := local.dot(HAUT_ECRAN) - 1.0
-	var t := atan2(x / 25.0, -y / 19.0)
-	var r := 1.0 + 0.18 * sin(t * 3.0 + 1.0) + 0.1 * sin(t * 7.0)
-	return Vector2(x / (25.0 * r + marge), y / (19.0 * r + marge)).length() < 1.0
+	var x := local.dot(DROITE_ECRAN)
+	var y := local.dot(HAUT_ECRAN) - 1.3
+	return Vector2(x / (27.0 + marge), y / (21.0 + marge)).length() < 1.0

@@ -209,16 +209,15 @@ Couleurs : noir, gris et rouge sang.
   approche, en laissant un trou.
 - Le chemin part juste derrière le coffre, étroit et en dégradé sur 4 m.
 - Arbres tordus au feuillage rouge retirés ; trous de la forêt comblés jusqu'aux limites.
-- **Bruneval construit** (étape 9, d'après la maquette « naturelle » validée par Tom ; pas de
-  palissade, la forêt l'entoure) : `scripts/bruneval.gd`, positions données « comme à
-  l'écran » via `Chemin.bruneval(x, y)`. Clairière au bord irrégulier, le chemin serpente
-  jusqu'à la place (terre boueuse, flaques, feu de camp, banc du vieux Hugo), puits fabriqué
-  (margelle de pierre, poteaux, seau, corde). Maisons tournées vers la place avec un petit écart :
-  **auberge** à étage (lanterne, cheminée) au fond à gauche, **forge** en briques (cheminée,
-  foyer rougeoyant, enclume, râtelier d'armes, tas de bois) à gauche, **médecin** à droite, un
-  **abri** près du chemin et un **abri du fond** entre les arbres. Fenêtres éclairées (parfois
-  volets ouverts), lierre, tonneaux et caisses au hasard. **Étal d'Osric** au bord du chemin,
-  **potager** clôturé, **charrette**, rochers. Bosquets, ceinture de sapins serrée et quelques
-  arbres isolés dans le hameau ; limite invisible le long du bord. Le nom « Bruneval » apparaît
-  en entrant dans la clairière.
-- **Préférence de Tom : tout doit être naturel** (pas de symétrie, ni de cercle parfait).
+- **Bruneval construit** (étape 9) d'après la **deuxième maquette, choisie par Tom** (il a
+  préféré cette disposition plus régulière à la version « naturelle ») : `scripts/bruneval.gd`,
+  positions « comme à l'écran » via `Chemin.bruneval(x, y)`. Clairière ovale entourée d'une
+  ceinture de sapins (pas de palissade), chemin droit jusqu'à la place ovale de terre boueuse
+  (flaques, feu de camp, banc du vieux Hugo), puits fabriqué. Maisons en arc, **façades
+  éclairées tournées vers la caméra**, légèrement tournées vers la place (réglage
+  « vers_place » par maison — Tom veut revoir les rotations ensuite) : **auberge** à étage au
+  fond (lanterne, cheminée), **forge** en briques à gauche (cheminée, foyer rougeoyant,
+  enclume, râtelier), **médecin** à droite, deux **abris** devant, **étal d'Osric** près de la
+  place. Limite invisible le long de la clairière. « Bruneval » apparaît en y entrant.
+- **Préférence de Tom : du naturel** (pas de cercle parfait, variété), mais pour Bruneval il a
+  choisi la disposition plus régulière de la deuxième maquette : toujours montrer une maquette.
