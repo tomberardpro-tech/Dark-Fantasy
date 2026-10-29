@@ -60,10 +60,11 @@ const ETATS := {
 const ANIM_DEGAINER := "ual2/OverhandThrow"
 const MAIN_DANS_LE_DOS := 0.25
 ## Position de l'épée dans la main, mesurée sur l'animation « Sword_Idle » :
-## la lame sort du côté du pouce et la poignée est au creux de la main.
+## la lame sort du côté du pouce, dans l'axe des jointures, et la poignée est serrée au
+## creux du poing (3,5 cm côté paume : avant, elle passait au ras des jointures).
 const EPEE_DANS_LA_MAIN := Transform3D(
 	Vector3(-0.996105, -0.086398, 0.017613), Vector3(-0.005154, 0.256456, 0.966542),
-	Vector3(-0.088024, 0.962687, -0.255902), Vector3(-0.0092, 0.10505, -0.005))
+	Vector3(-0.088024, 0.962687, -0.255902), Vector3(-0.035, 0.112, -0.005))
 ## Le combo : pour chaque coup, son animation, sa durée, le moment où il touche,
 ## ses dégâts, puis son retour en garde (et la durée de ce retour).
 const COUPS := [
@@ -96,7 +97,15 @@ const BOND_MIXAMO := {"anim": "mixamo/attack", "debut": 0.3, "longueur": 1.9, "v
 const ELAN_COUP := 1.6
 const ELAN_BOND := 3.0
 ## Sans épée : un coup de poing.
-const COUP_DE_POING := {"anim": "Punch_Jab", "duree": 0.6, "touche": 0.25, "degats": 4.0, "retour": "", "duree_retour": 0.0}
+## Trois coups de poing qui s'enchaînent en recliquant : direct du gauche, direct du
+## droit, puis un crochet qui repousse. « touche » = quand la main va le plus vite (mesuré).
+const POINGS := [
+	{"anim": "Punch_Jab", "duree": 0.34, "touche": 0.2, "degats": 4.0, "retour": "", "duree_retour": 0.35, "portee": 1.6, "recul": 3.0},
+	{"anim": "Punch_Cross", "duree": 0.4, "touche": 0.24, "degats": 5.0, "retour": "", "duree_retour": 0.4, "portee": 1.6, "recul": 3.5},
+	{"anim": "ual2/Melee_Hook", "duree": 0.47, "touche": 0.28, "degats": 8.0, "retour": "ual2/Melee_Hook_Rec", "duree_retour": 0.6, "portee": 1.7, "recul": 7.0},
+]
+## Quand un coup touche, le temps ralentit un très court instant : le coup a du poids.
+const ARRET_SUR_IMAGE := 0.06
 
 var est_assis := false
 ## L'objet sur lequel il est assis (un tronc près d'un feu), ou rien.
@@ -246,7 +255,7 @@ func _physics_process(delta: float) -> void:
 			var elan := 0.0
 			if _en_bond:
 				elan = ELAN_BOND
-			elif _action == "attaque" and _phase == "coup" and not _a_touche and not _bond.is_empty():
+			elif _action == "attaque" and _phase == "coup" and not _a_touche:
 				elan = ELAN_COUP
 			var devant := -_visuel.global_basis.z
 			velocity.x += devant.x * elan
@@ -438,16 +447,17 @@ func _commencer_attaque() -> void:
 		_epee_dos.visible = false
 		_epee_main.visible = true
 		epee_sortie = true
-	if epee_sortie:
-		_lancer_coup(0)
-	else:
-		_coup_actuel = COUP_DE_POING
-		_lancer(_coup_actuel)
+	_lancer_coup(0)
+
+
+## Les coups qui s'enchaînent : à l'épée si elle est sortie, sinon aux poings.
+func _serie() -> Array:
+	return _coups if epee_sortie else POINGS
 
 
 func _lancer_coup(numero: int) -> void:
 	_coup = numero
-	_lancer(_coups[numero])
+	_lancer(_serie()[numero])
 
 
 func _lancer(coup: Dictionary) -> void:
@@ -469,10 +479,10 @@ func _avancer_action(delta: float) -> void:
 	if _phase == "coup":
 		if not _a_touche and _temps_action >= _coup_actuel["touche"]:
 			_a_touche = true
-			_toucher_les_ennemis(_coup_actuel["degats"])
+			_toucher_les_ennemis(_coup_actuel["degats"], _coup_actuel.get("portee", portee_epee), _coup_actuel.get("recul", 5.0))
 		if _temps_action >= _coup_actuel["duree"]:
 			var suivant := _coup + 1
-			if epee_sortie and _clic_en_attente and suivant < _coups.size() and _coup_actuel != COUP_DE_POING:
+			if _clic_en_attente and suivant < _serie().size():
 				_lancer_coup(suivant)
 			elif _coup_actuel["duree_retour"] > 0.0:
 				_phase = "retour"
@@ -484,7 +494,7 @@ func _avancer_action(delta: float) -> void:
 				_fin_attaque()
 	elif _phase == "retour":
 		# Un clic pendant le retour en garde enchaîne tout de suite le coup suivant.
-		if _clic_en_attente and _coup + 1 < _coups.size():
+		if _clic_en_attente and _coup + 1 < _serie().size():
 			_lancer_coup(_coup + 1)
 		elif _temps_action >= _coup_actuel["duree_retour"]:
 			_fin_attaque()
@@ -498,15 +508,26 @@ func _fin_attaque() -> void:
 
 
 ## Les ennemis devant le héros, à portée, prennent le coup.
-func _toucher_les_ennemis(degats: float) -> void:
+func _toucher_les_ennemis(degats: float, portee: float, recul: float) -> void:
 	var devant := -_visuel.global_basis.z
+	var touche := false
 	for ennemi in get_tree().get_nodes_in_group("ennemi"):
 		if not ennemi.est_vivant():
 			continue
 		var vers: Vector3 = ennemi.global_position - global_position
 		vers.y = 0.0
-		if vers.length() < portee_epee and (vers.length() < 0.8 or devant.dot(vers.normalized()) > 0.3):
-			ennemi.prendre_coup(degats, global_position)
+		if vers.length() < portee and (vers.length() < 0.8 or devant.dot(vers.normalized()) > 0.3):
+			ennemi.prendre_coup(degats, global_position, recul)
+			touche = true
+	if touche:
+		_arret_sur_image()
+
+
+## Le jeu tourne au ralenti un instant (le minuteur, lui, compte en temps réel).
+func _arret_sur_image() -> void:
+	Engine.time_scale = 0.15
+	await get_tree().create_timer(ARRET_SUR_IMAGE, true, false, true).timeout
+	Engine.time_scale = 1.0
 
 
 ## Un ennemi nous frappe.

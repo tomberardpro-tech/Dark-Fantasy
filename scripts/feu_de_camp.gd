@@ -1,6 +1,7 @@
 extends Node3D
-## Feu de camp, animé comme sur la maquette : un cercle de galets, des bûches,
-## trois flammes qui vacillent et tournent, des braises qui montent en tourbillonnant,
+## Feu de camp, animé comme sur la maquette : un cercle de galets, des bûches d'écorce
+## noircie sur un lit de braises qui rougeoient,
+## trois flammes dessinées qui ondulent (shaders/flamme.gdshader), des braises qui montent en tourbillonnant,
 ## et une lumière orange qui tremble.
 ## Le vent (voir vent.gd) couche les flammes et emporte les braises.
 
@@ -73,7 +74,12 @@ func _creer_pierres() -> void:
 
 
 func _creer_buches() -> void:
-	var mat := _materiau(Color("4a3b31"))
+	# L'écorce des arbres du pack, noircie par le feu.
+	var mat := _materiau(Color(0.32, 0.27, 0.25))
+	mat.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
+	mat.normal_enabled = true
+	mat.normal_texture = load("res://assets/nature/Bark_NormalTree_Normal.png")
+	mat.uv1_scale = Vector3(1.0, 2.0, 1.0)
 	for i in 4:
 		var forme := CylinderMesh.new()
 		forme.top_radius = 0.09
@@ -93,21 +99,37 @@ func _creer_flammes() -> void:
 	_support_flammes = Node3D.new()
 	_support_flammes.position.y = 0.2
 	add_child(_support_flammes)
-	# [couleur, largeur, hauteur] : de la grande flamme orange au cœur jaune pâle.
-	for f in [[Color("d07a35"), 0.42, 1.2], [Color("f0ad55"), 0.3, 0.95], [Color("ffe0a0"), 0.16, 0.65]]:
-		var forme := CylinderMesh.new()
-		forme.top_radius = 0.0
-		forme.bottom_radius = f[1]
-		forme.height = f[2]
-		forme.radial_segments = 6
+	# Des flammes dessinées (shaders/flamme.gdshader), toujours face à la caméra :
+	# [largeur, hauteur, décalage dans le temps, intensité], de la grande à la petite.
+	for f in [[1.0, 1.45, 0.0, 1.0], [0.75, 1.1, 3.7, 0.8], [0.45, 0.75, 7.3, 0.9]]:
+		var forme := QuadMesh.new()
+		forme.size = Vector2(f[0], f[1])
+		var mat := ShaderMaterial.new()
+		mat.shader = load("res://shaders/flamme.gdshader")
+		mat.set_shader_parameter("decalage", f[2])
+		mat.set_shader_parameter("intensite", f[3])
 		var flamme := MeshInstance3D.new()
 		flamme.mesh = forme
-		flamme.material_override = _materiau_brillant(f[0])
+		flamme.material_override = mat
 		flamme.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		flamme.set_meta("hauteur", f[2])
-		flamme.position.y = f[2] / 2.0
+		flamme.set_meta("hauteur", f[1])
+		flamme.position.y = f[1] / 2.0
 		_support_flammes.add_child(flamme)
 		_flammes.append(flamme)
+	# Le lit de braises sous les bûches (shaders/braises.gdshader).
+	var lit := MeshInstance3D.new()
+	var disque := CylinderMesh.new()
+	disque.top_radius = 0.55
+	disque.bottom_radius = 0.55
+	disque.height = 0.02
+	disque.radial_segments = 20
+	lit.mesh = disque
+	var mat_lit := ShaderMaterial.new()
+	mat_lit.shader = load("res://shaders/braises.gdshader")
+	lit.material_override = mat_lit
+	lit.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	lit.position.y = 0.03
+	add_child(lit)
 
 
 ## Des braises qui montent jusqu'à 3,5 m en tourbillonnant, puis renaissent en bas.

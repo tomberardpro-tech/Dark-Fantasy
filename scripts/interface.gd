@@ -11,6 +11,13 @@ var _barre_vie: ProgressBar
 func _ready() -> void:
 	_creer_barre_de_vie()
 
+	# L'indicateur de destination en haut de l'écran (voir objectif.gd).
+	var objectif := Control.new()
+	objectif.set_script(load("res://scripts/objectif.gd"))
+	add_child(objectif)
+	objectif.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
+	objectif.offset_bottom = 80.0
+
 	_annonce = Label.new()
 	_annonce.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_annonce.add_theme_font_size_override("font_size", 26)
@@ -21,8 +28,8 @@ func _ready() -> void:
 	_annonce.set_anchors_and_offsets_preset(Control.PRESET_CENTER_TOP)
 	_annonce.offset_left = -250.0
 	_annonce.offset_right = 250.0
-	_annonce.offset_top = 40.0
-	_annonce.offset_bottom = 80.0
+	_annonce.offset_top = 86.0
+	_annonce.offset_bottom = 126.0
 	_annonce.hide()
 
 	_message = Label.new()
@@ -53,7 +60,7 @@ func _creer_barre_de_vie() -> void:
 	fond.set_border_width_all(1)
 	fond.set_corner_radius_all(3)
 	var plein := StyleBoxFlat.new()
-	plein.bg_color = Color("b0303a")
+	plein.bg_color = Color("4f8a3c")
 	plein.set_corner_radius_all(3)
 	_barre_vie.add_theme_stylebox_override("background", fond)
 	_barre_vie.add_theme_stylebox_override("fill", plein)

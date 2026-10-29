@@ -172,8 +172,19 @@ Couleurs : noir, gris et rouge sang.
   d'os. Si le héros meurt, il se
   réveille assis au dernier feu de camp avec toute sa vie, et les squelettes se rendorment.
 - La ruine est remplacée par une **cabane à moitié effondrée** (pièces du Medieval Village MegaKit).
-- Le tronc pour s'asseoir est un **vrai rondin** (écorce, cernes aux bouts, moignons de branches).
+- Le tronc pour s'asseoir est un **rondin simple** (choix de Tom) : bien rond, net, plus court, écorce et cernes aux bouts.
 - **Cheveux longs noirs** qui bougent avec les mouvements et le vent.
-- **Musique** douce dans la clairière : « Lament for a Warrior's Soul » (RandomMind, CC0), qui
-  s'éteint en s'éloignant du feu.
+- **Musique** douce : « Lament for a Warrior's Soul » (RandomMind, CC0), partout au même volume,
+  en boucle sans trou.
 - **Carte refaite (maquette validée par Tom)** : le chemin part juste derrière le coffre et monte presque tout droit vers le haut de l'écran jusqu'à Bruneval (environ 130 m). Dans l'ordre : cabane à gauche, ruisseau qui traverse l'écran de gauche à droite avec le pont, squelettes, autel à droite, charrette à gauche, Bruneval. La clairière n'a pas bougé ; la forêt du chemin a été replantée puis figée. Le ruisseau a une vraie matière (courant, reflets, mousse aux berges).
+- **Coffre** : il tremble, le couvercle se soulève lentement, une lueur dorée et une poussière
+  brillante s'en échappent, puis l'épée s'élève en tournant avant de rejoindre le dos du héros.
+- **Poings** (sans épée) : trois coups qui s'enchaînent en recliquant (direct gauche, direct
+  droit, crochet qui repousse). Tout coup qui touche fait un très court ralenti (impact).
+- **Feu** : flammes dessinées qui ondulent (cœur jaune, pointes rouges), lit de braises qui
+  rougeoient, bûches en écorce noircie.
+- **Barre de vie verte.** **Indicateur sobre en haut de l'écran** : « Bruneval » entre deux
+  traits ornés, avec un petit chevron vers le village ; il s'efface à l'arrivée.
+- Terre : **légère texture** de mottes et de grain, mate (essai, réglage `texture_terre` dans
+  `shaders/sol.gdshader`, 0 = sol lisse comme avant).
+- L'épée est serrée au creux du poing (avant, elle passait au ras des jointures).

@@ -12,6 +12,8 @@ uniform float fin_de_la_terre = 4.0;
 uniform float fin_de_la_clairiere = 9.0;
 // Force des variations « peintes » du sol (0 = sol uni).
 uniform float variations = 0.15;
+// Texture de la terre (essai demandé par Tom) : mottes et grain, mats. 0 = sol lisse.
+uniform float texture_terre = 0.5;
 
 varying vec3 position_monde;
 
@@ -57,6 +59,11 @@ void fragment() {
 	// Seulement de grandes taches très douces, comme sur l'image de référence.
 	float grandes = nuages(p * 0.08);
 	couleur *= 1.0 - variations * 0.5 + grandes * variations;
+	// Des mottes de terre (environ 70 cm) et un grain plus fin (environ 25 cm), sans relief
+	// ni brillance : seulement des nuances de couleur.
+	float mottes = nuages(p * 1.4 + vec2(31.0, 7.0));
+	float grain = bruit(p * 4.0 + vec2(3.0, 19.0));
+	couleur *= 1.0 + ((mottes - 0.5) * 0.3 + (grain - 0.5) * 0.14) * texture_terre;
 	ALBEDO = couleur;
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.1;

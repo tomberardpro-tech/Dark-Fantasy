@@ -48,7 +48,7 @@ func interagir(joueur: Node3D) -> void:
 		interface.notifier("Partie sauvegardée")
 
 
-## Un vrai rondin à la place du cylindre : un peu bosselé et irrégulier, plus épais d'un
+## Un rondin simple et net (choix de Tom) : bien rond, à peine irrégulier, un peu plus épais d'un
 ## côté, habillé de l'écorce des arbres morts du pack nature, avec les bouts coupés qui
 ## montrent les cernes du bois.
 func _habiller_d_ecorce() -> void:
@@ -70,16 +70,16 @@ func _habiller_d_ecorce() -> void:
 ## Fabrique le rondin : un tube bosselé (l'écorce) fermé par deux bouts plats (le bois coupé).
 ## Son axe est le Y du maillage (le nœud « Apparence » le couche à l'horizontale).
 func _maillage_rondin(ecorce: Material, bois_coupe: Material) -> ArrayMesh:
-	const LONGUEUR := 2.6
-	const TOURS := 18
+	const LONGUEUR := 1.9
+	const TOURS := 24
 	const ANNEAUX := 14
 	var bruit := FastNoiseLite.new()
 	bruit.seed = 5
 	bruit.frequency = 0.9
 	var rayon := func(angle: float, t: float) -> float:
-		var base := lerpf(0.235, 0.205, t)
+		var base := lerpf(0.23, 0.215, t)
 		var p := Vector2(cos(angle), sin(angle)) * 1.5
-		return base * (1.0 + bruit.get_noise_3d(p.x, p.y, t * 4.0) * 0.12)
+		return base * (1.0 + bruit.get_noise_3d(p.x, p.y, t * 4.0) * 0.025)
 	var outil := SurfaceTool.new()
 	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
 	for a in ANNEAUX + 1:
@@ -87,7 +87,7 @@ func _maillage_rondin(ecorce: Material, bois_coupe: Material) -> ArrayMesh:
 		for k in TOURS + 1:
 			var angle := TAU * k / TOURS
 			var r: float = rayon.call(angle, t)
-			outil.set_uv(Vector2(float(k) / TOURS * 2.0, t * 3.0))
+			outil.set_uv(Vector2(float(k) / TOURS * 2.0, t * 2.2))
 			outil.add_vertex(Vector3(cos(angle) * r, (t - 0.5) * LONGUEUR, sin(angle) * r))
 	for a in ANNEAUX:
 		for k in TOURS:

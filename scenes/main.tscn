@@ -55,7 +55,7 @@ albedo_color = Color(0.29, 0.231, 0.192, 1)
 roughness = 1.0
 
 [sub_resource type="BoxShape3D" id="Shape_tronc"]
-size = Vector3(2.6, 0.46, 0.46)
+size = Vector3(1.9, 0.46, 0.46)
 
 [sub_resource type="CapsuleShape3D" id="Shape_joueur"]
 radius = 0.35
