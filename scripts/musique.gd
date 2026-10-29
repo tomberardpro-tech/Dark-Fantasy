@@ -18,6 +18,8 @@ var _longueur := 0.0
 
 
 func _ready() -> void:
+	# La musique continue pendant la lecture d'une lettre (jeu en pause).
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	var flux := load(FICHIER) as AudioStreamMP3
 	if flux == null:
 		return

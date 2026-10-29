@@ -9,11 +9,15 @@ extends Node3D
 @export var ecart_lanternes := 14.0
 ## Longueur sur laquelle le sentier apparaît doucement en sortant de la clairière.
 @export var fondu_depart := 7.0
+## Les limites invisibles du parcours, de chaque côté du chemin (en mètres).
+@export var distance_bordure := 12.0
 
 const COULEUR_TERRE := Color("3a2f29")
 const COULEUR_TERRE_MOUILLEE := Color("1f1813")
 const COULEUR_LANTERNE := Color("f0ad55")
 const COULEUR_MAUDITE := Color("b0303a")
+## Rayon du cercle invisible autour de la clairière.
+const RAYON_CLAIRIERE := 16.0
 const GALETS := ["Pebble_Round_1", "Pebble_Round_2", "Pebble_Round_3", "Pebble_Round_4", "Pebble_Round_5"]
 const TEINTE_PIERRE := Color(0.55, 0.58, 0.68)
 const TEINTE_HERBE := Color(0.42, 0.5, 0.52)
@@ -33,7 +37,7 @@ func _ready() -> void:
 	_creer_berges()
 	_creer_cailloux()
 	_creer_racines()
-	_bloquer_le_ruisseau()
+	_creer_bordures()
 	_creer_pont()
 	_creer_lanternes()
 	_creer_ruine()
@@ -44,6 +48,9 @@ func _ready() -> void:
 	charrette.position = Chemin.CHARRETTE
 	charrette.rotation.y = Chemin.ROTATION_CHARRETTE
 	add_child(charrette)
+	var abri := Node3D.new()
+	abri.set_script(load("res://scripts/abri_ecrivain.gd"))
+	add_child(abri)
 
 
 ## La lueur rouge de l'autel palpite lentement : la malédiction n'est pas loin.
@@ -279,38 +286,137 @@ func _creer_berges() -> void:
 				add_child(herbe)
 
 
-## On ne peut pas traverser le ruisseau à pied : il faut passer par le pont.
-func _bloquer_le_ruisseau() -> void:
-	var points := Chemin.courbe_ruisseau.get_baked_points()
-	for i in range(0, points.size() - 1, 2):
-		if points[i].distance_to(Chemin.PONT) < 3.2:
-			continue
-		var direction := (points[min(i + 2, points.size() - 1)] - points[i]).normalized()
-		var bloc := BoxShape3D.new()
-		bloc.size = Vector3(2.4, 2.0, 2.4)
-		_ajouter_obstacle(bloc, Transform3D(Basis.looking_at(direction), points[i] + Vector3(0, 1, 0)))
+## Un parcours linéaire (demande de Tom) : des murs invisibles, cachés dans la forêt, à
+## « distance_bordure » de chaque côté du chemin, et un cercle autour de la clairière
+## ouvert seulement là où part le chemin. On peut marcher dans le ruisseau.
+func _creer_bordures() -> void:
+	var courbe := Chemin.courbe_chemin
+	var longueur := courbe.get_baked_length()
+	for cote in [-1.0, 1.0]:
+		var avant := Vector3.INF
+		var d := 0.0
+		while d <= longueur:
+			var p := courbe.sample_baked(d)
+			var tangente := (courbe.sample_baked(min(d + 1.0, longueur)) - courbe.sample_baked(max(d - 1.0, 0.0))).normalized()
+			var bord: Vector3 = p + Vector3(-tangente.z, 0, tangente.x) * cote * distance_bordure
+			if Vector2(bord.x, bord.z).length() > RAYON_CLAIRIERE - 1.0:
+				if avant != Vector3.INF:
+					_mur_invisible(avant, bord)
+				avant = bord
+			d += 3.0
+	var morceaux := 48
+	for i in morceaux:
+		var a := Vector3.RIGHT.rotated(Vector3.UP, TAU * i / morceaux) * RAYON_CLAIRIERE
+		var b := Vector3.RIGHT.rotated(Vector3.UP, TAU * (i + 1) / morceaux) * RAYON_CLAIRIERE
+		if Chemin.distance_au_chemin((a + b) / 2.0) > distance_bordure - 1.0:
+			_mur_invisible(a, b)
 
 
-## Un pont de planches avec des barrières en bois de chaque côté.
+func _mur_invisible(a: Vector3, b: Vector3) -> void:
+	var milieu := (a + b) / 2.0 + Vector3(0, 1.5, 0)
+	var direction := b - a
+	direction.y = 0.0
+	if direction.length() < 0.01:
+		return
+	var forme := BoxShape3D.new()
+	forme.size = Vector3(0.4, 3.0, direction.length() + 0.6)
+	_ajouter_obstacle(forme, Transform3D(Basis.looking_at(direction.normalized()), milieu))
+
+
+## Un vieux pont de bois fait main, légèrement bombé : deux troncs posés sur des pierres
+## de chaque berge, des planches clouées une à une (largeurs inégales, un peu de
+## travers, quelques-unes manquantes), et une rambarde de rondins sur des poteaux.
+## On marche dessus (des pentes invisibles suivent la bosse).
 func _creer_pont() -> void:
+	const LONGUEUR := 7.0
+	const LARGEUR := 1.9
+	const BOSSE := 0.3
 	var direction: Vector3 = Chemin.direction_pont
 	var cote := Vector3(-direction.z, 0, direction.x)
-	var angle := atan2(-direction.z, direction.x)
-	for i in 3:
-		var plancher := Modeles.creer("Floor_WoodDark")
-		plancher.position = Chemin.PONT + direction * (i - 1) * 2.0 + Vector3(0, 0.1, 0)
-		plancher.rotation.y = angle
-		plancher.scale = Vector3(1.0, 1.0, 1.25)
-		add_child(plancher)
+	var repere := Basis(cote, Vector3.UP, -direction)
+	var hauteur := func(t: float) -> float: return 0.04 + sin(t * PI) * BOSSE
+	var ecorce := StandardMaterial3D.new()
+	ecorce.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
+	ecorce.normal_enabled = true
+	ecorce.normal_texture = load("res://assets/nature/Bark_NormalTree_Normal.png")
+	ecorce.albedo_color = Color(0.42, 0.38, 0.38)
+	ecorce.roughness = 1.0
+	var planche_mat := _bois.duplicate() as Material
+	# Les deux troncs porteurs, sous les planches, qui suivent la bosse (en trois tronçons).
+	for s in [-0.6, 0.6]:
+		for k in 3:
+			var t0 := k / 3.0
+			var t1 := (k + 1) / 3.0
+			var a: Vector3 = Chemin.PONT + direction * (t0 - 0.5) * (LONGUEUR + 0.6) + cote * s + Vector3.UP * (hauteur.call(t0) - 0.16)
+			var b: Vector3 = Chemin.PONT + direction * (t1 - 0.5) * (LONGUEUR + 0.6) + cote * s + Vector3.UP * (hauteur.call(t1) - 0.16)
+			add_child(_rondin(a, b, 0.13, ecorce))
+	# Les planches.
+	var t := 0.0
+	var i := 0
+	while t < 1.0:
+		var epaisseur := _rng.randf_range(0.2, 0.3)
+		var milieu := t + epaisseur / LONGUEUR / 2.0
+		i += 1
+		# Une planche manque de temps en temps (jamais aux deux bouts).
+		if not (i % 7 == 4 and milieu > 0.15 and milieu < 0.85):
+			var planche := MeshInstance3D.new()
+			var boite := BoxMesh.new()
+			boite.size = Vector3(LARGEUR * _rng.randf_range(0.92, 1.05), 0.05, epaisseur - 0.025)
+			planche.mesh = boite
+			planche.material_override = planche_mat
+			var pente := atan(cos(milieu * PI) * PI * BOSSE / LONGUEUR)
+			planche.basis = repere * Basis(Vector3.UP, _rng.randf_range(-0.05, 0.05)) * Basis(Vector3.RIGHT, pente)
+			planche.position = Chemin.PONT + direction * (milieu - 0.5) * LONGUEUR + cote * _rng.randf_range(-0.05, 0.05) + Vector3.UP * hauteur.call(milieu)
+			add_child(planche)
+		t += epaisseur / LONGUEUR
+	# Le sol du pont pour marcher : des pentes invisibles qui suivent le dessus des
+	# planches, plus une petite rampe depuis le sol à chaque bout (pas de marche).
+	var dessus := func(t: float) -> Vector3:
+		var h: float = 0.0 if t < 0.0 or t > 1.0 else hauteur.call(t) + 0.025
+		return Chemin.PONT + direction * (t - 0.5) * LONGUEUR + Vector3.UP * h
+	var etapes := [-0.08, 0.0, 1.0 / 6.0, 2.0 / 6.0, 0.5, 4.0 / 6.0, 5.0 / 6.0, 1.0, 1.08]
+	for k in etapes.size() - 1:
+		var a: Vector3 = dessus.call(etapes[k])
+		var b: Vector3 = dessus.call(etapes[k + 1])
+		var forme := BoxShape3D.new()
+		forme.size = Vector3(LARGEUR, 0.1, a.distance_to(b) + 0.05)
+		_ajouter_obstacle(forme, Transform3D(Basis.looking_at((b - a).normalized()), (a + b) / 2.0 - Vector3(0, 0.05, 0)))
+	# Les poteaux (aux deux bouts et au milieu) et la rambarde en rondins, de chaque côté.
 	for s in [-1.0, 1.0]:
-		for i in 3:
-			var barriere := Modeles.creer("Prop_WoodenFence_Single")
-			barriere.position = Chemin.PONT + direction * (i - 1) * 2.0 + cote * s * 1.3 + Vector3(0, 0.1, 0)
-			barriere.rotation.y = angle
-			add_child(barriere)
-		var garde := BoxShape3D.new()
-		garde.size = Vector3(0.2, 2.0, 6.2)
-		_ajouter_obstacle(garde, Transform3D(Basis.looking_at(direction), Chemin.PONT + cote * s * 1.35 + Vector3(0, 1, 0)))
+		var hauts := []
+		for k in 3:
+			var tp := k / 2.0
+			var pied: Vector3 = Chemin.PONT + direction * (tp - 0.5) * (LONGUEUR - 0.3) + cote * s * (LARGEUR / 2.0 + 0.08)
+			var haut: Vector3 = pied + Vector3.UP * (hauteur.call(tp) + 0.95)
+			add_child(_rondin(pied - Vector3.UP * 0.2, haut, 0.07, ecorce))
+			hauts.append(haut - Vector3.UP * 0.08)
+		for k in 2:
+			add_child(_rondin(hauts[k], hauts[k + 1], 0.045, ecorce))
+	# Des pierres sous les bouts des troncs, à moitié dans la berge.
+	for bout in [-1.0, 1.0]:
+		for s in [-0.7, 0.7]:
+			var pierre := Modeles.creer("Rock_Medium_" + str(_rng.randi_range(1, 3)), Modeles.NATURE, TEINTE_PIERRE)
+			pierre.position = Chemin.PONT + direction * bout * (LONGUEUR / 2.0 + 0.1) + cote * s - Vector3.UP * 0.1
+			pierre.rotation.y = _rng.randf_range(0.0, TAU)
+			pierre.scale = Vector3.ONE * _rng.randf_range(0.18, 0.24)
+			add_child(pierre)
+
+
+## Un rondin (cylindre d'écorce) tendu entre deux points.
+func _rondin(a: Vector3, b: Vector3, rayon: float, mat: Material) -> MeshInstance3D:
+	var forme := CylinderMesh.new()
+	forme.top_radius = rayon
+	forme.bottom_radius = rayon * 1.1
+	forme.height = a.distance_to(b)
+	forme.radial_segments = 8
+	var rondin := MeshInstance3D.new()
+	rondin.mesh = forme
+	rondin.material_override = mat
+	var axe := (b - a).normalized()
+	var x := axe.cross(Vector3.FORWARD if absf(axe.dot(Vector3.FORWARD)) < 0.9 else Vector3.RIGHT).normalized()
+	rondin.basis = Basis(x, axe, x.cross(axe))
+	rondin.position = (a + b) / 2.0
+	return rondin
 
 
 func _creer_lanternes() -> void:
@@ -337,7 +443,7 @@ func _place_pour_lanterne(pos: Vector3) -> bool:
 	if pos.distance_to(Chemin.PONT) < 6.0 or Chemin.distance_au_ruisseau(pos) < 3.5:
 		return false
 	return pos.distance_to(Chemin.RUINE) > 7.0 and pos.distance_to(Chemin.AUTEL) > 4.0 \
-		and pos.distance_to(Chemin.CHARRETTE) > 5.0
+		and pos.distance_to(Chemin.CHARRETTE) > 5.0 and pos.distance_to(Chemin.ABRI) > 5.0
 
 
 ## Un poteau de bois avec une lanterne suspendue au-dessus du bord du sentier.

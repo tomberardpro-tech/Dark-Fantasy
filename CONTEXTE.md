@@ -188,3 +188,13 @@ Couleurs : noir, gris et rouge sang.
 - Terre : **légère texture** de mottes et de grain, mate (essai, réglage `texture_terre` dans
   `shaders/sol.gdshader`, 0 = sol lisse comme avant).
 - L'épée est serrée au creux du poing (avant, elle passait au ras des jointures).
+- **Cabane de l'écrivain** juste avant Bruneval (à droite du chemin, ouverte vers la caméra,
+  moitié du toit tombée) : table d'écrivain, chaise, bougie, livres, parchemin, et une
+  **lettre de Maren** sous un faisceau de lumière dorée. E : la lettre s'affiche en grand sur
+  un parchemin (jeu en pause, E pour refermer) ; le faisceau s'éteint une fois lue. Système
+  réutilisable pour tous les objets d'information (`scripts/lettre.gd`). Texte modifiable dans
+  `scripts/abri_ecrivain.gd`.
+- **Parcours linéaire** : forêt resserrée de chaque côté du chemin, limites invisibles à 12 m
+  du chemin et autour de la clairière (ouverte seulement vers le chemin).
+- **On peut marcher dans le ruisseau.** **Nouveau pont** fait main : troncs sur des pierres,
+  planches inégales légèrement bombées (quelques-unes manquent), rambarde en rondins.

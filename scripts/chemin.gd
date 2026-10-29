@@ -28,6 +28,10 @@ const ROTATION_RUINE := -0.51
 const AUTEL := Vector3(58.54, 0, 71.99)
 const CHARRETTE := Vector3(88.96, 0, 71.88)
 const ROTATION_CHARRETTE := 1.6
+## La petite cabane de l'écrivain, à droite du chemin juste avant le village ; son fond
+## est vers le haut de l'écran et elle est ouverte vers la caméra.
+const ABRI := Vector3(73.6, 0, 79.36)
+const ROTATION_ABRI := -2.33
 ## Le centre du hameau de Bruneval (construit à l'étape 9).
 const VILLAGE := Vector3(103.1, 0, 97.67)
 

@@ -158,7 +158,7 @@ func _est_libre(pos: Vector3, rayon: float, sur_le_bord := false) -> bool:
 		return false
 	if pos.distance_to(Chemin.RUINE) < 6.5 or pos.distance_to(Chemin.AUTEL) < 3.5:
 		return false
-	if pos.distance_to(Chemin.CHARRETTE) < 4.5 or pos.distance_to(Chemin.PONT) < 5.0:
+	if pos.distance_to(Chemin.CHARRETTE) < 4.5 or pos.distance_to(Chemin.PONT) < 5.0 or pos.distance_to(Chemin.ABRI) < 5.0:
 		return false
 	if Vector2(pos.x, pos.z).length() < 3.2:
 		return false
