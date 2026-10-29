@@ -33,12 +33,51 @@ var _points_chemin: PackedVector3Array
 var _points_ruisseau: PackedVector3Array
 
 
+## Le sentier serpente de part et d'autre du tracé (en mètres), comme un vrai chemin
+## qui contourne les arbres ; mais il reste droit au départ, au pont, près des lieux et
+## à l'arrivée.
+const SERPENTE := 1.8
+## Demi-largeur moyenne du sentier (en mètres) ; elle varie le long du chemin.
+const DEMI_LARGEUR := 0.9
+
+
 func _init() -> void:
-	courbe_chemin = _courbe_douce(TRACE)
 	courbe_ruisseau = _courbe_douce(RUISSEAU)
-	_points_chemin = courbe_chemin.get_baked_points()
 	_points_ruisseau = courbe_ruisseau.get_baked_points()
+	courbe_chemin = _serpenter(_courbe_douce(TRACE))
+	_points_chemin = courbe_chemin.get_baked_points()
 	_placer_le_pont()
+
+
+## La demi-largeur du sentier à cette distance du départ : il s'élargit et se resserre,
+## usé par les passages (entre 0,65 et 1,15 m).
+func demi_largeur(parcouru: float) -> float:
+	return DEMI_LARGEUR * (1.0 + sin(parcouru * 0.21 + 1.0) * 0.16 + sin(parcouru * 0.57) * 0.1)
+
+
+## Décale le tracé de côté, en douces ondulations (deux vagues de longueurs différentes,
+## pour que ce ne soit pas régulier).
+func _serpenter(base: Curve3D) -> Curve3D:
+	var longueur := base.get_baked_length()
+	var points := []
+	var s := 0.0
+	while s < longueur:
+		points.append(_point_serpente(base, s, longueur))
+		s += 3.0
+	points.append(_point_serpente(base, longueur, longueur))
+	return _courbe_douce(points)
+
+
+func _point_serpente(base: Curve3D, s: float, longueur: float) -> Vector3:
+	var p := base.sample_baked(s)
+	var tangente := (base.sample_baked(min(s + 1.0, longueur)) - base.sample_baked(max(s - 1.0, 0.0))).normalized()
+	var cote := Vector3(-tangente.z, 0.0, tangente.x)
+	var force := smoothstep(8.0, 20.0, s) * smoothstep(0.0, 12.0, longueur - s)
+	force *= smoothstep(8.0, 18.0, distance_au_ruisseau(p))
+	for lieu in [RUINE, AUTEL, CHARRETTE]:
+		force *= smoothstep(6.0, 12.0, p.distance_to(lieu))
+	var vague := sin(s * TAU / 31.0 + 0.7) * 0.65 + sin(s * TAU / 13.0 + 2.1) * 0.35
+	return p + cote * vague * SERPENTE * force
 
 
 func _placer_le_pont() -> void:

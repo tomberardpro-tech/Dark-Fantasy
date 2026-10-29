@@ -31,6 +31,8 @@ func _ready() -> void:
 	add_child(_berges_mouillees())
 	add_child(_eau())
 	_creer_berges()
+	_creer_cailloux()
+	_creer_racines()
 	_bloquer_le_ruisseau()
 	_creer_pont()
 	_creer_lanternes()
@@ -49,14 +51,140 @@ func _process(delta: float) -> void:
 	_lumiere_autel.light_energy = 1.2 + sin(_temps * 1.3) * 0.35
 
 
+## Le sentier de terre battue (son aspect est dans shaders/chemin.gdshader). Le ruban
+## déborde largement du sentier : c'est le shader qui dessine les bords irréguliers.
 func _sentier() -> MeshInstance3D:
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://shaders/chemin.gdshader")
+	var points := Chemin.courbe_chemin.get_baked_points()
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	# Positions en travers, en demi-largeurs : le bord est vers ±1, on va jusqu'à ±1,9.
+	var travers := [-1.9, -1.2, -0.6, 0.0, 0.6, 1.2, 1.9]
+	var parcouru := 0.0
+	for i in points.size():
+		if i > 0:
+			parcouru += points[i].distance_to(points[i - 1])
+		var tangente := (points[min(i + 1, points.size() - 1)] - points[max(i - 1, 0)]).normalized()
+		var cote := Vector3(-tangente.z, 0.0, tangente.x)
+		var demi := Chemin.demi_largeur(parcouru)
+		var humidite := 1.0 - smoothstep(3.0, 9.0, Chemin.distance_au_ruisseau(points[i]))
+		var apparition := smoothstep(0.0, fondu_depart, parcouru)
+		for u in travers:
+			outil.set_color(Color(humidite, 0, 0, apparition))
+			outil.set_normal(Vector3.UP)
+			outil.set_uv(Vector2(u, parcouru))
+			outil.add_vertex(points[i] + cote * u * demi + Vector3(0, 0.03, 0))
+	var n := travers.size()
+	for i in points.size() - 1:
+		for k in n - 1:
+			var a := i * n + k
+			var b := a + n
+			outil.add_index(a)
+			outil.add_index(a + 1)
+			outil.add_index(b)
+			outil.add_index(a + 1)
+			outil.add_index(b + 1)
+			outil.add_index(b)
+	var bande := MeshInstance3D.new()
+	bande.mesh = outil.commit()
+	bande.material_override = mat
+	bande.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	return bande
+
+
+## Quelques cailloux à moitié enfoncés au bord du sentier, de loin en loin (discret).
+func _creer_cailloux() -> void:
+	var courbe := Chemin.courbe_chemin
+	var longueur := courbe.get_baked_length()
+	var distance := 10.0
+	while distance < longueur - 4.0:
+		var p := courbe.sample_baked(distance)
+		var tangente := (courbe.sample_baked(min(distance + 1.0, longueur)) - p).normalized()
+		var cote := Vector3(-tangente.z, 0, tangente.x) * (1.0 if _rng.randf() < 0.5 else -1.0)
+		var demi := Chemin.demi_largeur(distance)
+		if _rng.randf() < 0.45 and p.distance_to(Chemin.PONT) > 5.0:
+			var galet := Modeles.creer(GALETS[_rng.randi_range(0, 4)], Modeles.NATURE, TEINTE_PIERRE)
+			galet.position = p + cote * demi * _rng.randf_range(0.85, 1.25) - Vector3(0, 0.03, 0)
+			galet.rotation.y = _rng.randf_range(0.0, TAU)
+			galet.scale = Vector3(1.0, 0.7, 1.0) * _rng.randf_range(0.9, 1.6)
+			add_child(galet)
+			# Parfois un petit rocher un peu plus loin du bord.
+			if _rng.randf() < 0.3:
+				var rocher := Modeles.creer("Rock_Medium_" + str(_rng.randi_range(1, 3)), Modeles.NATURE, TEINTE_PIERRE)
+				rocher.position = p + cote * (demi * 1.5 + _rng.randf_range(0.3, 0.7)) - Vector3(0, 0.08, 0)
+				rocher.rotation.y = _rng.randf_range(0.0, TAU)
+				rocher.scale = Vector3.ONE * _rng.randf_range(0.13, 0.2)
+				add_child(rocher)
+		distance += _rng.randf_range(7.0, 12.0)
+
+
+## Les racines des arbres proches du sentier, qui rampent vers lui et s'enfoncent dans la
+## terre. On lit la place des arbres dans la disposition figée de la forêt.
+func _creer_racines() -> void:
+	var liste: Variant = JSON.parse_string(FileAccess.get_file_as_string("res://donnees/foret.json"))
+	if not liste is Array:
+		return
 	var mat := StandardMaterial3D.new()
-	mat.vertex_color_use_as_albedo = true
-	mat.albedo_color = COULEUR_TERRE
-	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color("2b221c")
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.roughness = 1.0
-	return _ruban(Chemin.courbe_chemin, 0.9, 1.7, 0.03, mat, fondu_depart)
+	for e in liste:
+		if e.has("obstacle") or not (e["modele"].begins_with("Pine") or e["modele"].begins_with("DeadTree") or e["modele"].begins_with("TwistedTree")):
+			continue
+		var tronc := Vector3(e["x"], 0.0, e["z"])
+		var d := Chemin.distance_au_chemin(tronc)
+		if d < 1.8 or d > 4.0 or _rng.randf() > 0.4:
+			continue
+		var vers := _vers_le_chemin(tronc)
+		for k in _rng.randi_range(1, 2):
+			var direction := vers.rotated(Vector3.UP, _rng.randf_range(-0.6, 0.6))
+			var longueur := clampf(d - 1.0, 0.8, 2.2) * _rng.randf_range(0.7, 1.0)
+			add_child(_racine(tronc + direction * 0.18, direction, longueur, mat))
+
+
+## La direction (au sol) d'un point vers le milieu du sentier le plus proche.
+func _vers_le_chemin(p: Vector3) -> Vector3:
+	var courbe := Chemin.courbe_chemin
+	var proche := courbe.sample_baked(courbe.get_closest_offset(p))
+	var vers := proche - p
+	vers.y = 0.0
+	return vers.normalized()
+
+
+## Une racine : un tube qui s'amincit, sort du pied de l'arbre, se bombe un peu au-dessus
+## du sol puis s'y enfonce.
+func _racine(depart: Vector3, direction: Vector3, longueur: float, mat: Material) -> MeshInstance3D:
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var cote := Vector3(-direction.z, 0, direction.x)
+	var tranches := 7
+	var faces := 5
+	var ondule := _rng.randf_range(-0.25, 0.25)
+	for i in tranches + 1:
+		var t := float(i) / tranches
+		var centre := depart + direction * longueur * t + cote * sin(t * PI) * ondule
+		centre.y = 0.13 * (1.0 - t) + sin(t * PI) * 0.05 - t * t * 0.08
+		var rayon := lerpf(0.085, 0.02, t)
+		for f in faces:
+			var a := TAU * f / faces
+			var normale := (cote * cos(a) + Vector3.UP * sin(a)).normalized()
+			outil.set_normal(normale)
+			outil.add_vertex(centre + normale * rayon)
+	for i in tranches:
+		for f in faces:
+			var a := i * faces + f
+			var b := i * faces + (f + 1) % faces
+			outil.add_index(a)
+			outil.add_index(b)
+			outil.add_index(a + faces)
+			outil.add_index(b)
+			outil.add_index(b + faces)
+			outil.add_index(a + faces)
+	var racine := MeshInstance3D.new()
+	racine.mesh = outil.commit()
+	racine.material_override = mat
+	return racine
 
 
 ## Une bande de terre brune plus sombre et humide de chaque côté de l'eau : la rivière

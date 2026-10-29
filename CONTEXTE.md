@@ -66,7 +66,7 @@ Rien d'autre autour du feu. Ce feu sert de point de sauvegarde.
 
 ### Le chemin dans la forêt
 
-Un sentier de terre plat qui serpente entre les arbres, bordé de lanternes. Le long du chemin :
+Un sentier de terre battue plat qui serpente entre les arbres (virages doux, largeur qui varie, bords irréguliers mangés par la forêt, boue dans les creux et près du ruisseau, quelques flaques mates, cailloux et racines discrets ; aspect dans `shaders/chemin.gdshader`), bordé de lanternes. Le long du chemin :
 - une **ruine** couverte de mousse (décor) ;
 - un **ruisseau** à l'eau sombre et calme qui reflète la lune, avec un petit **pont de bois** ;
 - un **autel abandonné** avec une lueur rouge, premier signe de la malédiction (décor) ;
