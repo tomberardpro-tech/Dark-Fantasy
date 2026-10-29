@@ -8,7 +8,7 @@ extends Node3D
 ## Écart entre deux lanternes (en mètres).
 @export var ecart_lanternes := 14.0
 ## Longueur sur laquelle le sentier apparaît doucement en sortant de la clairière.
-@export var fondu_depart := 7.0
+@export var fondu_depart := 4.0
 ## Les limites invisibles du parcours, de chaque côté du chemin (en mètres).
 @export var distance_bordure := 12.0
 
@@ -34,6 +34,9 @@ func _ready() -> void:
 	add_child(_sentier())
 	add_child(_berges_mouillees())
 	add_child(_eau())
+	_bruit_de_l_eau()
+	# Le vent dans les arbres, partout, très doux.
+	Sons.boucle_partout("vent", -24.0)
 	_creer_berges()
 	_creer_cailloux()
 	_creer_racines()
@@ -75,7 +78,8 @@ func _sentier() -> MeshInstance3D:
 			parcouru += points[i].distance_to(points[i - 1])
 		var tangente := (points[min(i + 1, points.size() - 1)] - points[max(i - 1, 0)]).normalized()
 		var cote := Vector3(-tangente.z, 0.0, tangente.x)
-		var demi := Chemin.demi_largeur(parcouru)
+		# Au départ, le sentier est plus étroit et apparaît en dégradé.
+		var demi := Chemin.demi_largeur(parcouru) * lerpf(0.55, 1.0, smoothstep(0.0, fondu_depart * 1.5, parcouru))
 		var humidite := 1.0 - smoothstep(3.0, 9.0, Chemin.distance_au_ruisseau(points[i]))
 		var apparition := smoothstep(0.0, fondu_depart, parcouru)
 		for u in travers:
@@ -213,6 +217,20 @@ func _eau() -> MeshInstance3D:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/eau.gdshader")
 	return _ruban(Chemin.courbe_ruisseau, 1.3, 1.8, 0.04, mat, 0.0)
+
+
+## Le bruit du ruisseau : des sources sonores tous les 16 m le long de l'eau ; on
+## l'entend de plus en plus fort en s'approchant.
+func _bruit_de_l_eau() -> void:
+	var courbe := Chemin.courbe_ruisseau
+	var longueur := courbe.get_baked_length()
+	var d := 8.0
+	while d < longueur:
+		var source := Node3D.new()
+		source.position = courbe.sample_baked(d) + Vector3(0, 0.3, 0)
+		add_child(source)
+		Sons.boucle("eau", source, -9.0, 10.0)
+		d += 16.0
 
 
 ## Une bande au sol qui suit une courbe, avec des bords qui s'estompent.

@@ -97,6 +97,30 @@ func notifier(texte: String) -> void:
 	_fondu.tween_callback(_annonce.hide)
 
 
+## On découvre un lieu : son nom apparaît en grand au milieu de l'écran, entre deux
+## traits, puis s'efface lentement.
+func annoncer_lieu(nom: String) -> void:
+	var titre := Label.new()
+	titre.text = nom
+	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titre.add_theme_font_size_override("font_size", 46)
+	titre.add_theme_color_override("font_color", Color("d8cdb4"))
+	titre.add_theme_color_override("font_outline_color", Color("07091a"))
+	titre.add_theme_constant_override("outline_size", 10)
+	add_child(titre)
+	titre.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	titre.offset_left = -300.0
+	titre.offset_right = 300.0
+	titre.offset_top = -170.0
+	titre.offset_bottom = -110.0
+	titre.modulate.a = 0.0
+	var anim := create_tween()
+	anim.tween_property(titre, "modulate:a", 1.0, 1.4).set_ease(Tween.EASE_OUT)
+	anim.tween_interval(2.6)
+	anim.tween_property(titre, "modulate:a", 0.0, 2.0)
+	anim.tween_callback(titre.queue_free)
+
+
 ## Affiche une lettre en grand, sur une feuille de parchemin, le jeu en pause.
 ## E ou Échap pour la refermer.
 func lire_lettre(titre: String, texte: String, signature: String) -> void:
@@ -122,6 +146,7 @@ func _process(_delta: float) -> void:
 		return
 	if Input.is_action_just_pressed("interagir") or Input.is_action_just_pressed("ui_cancel"):
 		_lettre.hide()
+		Sons.jouer("papier_ferme")
 		get_tree().set_deferred("paused", false)
 
 

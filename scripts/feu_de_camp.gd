@@ -1,7 +1,7 @@
 extends Node3D
 ## Feu de camp, animé comme sur la maquette : un cercle de galets, des bûches d'écorce
 ## noircie sur un lit de braises qui rougeoient,
-## trois flammes dessinées qui ondulent (shaders/flamme.gdshader), des braises qui montent en tourbillonnant,
+## des flammes en particules (jaunes au cœur, rouges en montant), une fumée sombre, des braises qui montent en tourbillonnant,
 ## et une lumière orange qui tremble.
 ## Le vent (voir vent.gd) couche les flammes et emporte les braises.
 
@@ -17,7 +17,7 @@ extends Node3D
 
 const GALETS := ["Pebble_Round_1", "Pebble_Round_2", "Pebble_Round_3", "Pebble_Round_4", "Pebble_Round_5"]
 
-var _flammes: Array[MeshInstance3D] = []
+var _flammes: Array[CPUParticles3D] = []
 var _support_flammes: Node3D
 var _lumiere: OmniLight3D
 var _braises: MultiMesh
@@ -31,6 +31,8 @@ func _ready() -> void:
 	_creer_flammes()
 	_creer_braises()
 	_creer_obstacle()
+	# Le crépitement du feu, qu'on entend en s'approchant.
+	Sons.boucle("feu", self, -6.0, 12.0)
 	_lumiere = OmniLight3D.new()
 	_lumiere.light_color = Color("e0823a")
 	_lumiere.light_energy = puissance
@@ -47,15 +49,10 @@ func _process(delta: float) -> void:
 	# Plusieurs vagues mélangées pour un vacillement qui ne semble pas répétitif.
 	var v := 0.85 + sin(_temps * 13.0) * 0.08 + sin(_temps * 7.3) * 0.07 + sin(_temps * 23.0) * 0.04
 	_lumiere.light_energy = puissance * v
-	# Les flammes se couchent dans le sens du vent.
-	_support_flammes.rotation = Vector3(vent.z * 0.3, 0.0, -vent.x * 0.3)
+	# Le vent emporte les flammes et la fumée (la fumée, plus légère, beaucoup plus).
 	for i in _flammes.size():
-		var flamme := _flammes[i]
-		var k := v + sin(_temps * (9.0 + i * 4.0)) * 0.08
-		var hauteur: float = flamme.get_meta("hauteur")
-		flamme.scale = Vector3(1.0, k, 1.0)
-		flamme.position.y = hauteur * k / 2.0
-		flamme.rotation.y = _temps * (0.8 + i)
+		var force := 2.5 if i == _flammes.size() - 1 else 0.8
+		_flammes[i].gravity = Vector3(vent.x * force, _flammes[i].gravity.y, vent.z * force)
 	_animer_braises(delta)
 
 
@@ -95,27 +92,100 @@ func _creer_buches() -> void:
 
 
 func _creer_flammes() -> void:
-	# Les flammes sont posées sur un support qu'on incline avec le vent.
+	# Des particules (comme dans la plupart des jeux) : chaque langue de feu naît à la base,
+	# monte en tremblant, passe du jaune au rouge en rétrécissant, et s'éteint.
 	_support_flammes = Node3D.new()
-	_support_flammes.position.y = 0.2
+	_support_flammes.position.y = 0.15
 	add_child(_support_flammes)
-	# Des flammes dessinées (shaders/flamme.gdshader), toujours face à la caméra :
-	# [largeur, hauteur, décalage dans le temps, intensité], de la grande à la petite.
-	for f in [[1.0, 1.45, 0.0, 1.0], [0.75, 1.1, 3.7, 0.8], [0.45, 0.75, 7.3, 0.9]]:
-		var forme := QuadMesh.new()
-		forme.size = Vector2(f[0], f[1])
-		var mat := ShaderMaterial.new()
-		mat.shader = load("res://shaders/flamme.gdshader")
-		mat.set_shader_parameter("decalage", f[2])
-		mat.set_shader_parameter("intensite", f[3])
-		var flamme := MeshInstance3D.new()
-		flamme.mesh = forme
-		flamme.material_override = mat
-		flamme.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-		flamme.set_meta("hauteur", f[1])
-		flamme.position.y = f[1] / 2.0
-		_support_flammes.add_child(flamme)
-		_flammes.append(flamme)
+	var tache := _tache_douce()
+	# [nombre, durée de vie, taille, vitesse, couleurs (du début à la fin)]
+	var couches := [
+		[46, 0.8, 0.5, 1.1, [Color(1.0, 0.85, 0.5, 0.9), Color(1.0, 0.55, 0.18, 0.8), Color(0.75, 0.18, 0.05, 0.5), Color(0.25, 0.05, 0.02, 0.0)]],
+		[22, 0.45, 0.32, 0.8, [Color(1.0, 0.97, 0.8, 1.0), Color(1.0, 0.8, 0.4, 0.8), Color(1.0, 0.5, 0.15, 0.0)]],
+	]
+	for c in couches:
+		var feu := _particules(c[0], c[1], c[2], tache, c[4], true)
+		feu.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+		feu.emission_sphere_radius = 0.22
+		feu.direction = Vector3.UP
+		feu.spread = 14.0
+		feu.initial_velocity_min = c[3] * 0.7
+		feu.initial_velocity_max = c[3]
+		feu.gravity = Vector3(0, 1.2, 0)
+		feu.damping_min = 0.5
+		feu.damping_max = 1.0
+		feu.angle_min = -180.0
+		feu.angle_max = 180.0
+		var retrecit := Curve.new()
+		retrecit.add_point(Vector2(0.0, 0.7))
+		retrecit.add_point(Vector2(0.25, 1.0))
+		retrecit.add_point(Vector2(1.0, 0.1))
+		feu.scale_amount_curve = retrecit
+		_support_flammes.add_child(feu)
+		_flammes.append(feu)
+	# La fumée : sombre, légère, qui monte lentement en s'élargissant.
+	var fumee := _particules(14, 2.8, 0.7, tache, [Color(0.1, 0.09, 0.1, 0.0), Color(0.12, 0.11, 0.12, 0.28), Color(0.1, 0.1, 0.12, 0.0)], false)
+	fumee.position.y = 0.9
+	fumee.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	fumee.emission_sphere_radius = 0.15
+	fumee.direction = Vector3.UP
+	fumee.spread = 10.0
+	fumee.initial_velocity_min = 0.4
+	fumee.initial_velocity_max = 0.6
+	fumee.gravity = Vector3(0, 0.2, 0)
+	var grandit := Curve.new()
+	grandit.add_point(Vector2(0.0, 0.5))
+	grandit.add_point(Vector2(1.0, 1.6))
+	fumee.scale_amount_curve = grandit
+	_support_flammes.add_child(fumee)
+	_flammes.append(fumee)
+
+
+## Des particules en panneaux toujours face à la caméra, avec un dégradé de couleurs.
+## « lumineuses » : elles s'ajoutent à la lumière (le feu) au lieu de la cacher (la fumée).
+func _particules(nombre: int, vie: float, taille: float, tache: Texture2D, couleurs: Array, lumineuses: bool) -> CPUParticles3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.blend_mode = BaseMaterial3D.BLEND_MODE_ADD if lumineuses else BaseMaterial3D.BLEND_MODE_MIX
+	mat.vertex_color_use_as_albedo = true
+	mat.albedo_texture = tache
+	mat.disable_receive_shadows = true
+	var panneau := QuadMesh.new()
+	panneau.size = Vector2(taille, taille)
+	panneau.material = mat
+	var p := CPUParticles3D.new()
+	p.mesh = panneau
+	p.amount = nombre
+	p.lifetime = vie
+	p.randomness = 0.4
+	p.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	var degrade := Gradient.new()
+	var positions := PackedFloat32Array()
+	for i in couleurs.size():
+		positions.append(float(i) / (couleurs.size() - 1))
+	degrade.offsets = positions
+	degrade.colors = PackedColorArray(couleurs)
+	p.color_ramp = degrade
+	return p
+
+
+## Une tache ronde et douce (blanche au centre, transparente au bord).
+func _tache_douce() -> Texture2D:
+	var degrade := Gradient.new()
+	degrade.set_color(0, Color(1, 1, 1, 1))
+	degrade.set_color(1, Color(1, 1, 1, 0))
+	var texture := GradientTexture2D.new()
+	texture.gradient = degrade
+	texture.fill = GradientTexture2D.FILL_RADIAL
+	texture.fill_from = Vector2(0.5, 0.5)
+	texture.fill_to = Vector2(0.5, 0.0)
+	texture.width = 64
+	texture.height = 64
+	return texture
+
+
 	# Le lit de braises sous les bûches (shaders/braises.gdshader).
 	var lit := MeshInstance3D.new()
 	var disque := CylinderMesh.new()

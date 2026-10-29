@@ -181,10 +181,10 @@ Couleurs : noir, gris et rouge sang.
   brillante s'en échappent, puis l'épée s'élève en tournant avant de rejoindre le dos du héros.
 - **Poings** (sans épée) : trois coups qui s'enchaînent en recliquant (direct gauche, direct
   droit, crochet qui repousse). Tout coup qui touche fait un très court ralenti (impact).
-- **Feu** : flammes dessinées qui ondulent (cœur jaune, pointes rouges), lit de braises qui
+- **Feu** : flammes en particules (jaunes au cœur, rouges en montant), fumée sombre, lit de braises qui
   rougeoient, bûches en écorce noircie.
-- **Barre de vie verte.** **Indicateur sobre en haut de l'écran** : « Bruneval » entre deux
-  traits ornés, avec un petit chevron vers le village ; il s'efface à l'arrivée.
+- **Barre de vie verte.** **Repère sobre en haut de l'écran** (trait orné, losange, chevron vers la
+  destination), sans nom : en arrivant, « Bruneval » apparaît en grand puis s'efface.
 - Terre : **légère texture** de mottes et de grain, mate (essai, réglage `texture_terre` dans
   `shaders/sol.gdshader`, 0 = sol lisse comme avant).
 - L'épée est serrée au creux du poing (avant, elle passait au ras des jointures).
@@ -198,3 +198,14 @@ Couleurs : noir, gris et rouge sang.
   du chemin et autour de la clairière (ouverte seulement vers le chemin).
 - **On peut marcher dans le ruisseau.** **Nouveau pont** fait main : troncs sur des pierres,
   planches inégales légèrement bombées (quelques-unes manquent), rambarde en rondins.
+- **Bruitages** (autoload `Sons`, `scripts/sons.gd`) : packs Kenney « Impact Sounds » et « RPG
+  Audio » (CC0, `assets/sons`) + sons fabriqués dans le jeu (souffles d'épée, râle, éclaboussures,
+  tintement, boucles feu / ruisseau / vent). Variantes au hasard sans répétition, petites
+  variations de hauteur et de volume, écoute depuis le héros. **Mixage** : canaux Musique,
+  Bruitages (compresseur + légère réverbération de sous-bois) et Ambiance, limiteur général.
+  On entend : coups d'épée et de poing, saut et impact, dégainer/rengainer, pas (terre, bois du
+  pont, eau), coups reçus, squelettes (os, râle, effondrement), coffre, lettre, feu, eau, vent.
+- **Squelettes enterrés** : ils jaillissent de terre (gerbe de mottes, grondement) quand on
+  approche, en laissant un trou.
+- Le chemin part juste derrière le coffre, étroit et en dégradé sur 4 m.
+- Arbres tordus au feuillage rouge retirés ; trous de la forêt comblés jusqu'aux limites.

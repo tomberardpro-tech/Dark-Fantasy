@@ -47,8 +47,11 @@ func texte_interaction(_joueur: Node3D) -> String:
 ## s'élève en tournant avant de rejoindre le dos du héros.
 func interagir(joueur: Node3D) -> void:
 	ouvert = true
+	Sons.jouer("loquet", global_position, -6.0)
 	await _trembler()
 	_ouvrir_couvercle(false)
+	# Un grincement léger et grave : un vieux couvercle de bois.
+	Sons.jouer("grincement", global_position, -4.0, 0.85)
 	_allumer_lueur()
 	await get_tree().create_timer(0.45).timeout
 	await _elever_epee()
@@ -115,17 +118,27 @@ func _allumer_lueur() -> void:
 
 
 ## L'épée sort du coffre, monte en tournant lentement, puis s'efface.
+## L'épée, couchée à l'horizontale comme si on la présentait, s'élève lentement du
+## coffre en tournant doucement sur elle-même et en flottant un peu, puis s'efface.
 func _elever_epee() -> void:
+	var support := Node3D.new()
+	support.position = Vector3(0, 0.45, 0)
+	add_child(support)
 	var epee := Modeles.creer("Sword_Bronze", Modeles.OBJETS, Color(0.6, 0.6, 0.7))
-	epee.position = Vector3(0, 0.35, 0)
-	epee.scale = Vector3.ONE * 0.9
-	add_child(epee)
+	# Le modèle est debout (lame vers le haut) : on le couche, centré sur le support.
+	epee.basis = Basis(Vector3.BACK, PI / 2.0)
+	epee.position = Vector3(0.42, 0, 0)
+	support.add_child(epee)
+	Sons.jouer("tintement", global_position + Vector3.UP)
 	var anim := create_tween().set_parallel()
-	anim.tween_property(epee, "position:y", 1.55, 0.9).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	anim.tween_property(epee, "rotation:y", TAU, 1.2).set_trans(Tween.TRANS_SINE)
-	anim.chain().tween_property(epee, "scale", Vector3.ONE * 0.01, 0.25).set_ease(Tween.EASE_IN)
+	anim.tween_property(support, "position:y", 1.2, 1.3).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	anim.tween_property(support, "rotation:y", PI * 0.9, 2.2).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	# Un léger balancement, comme portée par la lueur.
+	anim.tween_property(support, "rotation:x", 0.08, 0.7).set_trans(Tween.TRANS_SINE)
+	anim.chain().tween_property(support, "rotation:x", -0.06, 0.8).set_trans(Tween.TRANS_SINE)
+	anim.chain().tween_property(support, "scale", Vector3.ONE * 0.01, 0.35).set_ease(Tween.EASE_IN)
 	await anim.finished
-	epee.queue_free()
+	support.queue_free()
 
 
 func _ouvrir_couvercle(tout_de_suite: bool) -> void:

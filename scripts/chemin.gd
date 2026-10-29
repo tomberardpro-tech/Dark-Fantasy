@@ -10,7 +10,7 @@ extends Node
 ## Repère : le haut de l'écran est la direction (0,73 ; 0 ; 0,69) du monde, la droite
 ## de l'écran (-0,69 ; 0 ; 0,73).
 const TRACE := [
-	Vector3(3.67, 0, 4.85), Vector3(13.07, 0, 12.38), Vector3(25.98, 0, 19.11), Vector3(30.61, 0, 33.13),
+	Vector3(3.99, 0, 3.78), Vector3(7.99, 0, 7.57), Vector3(13.07, 0, 12.38), Vector3(25.98, 0, 19.11), Vector3(30.61, 0, 33.13),
 	Vector3(37.98, 0, 44.25), Vector3(47.99, 0, 48.22), Vector3(59.46, 0, 53.57), Vector3(65.42, 0, 64.73),
 	Vector3(78.29, 0, 70.04), Vector3(85.67, 0, 81.16), Vector3(92.93, 0, 88.04),
 ]

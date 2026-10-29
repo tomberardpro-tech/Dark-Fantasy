@@ -42,6 +42,12 @@ var _squelette: Skeleton3D
 var _forme: CollisionShape3D
 var _mat_os: StandardMaterial3D
 var _morceaux: Array[Node3D] = []
+## Le temps avant le prochain cliquetis de pas.
+var _prochain_pas := 0.0
+## Enterré : de combien le corps est sous la terre, sa hauteur normale, et le trou laissé.
+const PROFONDEUR := 1.8
+var _hauteur_visuel := 0.0
+var _trou: Node3D
 
 
 func _ready() -> void:
@@ -49,12 +55,14 @@ func _ready() -> void:
 	_depart = global_transform
 	vie = vie_max
 	_construire()
+	_hauteur_visuel = _visuel.position.y
 	_dormir()
 
 
 func _physics_process(delta: float) -> void:
 	_temps_etat += delta
-	if not is_on_floor():
+	# Enterré, il ne bouge pas (et ne tombe pas : il n'a plus de corps solide).
+	if not is_on_floor() and etat != "dort":
 		velocity += get_gravity() * delta
 	var joueur := get_tree().get_first_node_in_group("joueur") as Node3D
 	var vers := Vector3.ZERO
@@ -68,6 +76,9 @@ func _physics_process(delta: float) -> void:
 				_changer("reveil")
 				_tourner(vers, 1.0, true)
 				_anim.play(SE_RELEVER, 0.0)
+				_sortir_de_terre()
+				Sons.serie("os_cliquetis", self, 7, 1.0)
+				Sons.jouer_apres(0.5, "rale", self)
 		"reveil":
 			if _temps_etat > _anim.get_animation(SE_RELEVER).length - 0.15:
 				_changer("poursuite")
@@ -82,6 +93,9 @@ func _physics_process(delta: float) -> void:
 				_a_frappe = false
 				_tourner(vers, 1.0, true)
 				_anim.play(ATTAQUE, 0.1)
+				Sons.jouer_apres(_anim.get_animation(ATTAQUE).length * MOMENT_DU_COUP - 0.15, "souffle_epee", self, 0.0, 0.8)
+				if randf() < 0.35:
+					Sons.jouer("rale", self, -3.0)
 			else:
 				_tourner(vers, delta)
 				_jouer("Sword_Idle")
@@ -103,7 +117,13 @@ func _physics_process(delta: float) -> void:
 	_recul = _recul.lerp(Vector3.ZERO, 1.0 - exp(-8.0 * delta))
 	if direction.length() > 0.01:
 		_tourner(direction, delta)
-	move_and_slide()
+		# Les os qui cliquettent à chaque foulée.
+		_prochain_pas -= delta
+		if _prochain_pas <= 0.0:
+			_prochain_pas = 0.3
+			Sons.jouer("os_cliquetis", self, -3.0)
+	if etat != "dort":
+		move_and_slide()
 
 
 func est_vivant() -> bool:
@@ -142,10 +162,67 @@ func reinitialiser() -> void:
 
 func _dormir() -> void:
 	_changer("dort")
-	# Allongé au sol : la première image de l'animation « allongé → debout ».
+	# Couché sous la terre : la première image de l'animation « allongé → debout ».
 	_anim.play(SE_RELEVER, 0.0)
 	_anim.seek(0.0, true)
 	_anim.pause()
+	# Enterré : on ne le voit pas, on ne le touche pas.
+	_visuel.position.y = _hauteur_visuel - PROFONDEUR
+	_forme.disabled = true
+	if is_instance_valid(_trou):
+		_trou.queue_free()
+
+
+## Il sort de terre : le corps remonte en se relevant, dans une gerbe de terre, avec un
+## grondement sourd ; un trou de terre retournée reste à sa place.
+func _sortir_de_terre() -> void:
+	_forme.disabled = false
+	var duree := _anim.get_animation(SE_RELEVER).length * 0.8
+	var anim := create_tween()
+	anim.tween_property(_visuel, "position:y", _hauteur_visuel, duree).set_trans(Tween.TRANS_QUART).set_ease(Tween.EASE_OUT)
+	Sons.jouer("impact_sol", global_position, -6.0, 0.6)
+	Sons.serie("pas_terre", global_position, 6, duree, 4.0)
+	# Le trou : un disque de terre sombre, un peu bombé.
+	var terre := StandardMaterial3D.new()
+	terre.albedo_color = Color("221a14")
+	terre.roughness = 1.0
+	var disque := CylinderMesh.new()
+	disque.top_radius = 0.55
+	disque.bottom_radius = 0.75
+	disque.height = 0.08
+	disque.radial_segments = 12
+	var trou := MeshInstance3D.new()
+	trou.mesh = disque
+	trou.material_override = terre
+	trou.top_level = true
+	add_child(trou)
+	trou.global_position = global_position + Vector3(0, 0.02, 0)
+	_trou = trou
+	# La gerbe de terre : des mottes qui jaillissent et retombent.
+	var motte := BoxMesh.new()
+	motte.size = Vector3.ONE * 0.07
+	motte.material = terre
+	var gerbe := CPUParticles3D.new()
+	gerbe.mesh = motte
+	gerbe.amount = 36
+	gerbe.lifetime = 1.2
+	gerbe.one_shot = true
+	gerbe.explosiveness = 0.75
+	gerbe.emission_shape = CPUParticles3D.EMISSION_SHAPE_SPHERE
+	gerbe.emission_sphere_radius = 0.35
+	gerbe.direction = Vector3.UP
+	gerbe.spread = 40.0
+	gerbe.initial_velocity_min = 2.0
+	gerbe.initial_velocity_max = 4.0
+	gerbe.angular_velocity_min = -300.0
+	gerbe.angular_velocity_max = 300.0
+	gerbe.scale_amount_min = 0.6
+	gerbe.scale_amount_max = 1.6
+	gerbe.top_level = true
+	gerbe.emitting = true
+	add_child(gerbe)
+	gerbe.global_position = global_position + Vector3(0, 0.1, 0)
+	get_tree().create_timer(2.0).timeout.connect(gerbe.queue_free)
 
 
 func _changer(nouvel_etat: String) -> void:
@@ -192,6 +269,10 @@ func _afficher_degats(montant: float) -> void:
 ## Plus de vie : chaque os se détache et tombe au sol, puis le tas disparaît.
 func _s_effondrer(direction: Vector3) -> void:
 	_changer("mort")
+	# Les os qui tombent et rebondissent sur le sol.
+	Sons.serie("os_choc", global_position, 6, 0.8)
+	Sons.serie("os_cliquetis", global_position, 9, 1.1)
+	Sons.jouer("chute", global_position, -4.0, 1.3)
 	_forme.disabled = true
 	for os in _visuel.find_children("*", "MeshInstance3D", true, false):
 		var piece := RigidBody3D.new()

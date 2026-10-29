@@ -29,6 +29,7 @@ func _ready() -> void:
 		var lecteur := AudioStreamPlayer.new()
 		lecteur.stream = flux
 		lecteur.volume_db = -80.0
+		lecteur.bus = "Musique"
 		add_child(lecteur)
 		_lecteurs.append(lecteur)
 	_lecteurs[0].play()

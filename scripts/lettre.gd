@@ -79,6 +79,7 @@ func interagir(_joueur: Node3D) -> void:
 	var interface := get_tree().get_first_node_in_group("interface")
 	if interface:
 		interface.lire_lettre(titre, texte, signature)
+		Sons.jouer("papier")
 	if not lue:
 		lue = true
 		# Une fois lue, le faisceau s'éteint doucement (la lettre reste lisible).

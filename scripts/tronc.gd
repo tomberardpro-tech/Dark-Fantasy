@@ -49,17 +49,17 @@ func interagir(joueur: Node3D) -> void:
 
 
 ## Un rondin simple et net (choix de Tom) : bien rond, à peine irrégulier, un peu plus épais d'un
-## côté, habillé de l'écorce des arbres morts du pack nature, avec les bouts coupés qui
+## côté, habillé de l'écorce brune des pins du pack nature, avec les bouts coupés qui
 ## montrent les cernes du bois.
 func _habiller_d_ecorce() -> void:
 	var apparence := get_node_or_null("Apparence") as MeshInstance3D
 	if apparence == null:
 		return
 	var ecorce := StandardMaterial3D.new()
-	ecorce.albedo_texture = load("res://assets/nature/Bark_DeadTree.png")
+	ecorce.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
 	ecorce.normal_enabled = true
-	ecorce.normal_texture = load("res://assets/nature/Bark_DeadTree_Normal.png")
-	ecorce.albedo_color = Color(0.55, 0.52, 0.55)
+	ecorce.normal_texture = load("res://assets/nature/Bark_NormalTree_Normal.png")
+	ecorce.albedo_color = Color(0.72, 0.58, 0.48)
 	ecorce.roughness = 1.0
 	var bois_coupe := ShaderMaterial.new()
 	bois_coupe.shader = load("res://shaders/bois_coupe.gdshader")
@@ -70,7 +70,7 @@ func _habiller_d_ecorce() -> void:
 ## Fabrique le rondin : un tube bosselé (l'écorce) fermé par deux bouts plats (le bois coupé).
 ## Son axe est le Y du maillage (le nœud « Apparence » le couche à l'horizontale).
 func _maillage_rondin(ecorce: Material, bois_coupe: Material) -> ArrayMesh:
-	const LONGUEUR := 1.9
+	const LONGUEUR := 1.6
 	const TOURS := 24
 	const ANNEAUX := 14
 	var bruit := FastNoiseLite.new()

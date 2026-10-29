@@ -154,6 +154,10 @@ var _os_tete := -1
 var _tete_avant := Vector3.ZERO
 var _elan_cheveux := Vector3.ZERO
 var _temps := 0.0
+## Le temps qui reste avant le prochain bruit de pas.
+var _prochain_pas := 0.0
+## Les oreilles du joueur, sur le héros, tournées comme la caméra (gauche = gauche de l'écran).
+var _oreilles: AudioListener3D
 
 @onready var _visuel: Node3D = $Visuel
 @onready var _modele: Node3D = $Visuel/Modele
@@ -169,6 +173,12 @@ func _ready() -> void:
 		prendre_epee()
 	vie = vie_max
 	_changer_vie.call_deferred(0.0)
+	# On entend le monde depuis le héros (pas depuis la caméra, qui est loin au-dessus).
+	_oreilles = AudioListener3D.new()
+	add_child(_oreilles)
+	_oreilles.position.y = 1.4
+	_oreilles.make_current.call_deferred()
+	get_viewport().audio_listener_enable_3d = true
 
 
 ## Cherche ce qui est à portée (tronc, coffre…), affiche « E : … » et réagit à E.
@@ -176,6 +186,9 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_temps += delta
 	_animer_cheveux(delta)
+	var camera := get_viewport().get_camera_3d()
+	if _oreilles and camera:
+		_oreilles.global_basis = camera.global_basis
 	# La traînée de la lame pendant les coups.
 	if _trainee and _epee_main:
 		var lame := _epee_main.global_transform
@@ -276,6 +289,7 @@ func _physics_process(delta: float) -> void:
 		elif _temps_bond >= _bond["touche"]:
 			_impact_au_sol()
 	_choisir_deplacement(au_sol.length())
+	_bruit_de_pas(au_sol.length(), delta)
 
 
 # --- Déplacements ---------------------------------------------------------
@@ -293,6 +307,23 @@ func _choisir_deplacement(vitesse: float) -> void:
 		_etat("course")
 	else:
 		_etat("garde" if epee_sortie else "repos")
+
+
+## Un bruit de pas à chaque foulée, selon le sol : terre, planches du pont, eau du ruisseau.
+func _bruit_de_pas(vitesse: float, delta: float) -> void:
+	if vitesse < 0.5 or not is_on_floor() or _en_bond or _roulade_restante > 0.0 or est_assis:
+		_prochain_pas = 0.12
+		return
+	_prochain_pas -= delta
+	if _prochain_pas > 0.0:
+		return
+	_prochain_pas = 0.27 if vitesse > 5.5 else 0.34
+	var sol := "pas_terre"
+	if global_position.y > 0.05:
+		sol = "pas_bois"
+	elif Chemin.distance_au_ruisseau(global_position) < 1.6:
+		sol = "pas_eau"
+	Sons.jouer(sol, global_position, 2.0 if vitesse > 5.5 else 0.0)
 
 
 func _etat(nom: String) -> void:
@@ -334,6 +365,7 @@ func _commencer_roulade(direction: Vector3) -> void:
 	_direction_roulade = Vector3(direction.x, 0.0, direction.z).normalized()
 	_roulade_restante = duree_roulade
 	_attente_roulade = duree_roulade + 0.25
+	Sons.jouer("tissu", self)
 
 
 ## Assoit le personnage à un endroit précis, tourné dans une direction.
@@ -398,6 +430,9 @@ func _bondir() -> void:
 	_action = "bond"
 	if not _bond.is_empty():
 		# Le saut est dans l'animation Mixamo : le corps ne quitte pas le sol pour le jeu.
+		Sons.jouer("souffle_lourd", self)
+		Sons.jouer_apres(0.15, "tissu", self)
+		Sons.jouer_apres(0.5, "souffle_epee", self, 2.0, 0.85)
 		_jouer_geste(_bond["anim"], _bond["longueur"], false, false, _bond["debut"], _bond["vitesse"])
 		return
 	velocity.y = force_bond
@@ -408,6 +443,8 @@ func _bondir() -> void:
 
 
 func _impact_au_sol() -> void:
+	Sons.jouer("impact_sol", global_position)
+	Sons.jouer("impact_sol_bois", global_position)
 	_en_bond = false
 	# Le héros finit son geste, puis il est libre.
 	get_tree().create_timer(0.45).timeout.connect(func(): if _action == "bond": _action = "")
@@ -468,6 +505,9 @@ func _lancer(coup: Dictionary) -> void:
 	_a_touche = false
 	_clic_en_attente = false
 	_jouer_geste(coup["anim"], coup.get("longueur", 0.0), false, true, coup.get("debut", 0.0), coup.get("vitesse", 1.0))
+	# Le souffle du coup, calé un peu avant le moment où il touche.
+	var souffle := "souffle_epee" if epee_sortie else "souffle_poing"
+	Sons.jouer_apres(maxf(coup["touche"] - 0.14, 0.0), souffle, self)
 
 
 ## Le temps passe pour le geste en cours : le coup touche, puis on enchaîne ou on revient
@@ -518,9 +558,21 @@ func _toucher_les_ennemis(degats: float, portee: float, recul: float) -> void:
 		vers.y = 0.0
 		if vers.length() < portee and (vers.length() < 0.8 or devant.dot(vers.normalized()) > 0.3):
 			ennemi.prendre_coup(degats, global_position, recul)
+			_bruit_d_impact(ennemi.global_position + Vector3.UP, recul)
 			touche = true
 	if touche:
 		_arret_sur_image()
+
+
+## Le bruit d'un coup qui touche : la lame qui cogne les os (avec un léger tintement du
+## métal), ou un coup de poing (plus lourd pour le crochet).
+func _bruit_d_impact(ou: Vector3, recul: float) -> void:
+	if epee_sortie:
+		Sons.jouer("coup_epee", ou)
+		Sons.jouer("tinte_lame", ou)
+	else:
+		Sons.jouer("coup_poing_lourd" if recul > 5.0 else "coup_poing", ou)
+	Sons.jouer("os_choc", ou, -4.0)
 
 
 ## Le jeu tourne au ralenti un instant (le minuteur, lui, compte en temps réel).
@@ -537,6 +589,8 @@ func prendre_coup(degats: float, depuis: Vector3) -> void:
 	if est_assis:
 		se_relever()
 	_changer_vie(-degats)
+	Sons.jouer("heros_touche", global_position + Vector3.UP)
+	Sons.jouer("tissu", self)
 	var recul := global_position - depuis
 	recul.y = 0.0
 	_recul = recul.normalized() * 4.0
@@ -566,6 +620,7 @@ func _mourir() -> void:
 	est_mort = true
 	_arreter_geste()
 	_etat("mort")
+	Sons.jouer_apres(0.6, "chute", self)
 	await get_tree().create_timer(3.0).timeout
 	var interface := get_tree().get_first_node_in_group("interface")
 	for feu in get_tree().get_nodes_in_group("interactif"):
@@ -615,6 +670,7 @@ func _accrocher_epee(os: String) -> Node3D:
 func _degainer() -> void:
 	_action = "degainer"
 	_jouer_geste(ANIM_DEGAINER, MAIN_DANS_LE_DOS)
+	Sons.jouer_apres(MAIN_DANS_LE_DOS * 0.7, "degainer", self)
 	await get_tree().create_timer(MAIN_DANS_LE_DOS).timeout
 	if _action != "degainer":
 		return
@@ -628,6 +684,8 @@ func _degainer() -> void:
 func _ranger_epee() -> void:
 	_action = "ranger"
 	_jouer_geste(ANIM_DEGAINER, MAIN_DANS_LE_DOS, true)
+	Sons.jouer("tissu", self)
+	Sons.jouer_apres(0.1, "ranger", self)
 	await get_tree().create_timer(0.08).timeout
 	if _action != "ranger":
 		return
