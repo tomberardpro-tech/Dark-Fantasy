@@ -17,6 +17,14 @@ var _numero := 0
 var _interlocuteur: Node
 var _lettres := 0.0
 var _bulle_ouverte_a := -1
+## L'or et les potions, au-dessus de la barre de vie.
+var _or: Label
+var _potions: Label
+## La fenêtre de boutique (provisoire), le marchand et le héros qui achète.
+var _boutique: Control
+var _catalogue: Array = []
+var _acheteur: Node
+var _boutique_ouverte_a := -1
 
 
 func _ready() -> void:
@@ -83,6 +91,40 @@ func _creer_barre_de_vie() -> void:
 	_barre_vie.offset_right = 204.0
 	_barre_vie.offset_top = -32.0
 	_barre_vie.offset_bottom = -27.0
+	# L'or juste au-dessus, et les potions qu'on porte à côté.
+	_or = Label.new()
+	_potions = Label.new()
+	for etiquette in [_or, _potions]:
+		etiquette.add_theme_font_size_override("font_size", 15)
+		etiquette.add_theme_color_override("font_outline_color", Color("07091a"))
+		etiquette.add_theme_constant_override("outline_size", 5)
+		add_child(etiquette)
+		etiquette.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_LEFT)
+		etiquette.offset_top = -56.0
+		etiquette.offset_bottom = -36.0
+	_or.add_theme_color_override("font_color", Color("e0b45a"))
+	_or.offset_left = 24.0
+	_or.offset_right = 140.0
+	_potions.add_theme_color_override("font_color", Color("b9c4d8"))
+	_potions.offset_left = 140.0
+	_potions.offset_right = 520.0
+	inventaire(0, {})
+
+
+## Met à jour l'or et les potions affichés (« A : 2 soins », etc.).
+func inventaire(pieces: int, potions: Dictionary) -> void:
+	_or.text = "%d pièces d'or" % pieces if pieces != 1 else "1 pièce d'or"
+	var morceaux := []
+	var soins: int = potions.get("Potion de soin", 0) + potions.get("Grande potion de soin", 0)
+	if soins > 0:
+		morceaux.append("A : soin ×%d" % soins)
+	if potions.get("Potion de force", 0) > 0:
+		morceaux.append("2 : force ×%d" % potions["Potion de force"])
+	if potions.get("Potion de résistance", 0) > 0:
+		morceaux.append("3 : résistance ×%d" % potions["Potion de résistance"])
+	_potions.text = "    ".join(PackedStringArray(morceaux))
+	if _boutique and _boutique.visible:
+		_remplir_boutique()
 
 
 ## Met à jour la barre de vie (vie actuelle et maximum).
@@ -241,6 +283,11 @@ func _process(delta: float) -> void:
 	if dialogue_ouvert():
 		_avancer_dialogue(delta)
 		return
+	if boutique_ouverte():
+		if Engine.get_process_frames() != _boutique_ouverte_a and \
+				(Input.is_action_just_pressed("interagir") or Input.is_action_just_pressed("ui_cancel")):
+			fermer_boutique()
+		return
 	if not lettre_ouverte() or Engine.get_process_frames() == _ouverte_a:
 		return
 	if Input.is_action_just_pressed("interagir") or Input.is_action_just_pressed("ui_cancel"):
@@ -298,6 +345,142 @@ func _creer_lettre() -> void:
 	var fermer := _lettre.get_node("%Fermer") as Label
 	fermer.text = "E : refermer la lettre"
 	fermer.add_theme_color_override("font_color", Color(encre, 0.55))
+
+
+## La boutique d'un marchand (fenêtre provisoire) : la liste de ce qu'il vend, avec les prix.
+## On peut tout regarder ; « Acheter » est grisé tant qu'on n'a pas assez d'or. Le jeu est
+## en pause. E ou Échap pour fermer.
+func ouvrir_boutique(titre: String, boutique: String, acheteur: Node) -> void:
+	if _boutique == null:
+		_creer_boutique()
+	_catalogue = Boutiques.catalogue(boutique)
+	_acheteur = acheteur
+	_boutique.get_node("%Titre").text = titre
+	_remplir_boutique()
+	_boutique.show()
+	_boutique.modulate.a = 0.0
+	create_tween().tween_property(_boutique, "modulate:a", 1.0, 0.25)
+	_boutique_ouverte_a = Engine.get_process_frames()
+	_message.hide()
+	get_tree().paused = true
+
+
+func boutique_ouverte() -> bool:
+	return _boutique != null and _boutique.visible
+
+
+func fermer_boutique() -> void:
+	_boutique.hide()
+	get_tree().set_deferred("paused", false)
+
+
+func _remplir_boutique() -> void:
+	var liste := _boutique.get_node("%Liste") as VBoxContainer
+	for ligne in liste.get_children():
+		ligne.queue_free()
+	var pieces: int = _acheteur.pieces
+	for objet in _catalogue:
+		var ligne := HBoxContainer.new()
+		ligne.add_theme_constant_override("separation", 16)
+		var textes := VBoxContainer.new()
+		textes.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		textes.custom_minimum_size.x = 360
+		textes.add_theme_constant_override("separation", 2)
+		var nom := Label.new()
+		nom.text = objet["nom"]
+		nom.add_theme_font_size_override("font_size", 17)
+		nom.add_theme_color_override("font_color", Color("d8b46a"))
+		var description := Label.new()
+		description.text = objet["description"]
+		description.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		description.add_theme_font_size_override("font_size", 13)
+		description.add_theme_color_override("font_color", Color(0.78, 0.8, 0.86, 0.8))
+		textes.add_child(nom)
+		textes.add_child(description)
+		ligne.add_child(textes)
+		var prix := Label.new()
+		prix.text = "%d or" % objet["prix"]
+		prix.custom_minimum_size.x = 64
+		prix.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		prix.add_theme_font_size_override("font_size", 16)
+		prix.add_theme_color_override("font_color", Color("e0b45a") if pieces >= objet["prix"] else Color(0.6, 0.45, 0.4))
+		ligne.add_child(prix)
+		var acheter := Button.new()
+		acheter.custom_minimum_size = Vector2(96, 32)
+		acheter.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		if _acheteur.possede(objet):
+			acheter.text = "Équipé"
+			acheter.disabled = true
+		else:
+			acheter.text = "Acheter"
+			acheter.disabled = pieces < objet["prix"]
+		acheter.pressed.connect(_acheter.bind(objet))
+		ligne.add_child(acheter)
+		liste.add_child(ligne)
+	_boutique.get_node("%Or").text = "Ton or : %d" % pieces
+
+
+func _acheter(objet: Dictionary) -> void:
+	if _acheteur.acheter(objet):
+		notifier(objet["nom"] + " achetée")
+		_remplir_boutique()
+
+
+func _creer_boutique() -> void:
+	_boutique = Control.new()
+	_boutique.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_boutique.mouse_filter = Control.MOUSE_FILTER_STOP
+	add_child(_boutique)
+	var voile := ColorRect.new()
+	voile.color = Color(0.0, 0.0, 0.02, 0.55)
+	voile.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_boutique.add_child(voile)
+	var cadre := PanelContainer.new()
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.035, 0.04, 0.075, 0.95)
+	style.border_color = Color("5a4630")
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(4)
+	style.shadow_color = Color(0, 0, 0, 0.6)
+	style.shadow_size = 18
+	style.set_content_margin_all(26)
+	cadre.add_theme_stylebox_override("panel", style)
+	cadre.custom_minimum_size = Vector2(600, 0)
+	_boutique.add_child(cadre)
+	cadre.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	cadre.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	cadre.grow_vertical = Control.GROW_DIRECTION_BOTH
+	var colonne := VBoxContainer.new()
+	colonne.add_theme_constant_override("separation", 16)
+	cadre.add_child(colonne)
+	var titre := Label.new()
+	titre.name = "Titre"
+	titre.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	titre.add_theme_font_size_override("font_size", 22)
+	titre.add_theme_color_override("font_color", Color("d8cdb4"))
+	colonne.add_child(titre)
+	colonne.add_child(HSeparator.new())
+	var liste := VBoxContainer.new()
+	liste.name = "Liste"
+	liste.add_theme_constant_override("separation", 14)
+	colonne.add_child(liste)
+	colonne.add_child(HSeparator.new())
+	var bas := HBoxContainer.new()
+	var or_du_heros := Label.new()
+	or_du_heros.name = "Or"
+	or_du_heros.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	or_du_heros.add_theme_font_size_override("font_size", 16)
+	or_du_heros.add_theme_color_override("font_color", Color("e0b45a"))
+	var fermer := Label.new()
+	fermer.text = "E ou Échap : fermer"
+	fermer.add_theme_font_size_override("font_size", 12)
+	fermer.add_theme_color_override("font_color", Color(0.75, 0.78, 0.85, 0.5))
+	bas.add_child(or_du_heros)
+	bas.add_child(fermer)
+	colonne.add_child(bas)
+	for noeud in [titre, liste, or_du_heros]:
+		noeud.unique_name_in_owner = true
+		noeud.owner = _boutique
 
 
 func afficher(texte: String) -> void:

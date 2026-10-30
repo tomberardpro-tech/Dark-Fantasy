@@ -464,20 +464,23 @@ func _creer_etal(x: float, y: float) -> void:
 ## Les cinq survivants (étape 10), leurs tenues, leur activité et leurs répliques
 ## (proposées par Claude, à valider par Tom : on peut les changer ici).
 func _creer_survivants() -> void:
-	# Les deux marchands, derrière leur étal, face à la place (boutiques à venir).
+	# Les deux marchands, derrière leur étal, face à la place. Après la première
+	# conversation, E ouvre directement leur boutique (voir boutiques.gd).
 	_survivant({"nom": "Le forgeron", "tenue": "Male_Peasant", "teinte": Color(0.36, 0.32, 0.3), "activite": "etal",
 		"coiffures": ["Hair_Buzzed", "Hair_Beard"], "cheveux": Color(0.16, 0.12, 0.1),
 		"ou": _poste_forgeron, "regard": Chemin.VILLAGE,
+		"boutique": "forgeron", "titre_boutique": "Armes et armures",
 		"repliques": [
 			"Des lames, des armures… Le métal ne manque pas. C'est le temps qui manque.",
-			"Reviens me voir bientôt : je te forgerai de quoi tenir face aux morts.",
+			"Regarde, si tu veux. Mais ici rien n'est gratuit : l'or des morts paie aussi bien que le tien.",
 		]})
 	_survivant({"nom": "La médecin", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.46, 0.5, 0.44), "activite": "etal",
 		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.12, 0.1, 0.1),
 		"ou": _poste_medecin, "regard": Chemin.VILLAGE,
+		"boutique": "medecin", "titre_boutique": "Potions et remèdes",
 		"repliques": [
 			"Des potions pour les blessures, des herbes contre la fièvre… et contre la peur, rien.",
-			"Mes fioles ne sont pas encore prêtes. Repasse plus tard, je t'en garderai.",
+			"Les herbes coûtent cher à cueillir, quand la forêt mord. Voilà ce que j'ai.",
 		]})
 	_survivant({"nom": "Bran", "tenue": "Male_Ranger", "teinte": Color(0.42, 0.48, 0.45), "activite": "garde",
 		"ou": Chemin.bruneval(2.4, -19.0), "regard": Chemin.bruneval(2.4, -30.0),
@@ -506,7 +509,7 @@ func _creer_survivants() -> void:
 		"ou": Chemin.bruneval(-7.9, -4.6), "regard": Chemin.bruneval(-5.0, -10.0),
 		"repliques": [
 			"Des pommes, des carottes, de la corde. Le reste, je ne le vends plus.",
-			"L'or ne vaut plus rien, l'ami. Ramène-moi plutôt quelque chose qui brille encore.",
+			"Les pièces se font rares, l'ami. Les morts en portent encore sur eux, va savoir pourquoi.",
 			"Si tu sors du hameau, garde ton épée près de toi. Les morts ne marchandent pas.",
 		]})
 	_survivant({"nom": "Maren", "tenue": "Female_Ranger", "femme": true, "teinte": Color(0.4, 0.36, 0.46), "activite": "bras_croises",
@@ -528,6 +531,8 @@ func _survivant(d: Dictionary) -> void:
 	s.femme = d.get("femme", false)
 	s.teinte = d["teinte"]
 	s.activite = d["activite"]
+	s.boutique = d.get("boutique", "")
+	s.titre_boutique = d.get("titre_boutique", "")
 	var coiffures: Array[String] = []
 	coiffures.assign(d.get("coiffures", []))
 	s.coiffures = coiffures

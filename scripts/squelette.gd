@@ -266,6 +266,18 @@ func _afficher_degats(montant: float) -> void:
 	anim.chain().tween_callback(chiffre.queue_free)
 
 
+## Le squelette lâche quelques pièces d'or (de 6 à 12 en tout), à ramasser en passant dessus.
+func _lacher_de_l_or() -> void:
+	var total := randi_range(6, 12)
+	var nombre := randi_range(3, 5)
+	for i in nombre:
+		var piece := Node3D.new()
+		piece.set_script(load("res://scripts/piece_or.gd"))
+		piece.valeur = floori(float(total) / nombre) +(1 if i < total % nombre else 0)
+		get_parent().add_child(piece)
+		piece.global_position = global_position + Vector3.UP * 0.6
+
+
 ## Plus de vie : chaque os se détache et tombe au sol, puis le tas disparaît.
 func _s_effondrer(direction: Vector3) -> void:
 	_changer("mort")
@@ -294,6 +306,7 @@ func _s_effondrer(direction: Vector3) -> void:
 		piece.apply_central_impulse((direction * 0.8 + Vector3(randf_range(-0.6, 0.6), randf_range(0.2, 1.2), randf_range(-0.6, 0.6))) * 0.25)
 		_morceaux.append(piece)
 	_visuel.visible = false
+	_lacher_de_l_or()
 	await get_tree().create_timer(12.0).timeout
 	if etat == "mort":
 		for morceau in _morceaux:

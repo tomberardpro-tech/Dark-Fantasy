@@ -116,6 +116,18 @@ var a_epee := false
 var epee_sortie := false
 var vie := 100.0
 var est_mort := false
+## L'or et ce qu'on a acheté aux marchands (voir boutiques.gd).
+var pieces := 0
+## Les potions qu'on porte : nom de la potion → combien.
+var potions := {}
+## L'arme et l'armure achetées (vides : la vieille épée et la tenue de paysan).
+var arme: Dictionary = {}
+var armure: Dictionary = {}
+## Les effets des potions de force et de résistance, et le temps qu'il leur reste.
+var _force := 0.0
+var _force_restante := 0.0
+var _resistance := 0.0
+var _resistance_restante := 0.0
 
 var _clic_avant := false
 var _clic_droit_avant := false
@@ -173,6 +185,7 @@ func _ready() -> void:
 		prendre_epee()
 	vie = vie_max
 	_changer_vie.call_deferred(0.0)
+	_montrer_inventaire.call_deferred()
 	# On entend le monde depuis le héros (pas depuis la caméra, qui est loin au-dessus).
 	_oreilles = AudioListener3D.new()
 	add_child(_oreilles)
@@ -198,7 +211,7 @@ func _process(delta: float) -> void:
 	if est_mort:
 		return
 	# Pendant une conversation, c'est la bulle qui réagit à E.
-	if interface and interface.dialogue_ouvert():
+	if interface and (interface.dialogue_ouvert() or interface.boutique_ouverte()):
 		interface.cacher()
 		return
 	var cible: Node = null
@@ -241,6 +254,8 @@ func _physics_process(delta: float) -> void:
 	if clic_droit and not _clic_droit_avant and not est_assis:
 		_bondir()
 	_clic_droit_avant = clic_droit
+
+	_effets_des_potions(delta)
 
 	if Input.is_action_just_pressed("degainer") and a_epee and not est_assis and _action == "":
 		if epee_sortie:
@@ -458,7 +473,7 @@ func _impact_au_sol() -> void:
 	get_tree().create_timer(0.45).timeout.connect(func(): if _action == "bond": _action = "")
 	for ennemi in get_tree().get_nodes_in_group("ennemi"):
 		if ennemi.est_vivant() and ennemi.global_position.distance_to(global_position) < rayon_coup_au_sol:
-			ennemi.prendre_coup(degats_coup_au_sol, global_position, 9.0)
+			ennemi.prendre_coup(degats_coup_au_sol * multiplicateur_degats(), global_position, 9.0)
 	_onde_de_choc()
 
 
@@ -565,7 +580,7 @@ func _toucher_les_ennemis(degats: float, portee: float, recul: float) -> void:
 		var vers: Vector3 = ennemi.global_position - global_position
 		vers.y = 0.0
 		if vers.length() < portee and (vers.length() < 0.8 or devant.dot(vers.normalized()) > 0.3):
-			ennemi.prendre_coup(degats, global_position, recul)
+			ennemi.prendre_coup(degats * multiplicateur_degats(), global_position, recul)
 			_bruit_d_impact(ennemi.global_position + Vector3.UP, recul)
 			touche = true
 	if touche:
@@ -596,7 +611,7 @@ func prendre_coup(degats: float, depuis: Vector3) -> void:
 		return
 	if est_assis:
 		se_relever()
-	_changer_vie(-degats)
+	_changer_vie(-degats * (1.0 - armure.get("protection", 0.0)) * (1.0 - _resistance))
 	Sons.jouer("heros_touche", global_position + Vector3.UP)
 	Sons.jouer("tissu", self)
 	var recul := global_position - depuis
@@ -641,6 +656,93 @@ func _mourir() -> void:
 		interface.notifier("Vous vous réveillez près du feu")
 
 
+# --- L'or, les achats et les potions ------------------------------------------
+
+## Les dégâts de nos coups : ceux de l'arme achetée, plus la potion de force.
+func multiplicateur_degats() -> float:
+	return arme.get("degats", 1.0) * (1.0 + _force)
+
+
+func ajouter_pieces(nombre: int) -> void:
+	pieces += nombre
+	_montrer_inventaire()
+
+
+## Achète un objet d'un marchand (voir boutiques.gd). Renvoie false s'il n'y a pas assez d'or.
+func acheter(objet: Dictionary) -> bool:
+	if pieces < objet["prix"]:
+		return false
+	pieces -= objet["prix"]
+	match objet["sorte"]:
+		"arme":
+			arme = objet
+			if not a_epee:
+				prendre_epee()
+			else:
+				Modeles.teinter(_epee_main, objet["teinte"])
+				Modeles.teinter(_epee_dos, objet["teinte"])
+		"armure":
+			armure = objet
+			teinte = objet["teinte"]
+			_teinter_tenue()
+		"potion":
+			potions[objet["nom"]] = potions.get(objet["nom"], 0) + 1
+	_montrer_inventaire()
+	return true
+
+
+## Ce qu'on possède déjà (pour griser l'arme ou l'armure qu'on porte dans la boutique).
+func possede(objet: Dictionary) -> bool:
+	return arme == objet or armure == objet
+
+
+## A (ou 1) : une potion de soin (la petite d'abord) ; 2 : force ; 3 : résistance.
+func _effets_des_potions(delta: float) -> void:
+	_force_restante -= delta
+	if _force_restante <= 0.0:
+		_force = 0.0
+	_resistance_restante -= delta
+	if _resistance_restante <= 0.0:
+		_resistance = 0.0
+	if Input.is_action_just_pressed("potion_soin") and vie < vie_max:
+		for nom in ["Potion de soin", "Grande potion de soin"]:
+			if _boire(nom):
+				break
+	if Input.is_action_just_pressed("potion_force"):
+		_boire("Potion de force")
+	if Input.is_action_just_pressed("potion_resistance"):
+		_boire("Potion de résistance")
+
+
+func _boire(nom: String) -> bool:
+	if potions.get(nom, 0) <= 0:
+		return false
+	potions[nom] -= 1
+	var potion: Dictionary = {}
+	for objet in Boutiques.MEDECIN:
+		if objet["nom"] == nom:
+			potion = objet
+	if potion.has("soin"):
+		_changer_vie(potion["soin"])
+	if potion.has("force"):
+		_force = potion["force"]
+		_force_restante = potion["duree"]
+	if potion.has("resistance"):
+		_resistance = potion["resistance"]
+		_resistance_restante = potion["duree"]
+	var interface := get_tree().get_first_node_in_group("interface")
+	if interface:
+		interface.notifier(nom + " bue")
+	_montrer_inventaire()
+	return true
+
+
+func _montrer_inventaire() -> void:
+	var interface := get_tree().get_first_node_in_group("interface")
+	if interface:
+		interface.inventaire(pieces, potions)
+
+
 # --- L'épée ---------------------------------------------------------------
 
 ## Le héros trouve la vieille épée : elle est rangée dans son dos.
@@ -666,7 +768,7 @@ func prendre_epee() -> void:
 
 
 func _accrocher_epee(os: String) -> Node3D:
-	var epee := Modeles.creer("Sword_Bronze", Modeles.OBJETS, Color(0.6, 0.6, 0.7))
+	var epee := Modeles.creer("Sword_Bronze", Modeles.OBJETS, arme.get("teinte", Color(0.6, 0.6, 0.7)))
 	var attache := BoneAttachment3D.new()
 	attache.bone_name = os
 	_squelette.add_child(attache)

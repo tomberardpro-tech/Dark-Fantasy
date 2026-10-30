@@ -17,6 +17,10 @@ extends Node3D
 ## Pour « porte_eau » : l'autre bout de son aller-retour.
 @export var aller_vers := Vector3.ZERO
 @export var distance_interaction := 2.0
+## Pour un marchand : sa boutique (« forgeron » ou « medecin », voir boutiques.gd) et son
+## titre. Elle s'ouvre après la première conversation, puis directement avec E.
+@export var boutique := ""
+@export var titre_boutique := ""
 
 const DOSSIER := "res://assets/personnage/"
 const OS_DE_LA_TETE := ["Head", "neck_01"]
@@ -25,6 +29,8 @@ const VITESSE_MARCHE := 1.3
 static var _bibliotheques := {}
 
 var parle := false
+var _deja_parle := false
+var _client: Node
 var _anim: AnimationPlayer
 var _squelette: Skeleton3D
 var _modele: Node3D
@@ -108,12 +114,20 @@ func distance_pour_interagir(joueur: Node3D) -> float:
 
 
 func texte_interaction(_joueur: Node3D) -> String:
+	if boutique != "" and _deja_parle:
+		return "E : " + titre_boutique.to_lower()
+	if nom.begins_with("Le "):
+		return "E : parler au " + nom.substr(3)
 	return "E : parler à " + nom
 
 
 func interagir(joueur: Node3D) -> void:
 	var interface := get_tree().get_first_node_in_group("interface")
 	if interface == null:
+		return
+	_client = joueur
+	if boutique != "" and _deja_parle:
+		interface.ouvrir_boutique(titre_boutique, boutique, joueur)
 		return
 	parle = true
 	# Il se tourne vers le héros (sauf assis) et parle avec les mains.
@@ -128,6 +142,9 @@ func interagir(joueur: Node3D) -> void:
 func fin_de_dialogue() -> void:
 	parle = false
 	_anim.play(_animation_de_repos(), 0.4)
+	_deja_parle = true
+	if boutique != "" and is_instance_valid(_client):
+		get_tree().get_first_node_in_group("interface").ouvrir_boutique(titre_boutique, boutique, _client)
 
 
 # --- Construction -----------------------------------------------------------------
