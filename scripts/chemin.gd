@@ -40,6 +40,11 @@ const VILLAGE := Vector3(107.81, 0, 102.14)
 ## Le hameau est dessiné « comme à l'écran » (voir la maquette) : x vers la droite de
 ## l'écran, y vers le haut, en mètres, à partir de ce point.
 const ORIGINE_BRUNEVAL := Vector3(107.81, 0, 102.14)
+## La clairière de Bruneval, un ovale (en mètres, comme à l'écran), resserrée autour des
+## petites maisons à la demande de Tom.
+const DEMI_LARGEUR_BRUNEVAL := 19.0
+const DEMI_HAUTEUR_BRUNEVAL := 15.5
+const CENTRE_Y_BRUNEVAL := 0.8
 const DROITE_ECRAN := Vector3(-0.6878, 0, 0.726)
 const HAUT_ECRAN := Vector3(0.726, 0, 0.6878)
 
@@ -156,12 +161,12 @@ func bruneval(x: float, y: float) -> Vector3:
 ## Le bord de la clairière de Bruneval : un ovale (comme sur la maquette choisie par Tom),
 ## à l'angle « t », éventuellement repoussé de « marge » mètres.
 func bord_bruneval(t: float, marge := 0.0) -> Vector3:
-	return bruneval((27.0 + marge) * sin(t), 1.3 - (21.0 + marge) * cos(t))
+	return bruneval((DEMI_LARGEUR_BRUNEVAL + marge) * sin(t), CENTRE_Y_BRUNEVAL - (DEMI_HAUTEUR_BRUNEVAL + marge) * cos(t))
 
 
 ## Vrai si ce point est dans la clairière de Bruneval (avec une marge en mètres).
 func dans_bruneval(p: Vector3, marge := 0.0) -> bool:
 	var local := p - ORIGINE_BRUNEVAL
 	var x := local.dot(DROITE_ECRAN)
-	var y := local.dot(HAUT_ECRAN) - 1.3
-	return Vector2(x / (27.0 + marge), y / (21.0 + marge)).length() < 1.0
+	var y := local.dot(HAUT_ECRAN) - CENTRE_Y_BRUNEVAL
+	return Vector2(x / (DEMI_LARGEUR_BRUNEVAL + marge), y / (DEMI_HAUTEUR_BRUNEVAL + marge)).length() < 1.0

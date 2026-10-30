@@ -1,8 +1,8 @@
 extends Node3D
-## Le hameau de Bruneval, d'après la maquette choisie par Tom : les maisons en arc autour
-## d'une place de terre boueuse (feu de camp, banc, puits), façades éclairées vers la caméra,
-## légèrement tournées vers la place ; l'auberge à étage au fond, la forge en briques à
-## gauche, le médecin à droite, deux abris devant, l'étal d'Osric. Pas de palissade : une
+## Le hameau de Bruneval, d'après la maquette choisie par Tom : de petites maisons serrées
+## autour d'une place de terre boueuse (feu de camp, banc, puits), toutes tournées vers le
+## feu ; la maison du chef (à étage) au fond, la forge en briques à gauche, la médecin à
+## droite, deux abris devant, l'étal d'Osric. Pas de palissade : une
 ## ceinture de sapins entoure la clairière (voir foret.json). Pièces du Medieval Village
 ## MegaKit et du Fantasy Props MegaKit (Quaternius).
 ##
@@ -11,6 +11,8 @@ extends Node3D
 
 const TEINTE_PIERRE := Color(0.55, 0.58, 0.68)
 const COULEUR_FENETRE := Color("f2b766")
+## Les maisons sont un peu plus petites que les pièces du pack (Tom les veut petites).
+const ECHELLE_MAISONS := 0.8
 
 var _rng := RandomNumberGenerator.new()
 var _feux: Array[OmniLight3D] = []
@@ -26,20 +28,22 @@ var _poste_medecin := Vector3.ZERO
 func _ready() -> void:
 	_rng.seed = 1848
 	_creer_place()
-	# Comme sur la dernière maquette validée par Tom : les maisons en arc autour de la place,
-	# toutes tournées vers le feu. [x, y, largeur, longueur de façade, étages, briques, nom,
+	# Comme sur la maquette de Tom : de petites maisons serrées autour de la place, toutes
+	# tournées vers le feu, le forgeron et la médecin devant leur stand.
+	# [x, y, largeur, longueur de façade, étages, briques, nom,
 	# rotation vers la place (0 = face à la caméra, 1 = face au feu)]
-	_maison(0.0, 15.2, 6, 10, 2, false, "Maison du chef", 1.0)
-	_maison(-19.3, 3.1, 4, 8, 1, true, "Forge", 1.0)
-	_maison(20.2, 3.8, 6, 8, 1, false, "Médecin", 1.0)
-	_maison(-17.1, -8.7, 4, 6, 1, false, "Abri", 1.0)
-	_maison(17.1, -9.1, 4, 6, 1, false, "Abri de l'est", 1.0)
-	_creer_forge(-19.3, 3.1)
+	_maison(0.0, 10.0, 4, 4, 2, false, "Maison du chef", 1.0)
+	_maison(-11.0, 2.5, 4, 4, 1, true, "Forge", 1.0)
+	_maison(11.0, 3.0, 4, 4, 1, false, "Médecin", 1.0)
+	_maison(-9.5, -8.5, 4, 4, 1, false, "Abri", 1.0)
+	_maison(9.5, -8.5, 4, 4, 1, false, "Abri de l'est", 1.0)
+	_creer_forge(-11.0, 2.5)
 	_creer_feu()
-	_creer_puits(5.6, 3.3)
-	_creer_etal(-7.4, -5.7)
-	_creer_etal_medecin(20.2, 3.8)
+	_creer_puits(5.8, 2.2)
+	_creer_etal(-6.0, -5.2)
+	_creer_etal_medecin(11.0, 3.0)
 	_chemin_de_sortie()
+	_creer_rempart()
 	_creer_survivants()
 
 
@@ -117,6 +121,7 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 	var vers_le_feu := (Chemin.VILLAGE - maison.position).normalized()
 	var facade := vers_camera.lerp(vers_le_feu, vers_place).normalized()
 	maison.rotation.y = atan2(-facade.z, facade.x)
+	maison.scale = Vector3.ONE * ECHELLE_MAISONS
 	add_child(maison)
 	var prefixe := "Wall_UnevenBrick_" if briques else "Wall_Plaster_"
 	var murs_pleins := ["Wall_UnevenBrick_Straight"] if briques else ["Wall_Plaster_Straight", "Wall_Plaster_WoodGrid"]
@@ -213,8 +218,8 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 		maison.add_child(objet)
 	# On ne traverse pas les murs.
 	var forme := BoxShape3D.new()
-	forme.size = Vector3(largeur, 3.0, profondeur)
-	_obstacle(forme, maison.transform * Transform3D(Basis(), Vector3(0, 1.5, 0)))
+	forme.size = Vector3(largeur, 3.0, profondeur) * ECHELLE_MAISONS
+	_obstacle(forme, Transform3D(Basis(Vector3.UP, maison.rotation.y), maison.position + Vector3(0, 1.5 * ECHELLE_MAISONS, 0)))
 
 
 ## Une fenêtre éclairée de l'intérieur : le cadre, une lueur chaude derrière, parfois des
@@ -260,7 +265,7 @@ func _creer_forge(x: float, y: float) -> void:
 	var maison := Chemin.bruneval(x, y)
 	var vers_place := (Chemin.VILLAGE - maison).normalized()
 	var cote := Vector3(-vers_place.z, 0, vers_place.x)
-	var poste := maison + vers_place * 4.4
+	var poste := maison + vers_place * 3.6
 	var face := _vers(poste, Chemin.VILLAGE)
 	var etabli := Modeles.creer("Workbench")
 	etabli.position = poste
@@ -358,7 +363,7 @@ func _creer_etal_medecin(x: float, y: float) -> void:
 	var maison := Chemin.bruneval(x, y)
 	var vers_place := (Chemin.VILLAGE - maison).normalized()
 	var cote := Vector3(-vers_place.z, 0, vers_place.x)
-	var poste := maison + vers_place * 4.6
+	var poste := maison + vers_place * 3.7
 	var face := _vers(poste, Chemin.VILLAGE)
 	var tourne := Basis(Vector3.UP, face)
 	var etal := Modeles.creer("Stall_Empty")
@@ -442,6 +447,130 @@ func _chemin_de_sortie() -> void:
 	add_child(bande)
 
 
+## Le rempart (demande de Tom) : des pieux de bois taillés en pointe, serrés tout autour de
+## la clairière, tenus par deux traverses côté village. Il s'ouvre là où arrive le chemin ;
+## sur le chemin de sortie, une porte de planches reste fermée (la Zone 1 n'existe pas
+## encore). On ne le traverse pas.
+func _creer_rempart() -> void:
+	var ecorce := StandardMaterial3D.new()
+	ecorce.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
+	ecorce.albedo_color = Color(0.62, 0.52, 0.45)
+	ecorce.roughness = 1.0
+	# Un pieu : un tronc fin et sa pointe, en un seul maillage, répété avec un MultiMesh.
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var cotes := 7
+	for i in cotes:
+		var a := TAU * i / cotes
+		var b := TAU * (i + 1) / cotes
+		var pa := Vector3(cos(a), 0, sin(a)) * 0.17
+		var pb := Vector3(cos(b), 0, sin(b)) * 0.17
+		var h := Vector3.UP * 2.3
+		var pointe := Vector3.UP * 2.75
+		for v in [[pa, 0.0], [pa + h, 2.3], [pb + h, 2.3], [pa, 0.0], [pb + h, 2.3], [pb, 0.0], [pa + h, 2.3], [pointe, 2.75], [pb + h, 2.3]]:
+			var p: Vector3 = v[0]
+			outil.set_uv(Vector2(float(i) / cotes, v[1] * 0.5))
+			outil.add_vertex(p)
+	outil.generate_normals()
+	var pieu := outil.commit()
+	pieu.surface_set_material(0, ecorce)
+	# Les places des pieux, tous les 0,36 m le long du bord de la clairière.
+	var sortie := [Chemin.bruneval(4.5, 5.5), Chemin.bruneval(7.5, 11.0), Chemin.bruneval(9.5, 17.0)]
+	var places: Array[Transform3D] = []
+	var porte := Vector3.INF
+	var fin_porte := Vector3.INF
+	var pas := 400
+	var avant := Chemin.bord_bruneval(0.0, 0.3)
+	var depuis := 0.0
+	var debut_mur := Vector3.INF
+	for i in pas + 1:
+		var p := Chemin.bord_bruneval(TAU * i / pas, 0.3)
+		depuis += p.distance_to(avant)
+		var ouvert := Chemin.distance_au_chemin(p) < 2.6
+		if _distance_a(p, sortie) < 1.8:
+			if porte == Vector3.INF:
+				porte = p
+			fin_porte = p
+			ouvert = true
+		# Le mur invisible suit les pieux, par tronçons.
+		if ouvert and debut_mur != Vector3.INF:
+			_mur(debut_mur, avant)
+			debut_mur = Vector3.INF
+		elif not ouvert and debut_mur == Vector3.INF:
+			debut_mur = p
+		elif not ouvert and debut_mur.distance_to(p) > 4.0:
+			_mur(debut_mur, p)
+			debut_mur = p
+		if not ouvert and depuis >= 0.36:
+			depuis = 0.0
+			var penche := Basis(Vector3(_rng.randf_range(-1, 1), 0, _rng.randf_range(-1, 1)).normalized(), _rng.randf_range(0.0, 0.05))
+			var taille := Vector3(1.0, _rng.randf_range(0.85, 1.12), 1.0)
+			places.append(Transform3D(penche * Basis(Vector3.UP, _rng.randf_range(0.0, TAU)).scaled(taille), p))
+		avant = p
+	if debut_mur != Vector3.INF:
+		_mur(debut_mur, avant)
+	var multi := MultiMesh.new()
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.mesh = pieu
+	multi.instance_count = places.size()
+	for i in places.size():
+		multi.set_instance_transform(i, places[i])
+	var rempart := MultiMeshInstance3D.new()
+	rempart.name = "Rempart"
+	rempart.multimesh = multi
+	rempart.set_meta("pieux", places)
+	add_child(rempart)
+	# Deux traverses côté village, par tronçons, pour tenir les pieux.
+	var bois := Modeles.materiau_de("Floor_WoodDark")
+	for i in range(0, places.size() - 1, 6):
+		var a := places[i].origin
+		var b := places[mini(i + 6, places.size() - 1)].origin
+		if a.distance_to(b) > 3.0:
+			continue
+		var dedans := (Chemin.VILLAGE - (a + b) / 2.0).normalized() * 0.22
+		for hauteur in [0.7, 1.8]:
+			add_child(_poutre(a + dedans + Vector3.UP * hauteur, b + dedans + Vector3.UP * hauteur, 0.06, bois))
+	# La porte fermée sur le chemin de sortie : des planches entre deux gros poteaux.
+	if porte != Vector3.INF:
+		var centre := (porte + fin_porte) / 2.0
+		var travers := (fin_porte - porte).normalized()
+		var demi := porte.distance_to(fin_porte) / 2.0 + 0.2
+		var gauche := centre - travers * demi
+		var droite := centre + travers * demi
+		for poteau in [gauche, droite]:
+			add_child(_poutre(poteau, poteau + Vector3.UP * 3.2, 0.24, ecorce))
+		var planches := int(demi / 0.38) * 2 + 1
+		for k in planches:
+			var x := lerpf(-demi + 0.2, demi - 0.2, k / float(planches - 1))
+			add_child(_poutre(centre + travers * x, centre + travers * x + Vector3.UP * _rng.randf_range(2.35, 2.55), 0.19, ecorce))
+		for hauteur in [0.6, 1.9]:
+			add_child(_poutre(gauche + Vector3.UP * hauteur, droite + Vector3.UP * hauteur, 0.08, bois))
+		_mur(gauche, droite)
+
+
+## La plus petite distance (à plat) entre « p » et une ligne brisée.
+func _distance_a(p: Vector3, ligne: Array) -> float:
+	var meilleure := INF
+	var q := Vector2(p.x, p.z)
+	for i in ligne.size() - 1:
+		var a := Vector2(ligne[i].x, ligne[i].z)
+		var b := Vector2(ligne[i + 1].x, ligne[i + 1].z)
+		var t := clampf((q - a).dot(b - a) / (b - a).length_squared(), 0.0, 1.0)
+		meilleure = minf(meilleure, q.distance_to(a + (b - a) * t))
+	return meilleure
+
+
+## Un mur invisible de « a » à « b » (on ne traverse pas le rempart).
+func _mur(a: Vector3, b: Vector3) -> void:
+	var direction := b - a
+	direction.y = 0.0
+	if direction.length() < 0.05:
+		return
+	var forme := BoxShape3D.new()
+	forme.size = Vector3(0.5, 3.0, direction.length() + 0.3)
+	_obstacle(forme, Transform3D(Basis.looking_at(direction.normalized()), (a + b) / 2.0 + Vector3(0, 1.5, 0)))
+
+
 func _creer_etal(x: float, y: float) -> void:
 	var pos := Chemin.bruneval(x, y)
 	var etal := Modeles.creer("Stall_Empty")
@@ -499,21 +628,21 @@ func _creer_survivants() -> void:
 		]})
 	_survivant({"nom": "Élise", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.42, 0.46, 0.55), "activite": "porte_eau",
 		"coiffures": ["Hair_Buns"], "cheveux": Color(0.35, 0.24, 0.16),
-		"ou": Chemin.bruneval(6.8, 1.8), "aller_vers": Chemin.bruneval(15.0, -6.8), "regard": Chemin.bruneval(15.0, -6.8),
+		"ou": Chemin.bruneval(7.0, 0.8), "aller_vers": Chemin.bruneval(8.4, -6.4), "regard": Chemin.bruneval(8.4, -6.4),
 		"repliques": [
 			"Pardon, je n'ai pas le temps… Il faut de l'eau pour le médecin.",
 			"L'eau du puits a un goût de fer depuis trois jours. Personne ne veut savoir pourquoi.",
 		]})
 	_survivant({"nom": "Osric", "tenue": "Male_Peasant", "teinte": Color(0.6, 0.48, 0.3), "activite": "etal",
 		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.2, 0.15, 0.12),
-		"ou": Chemin.bruneval(-7.9, -4.6), "regard": Chemin.bruneval(-5.0, -10.0),
+		"ou": Chemin.bruneval(-6.5, -4.1), "regard": Chemin.bruneval(-3.6, -9.5),
 		"repliques": [
 			"Des pommes, des carottes, de la corde. Le reste, je ne le vends plus.",
 			"Les pièces se font rares, l'ami. Les morts en portent encore sur eux, va savoir pourquoi.",
 			"Si tu sors du hameau, garde ton épée près de toi. Les morts ne marchandent pas.",
 		]})
 	_survivant({"nom": "Maren", "tenue": "Female_Ranger", "femme": true, "teinte": Color(0.4, 0.36, 0.46), "activite": "bras_croises",
-		"ou": Chemin.bruneval(3.6, 11.4), "regard": Chemin.VILLAGE,
+		"ou": Chemin.bruneval(-3.8, 7.6), "regard": Chemin.VILLAGE,
 		"repliques": [
 			"… Tu viens de la forêt. Tu as vu l'autel rouge, n'est-ce pas ?",
 			"J'ai laissé une lettre dans la cabane, sur la route. Pour Aldric.",
