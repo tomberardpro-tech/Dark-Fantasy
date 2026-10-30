@@ -11,7 +11,8 @@ extends Node3D
 @export var coiffures: Array[String] = []
 @export var teinte := Color(0.6, 0.6, 0.65)
 @export var couleur_cheveux := Color(0.25, 0.22, 0.2)
-## « garde » (torche), « assis », « porte_eau », « etal », « bras_croises », « balade ».
+## « garde » (torche), « assis », « porte_eau », « etal », « bras_croises », « balade »,
+## « forge » (frappe l'enclume au marteau, avec des étincelles).
 @export var activite := "bras_croises"
 @export var repliques: Array[String] = []
 ## Pour « porte_eau » : l'autre bout de son aller-retour.
@@ -25,6 +26,9 @@ extends Node3D
 @export var ventre := 1.0
 ## Ses petits gestes, joués de temps en temps (sa personnalité), par ex. « Interact ».
 @export var gestes: Array[String] = []
+## Pour « forge » : l'endroit où frappe le marteau (le dessus de l'enclume), où jaillissent
+## les étincelles.
+@export var point_de_frappe := Vector3.ZERO
 @export var distance_interaction := 2.0
 ## Pour un marchand : sa boutique (« forgeron » ou « medecin », voir boutiques.gd) et son
 ## titre. Elle s'ouvre après la première conversation, puis directement avec E.
@@ -55,6 +59,21 @@ var _point := 0
 var _sens := 1
 ## Le temps qu'il reste au geste en cours (0 : pas de geste).
 var _geste_restant := 0.0
+## Le forgeron : son geste de frappe, le moment où le marteau touche l'enclume (mesuré
+## sur l'animation), ses étincelles et l'éclair de lumière du choc.
+const ANIM_FRAPPE := "Sword_Attack"
+const MOMENT_DU_CHOC := 0.47
+const MARTEAU := "res://assets/objets/Marteau.fbx"
+## Le marteau dans la main : la même prise que l'épée du héros, réduit à 60 cm environ.
+const MARTEAU_DANS_LA_MAIN := Transform3D(
+	Vector3(-0.996105, -0.086398, 0.017613) * 0.16, Vector3(-0.005154, 0.256456, 0.966542) * 0.16,
+	Vector3(-0.088024, 0.962687, -0.255902) * 0.16, Vector3(-0.035, 0.112, -0.005)) * Transform3D(Basis(), Vector3(0, -0.35, 0))
+var _temps_frappe := 0.0
+var _prochaine_frappe := 0.5
+var _a_frappe := false
+var _etincelles: CPUParticles3D
+var _eclair: OmniLight3D
+var _tete_du_marteau: MeshInstance3D
 
 
 func _ready() -> void:
@@ -106,8 +125,32 @@ func _process(delta: float) -> void:
 			_marcher(delta)
 		"balade":
 			_marcher(delta)
+		"forge":
+			_forger(delta)
 		_:
 			_faire_des_gestes(delta)
+
+
+## Le forgeron frappe le métal sur l'enclume : il lève le marteau, l'abat (étincelles et
+## éclair de lumière au moment du choc), souffle un instant, et recommence.
+func _forger(delta: float) -> void:
+	_temps_frappe += delta
+	if _anim.current_animation == ANIM_FRAPPE:
+		if not _a_frappe and _anim.current_animation_position >= MOMENT_DU_CHOC:
+			_a_frappe = true
+			_etincelles.restart()
+			_eclair.light_energy = 0.7
+			create_tween().tween_property(_eclair, "light_energy", 0.0, 0.45).set_ease(Tween.EASE_OUT)
+		return
+	if _a_frappe:
+		# Le geste vient de finir : une petite pause avant le coup suivant.
+		_a_frappe = false
+		_temps_frappe = 0.0
+		_prochaine_frappe = _rng.randf_range(0.3, 1.1)
+		_anim.play("Idle", 0.25)
+	elif _temps_frappe >= _prochaine_frappe:
+		_anim.play(ANIM_FRAPPE, 0.2)
+		_temps_frappe = 0.0
 
 
 ## Élise va du puits à la médecin et revient ; ceux qui flânent vont de point en point.
@@ -283,6 +326,8 @@ func _construire() -> void:
 		var haut := _squelette.find_bone("spine_03")
 		_squelette.set_bone_pose_scale(bas, Vector3(ventre, 1.0, ventre))
 		_squelette.set_bone_pose_scale(haut, Vector3(1.0 / ventre, 1.0, 1.0 / ventre))
+	if activite == "forge":
+		_preparer_la_forge()
 	# La torche de Bran, dans sa main, avec sa lumière.
 	if activite == "garde":
 		var attache := BoneAttachment3D.new()
@@ -297,6 +342,78 @@ func _construire() -> void:
 		lumiere.omni_range = 6.0
 		lumiere.position = Vector3(0, 0.6, 0)
 		attache.add_child(lumiere)
+
+
+## Le marteau (Hammer Pack, CC0) dans la main droite, couleur de fer ; les étincelles
+## (de petits éclats orange qui retombent) et l'éclair de lumière, sur l'enclume.
+func _preparer_la_forge() -> void:
+	var attache := BoneAttachment3D.new()
+	attache.bone_name = "hand_r"
+	_squelette.add_child(attache)
+	var marteau := (load(MARTEAU) as PackedScene).instantiate() as Node3D
+	# Le fichier du marteau contient aussi la lampe (un « soleil ») et la caméra de la scène
+	# Blender de son auteur : on les retire, sinon ce soleil tourne avec le bras à chaque
+	# coup et tout l'écran du jeu flashe.
+	for intrus in marteau.find_children("*", "Light3D", true, false) + marteau.find_children("*", "Camera3D", true, false):
+		intrus.free()
+	Modeles.teinter(marteau, Color(0.32, 0.3, 0.32))
+	marteau.transform = MARTEAU_DANS_LA_MAIN
+	attache.add_child(marteau)
+	_tete_du_marteau = marteau.find_children("*", "MeshInstance3D", true, false)[0]
+	_se_placer_a_l_enclume.call_deferred()
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.billboard_mode = BaseMaterial3D.BILLBOARD_ENABLED
+	mat.vertex_color_use_as_albedo = true
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	var eclat := QuadMesh.new()
+	eclat.size = Vector2(0.035, 0.035)
+	eclat.material = mat
+	_etincelles = CPUParticles3D.new()
+	_etincelles.mesh = eclat
+	_etincelles.top_level = true
+	_etincelles.emitting = false
+	_etincelles.one_shot = true
+	_etincelles.amount = 26
+	_etincelles.lifetime = 0.7
+	_etincelles.explosiveness = 0.95
+	_etincelles.direction = Vector3.UP
+	_etincelles.spread = 70.0
+	_etincelles.initial_velocity_min = 1.5
+	_etincelles.initial_velocity_max = 3.6
+	_etincelles.gravity = Vector3(0, -7.0, 0)
+	var couleurs := Gradient.new()
+	couleurs.set_color(0, Color(1.0, 0.9, 0.55, 1.0))
+	couleurs.set_color(1, Color(1.0, 0.35, 0.08, 0.0))
+	_etincelles.color_ramp = couleurs
+	add_child(_etincelles)
+	_etincelles.global_position = point_de_frappe
+	_eclair = OmniLight3D.new()
+	_eclair.light_color = Color("ff9a45")
+	_eclair.light_energy = 0.0
+	_eclair.omni_range = 2.5
+	_eclair.top_level = true
+	add_child(_eclair)
+	_eclair.global_position = point_de_frappe + Vector3.UP * 0.4
+
+
+## Le coup part un peu de côté : on mesure où tombe la tête du marteau au moment du choc,
+## puis le forgeron pivote et se place (toujours derrière l'enclume, du côté où il a été
+## posé) pour qu'elle tombe pile dessus.
+func _se_placer_a_l_enclume() -> void:
+	_anim.play(ANIM_FRAPPE)
+	_anim.seek(MOMENT_DU_CHOC, true)
+	var main := _squelette.global_transform * _squelette.get_bone_global_pose(_squelette.find_bone("hand_r"))
+	var boite := _tete_du_marteau.get_aabb()
+	var tete := main * MARTEAU_DANS_LA_MAIN * (_tete_du_marteau.transform * (boite.position + Vector3(boite.size.x / 2.0, boite.size.y * 0.9, boite.size.z / 2.0)))
+	var ecart := tete - global_position
+	ecart.y = 0.0
+	var vers_enclume := point_de_frappe - global_position
+	vers_enclume.y = 0.0
+	vers_enclume = vers_enclume.normalized()
+	_modele.rotation.y += atan2(vers_enclume.x, vers_enclume.z) - atan2(ecart.x, ecart.z)
+	global_position = Vector3(point_de_frappe.x, global_position.y, point_de_frappe.z) - vers_enclume * ecart.length()
+	_anim.play("Idle")
 
 
 ## Les animations (Universal Animation Library), chargées une seule fois pour tous.

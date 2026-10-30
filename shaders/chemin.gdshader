@@ -8,8 +8,8 @@ render_mode cull_disabled;
 //   UV.x  = la distance au milieu du sentier, en demi-largeurs (bord théorique à ±1) ;
 //   COLOR.r = l'humidité (1 près du ruisseau) ; COLOR.a = l'apparition au départ.
 
-uniform vec3 terre : source_color = vec3(0.227, 0.184, 0.161);
-uniform vec3 terre_tassee : source_color = vec3(0.275, 0.224, 0.188);
+uniform vec3 terre : source_color = vec3(0.272, 0.222, 0.193);
+uniform vec3 terre_tassee : source_color = vec3(0.33, 0.27, 0.226);
 uniform vec3 boue : source_color = vec3(0.122, 0.094, 0.075);
 uniform vec3 flaque : source_color = vec3(0.065, 0.060, 0.062);
 

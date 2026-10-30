@@ -9,6 +9,15 @@ extends SubViewportContainer
 
 
 func _ready() -> void:
+	# Sur un Mac à écran « Retina », il y a deux fois plus de pixels : sans ça, les textes
+	# et les fenêtres de l'interface y paraissent deux fois plus petits. On agrandit donc
+	# tout, d'un nombre entier seulement (2), et seulement sur Mac : sur PC, un agrandissement
+	# à virgule (écran réglé à 125 %…) faisait changer la taille de l'image à chaque instant
+	# et tout l'écran clignotait.
+	if OS.get_name() == "macOS":
+		var densite := roundf(DisplayServer.screen_get_scale())
+		if densite > 1.0:
+			get_window().content_scale_factor = densite
 	stretch = true
 	stretch_shrink = taille_pixels
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST

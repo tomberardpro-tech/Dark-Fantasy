@@ -1,8 +1,8 @@
 extends Node3D
 ## Tout ce qu'on voit le long du chemin (le tracé est dans chemin.gd) :
 ## le sentier de terre, les lanternes, le ruisseau et ses berges, le pont, la ruine
-## de briques, l'autel abandonné à la lueur rouge, la charrette renversée et les
-## torches de l'entrée de Bruneval. Les objets viennent des packs Quaternius
+## de briques, l'autel abandonné à la lueur rouge et la charrette renversée (les torches
+## de l'entrée sont sur les poteaux du rempart, voir bruneval.gd). Les objets viennent des packs Quaternius
 ## (Medieval Village MegaKit et Fantasy Props MegaKit).
 
 ## Écart entre deux lanternes (en mètres).
@@ -45,7 +45,6 @@ func _ready() -> void:
 	_creer_lanternes()
 	_creer_ruine()
 	_creer_autel()
-	_creer_torches_entree()
 	var charrette := Node3D.new()
 	charrette.set_script(load("res://scripts/charrette.gd"))
 	charrette.position = Chemin.CHARRETTE
@@ -72,6 +71,9 @@ func _sentier() -> MeshInstance3D:
 	var mat := ShaderMaterial.new()
 	mat.shader = load("res://shaders/chemin.gdshader")
 	var points := Chemin.courbe_chemin.get_baked_points()
+	# Le sentier s'arrête à l'entrée du rempart de Bruneval (demande de Tom) : il s'efface
+	# sur les derniers mètres, juste après les deux poteaux.
+	var fin := Chemin.courbe_chemin.get_closest_offset(Chemin.bord_bruneval(0.0, 0.3)) + 1.5
 	var outil := SurfaceTool.new()
 	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
 	# Positions en travers, en demi-largeurs : le bord est vers ±1, on va jusqu'à ±1,9.
@@ -85,7 +87,7 @@ func _sentier() -> MeshInstance3D:
 		# Au départ, le sentier est plus étroit et apparaît en dégradé.
 		var demi := Chemin.demi_largeur(parcouru) * lerpf(0.55, 1.0, smoothstep(0.0, fondu_depart * 1.5, parcouru))
 		var humidite := 1.0 - smoothstep(3.0, 9.0, Chemin.distance_au_ruisseau(points[i]))
-		var apparition := smoothstep(0.0, fondu_depart, parcouru)
+		var apparition := smoothstep(0.0, fondu_depart, parcouru) * (1.0 - smoothstep(fin - 3.5, fin, parcouru))
 		for u in travers:
 			outil.set_color(Color(humidite, 0, 0, apparition))
 			outil.set_normal(Vector3.UP)
@@ -603,38 +605,6 @@ func _creer_autel() -> void:
 	forme.radius = 0.9
 	forme.height = 2.0
 	_ajouter_obstacle(forme, Transform3D(Basis(), Chemin.AUTEL + Vector3(0, 1, 0)))
-
-
-## Deux torches sur des poteaux marquent l'arrivée à Bruneval, à l'entrée du hameau.
-func _creer_torches_entree() -> void:
-	var courbe := Chemin.courbe_chemin
-	var longueur := courbe.get_baked_length()
-	var a_l_entree := courbe.get_closest_offset(Chemin.ENTREE)
-	var fin := courbe.sample_baked(a_l_entree)
-	var tangente := (fin - courbe.sample_baked(a_l_entree - 1.0)).normalized()
-	var cote := Vector3(-tangente.z, 0, tangente.x)
-	for s in [-1.0, 1.0]:
-		var pos: Vector3 = fin + cote * s * 2.4
-		var poteau := _poteau(2.2)
-		poteau.position = pos + Vector3(0, 1.1, 0)
-		add_child(poteau)
-		var torche := Modeles.creer("Torch_Metal")
-		torche.basis = Basis(Vector3.UP, atan2(tangente.x, tangente.z))
-		torche.position = pos + Vector3(0, 1.9, 0)
-		add_child(torche)
-		var flamme := _flamme(0.12, 0.4)
-		flamme.position = pos + tangente * 0.3 + Vector3(0, 2.25, 0)
-		add_child(flamme)
-		var lumiere := OmniLight3D.new()
-		lumiere.light_color = Color("e0823a")
-		lumiere.light_energy = 1.6
-		lumiere.omni_range = 7.0
-		lumiere.position = flamme.position + Vector3(0, 0.2, 0)
-		add_child(lumiere)
-		var forme := CylinderShape3D.new()
-		forme.radius = 0.15
-		forme.height = 2.4
-		_ajouter_obstacle(forme, Transform3D(Basis(), pos + Vector3(0, 1.2, 0)))
 
 
 ## Un poteau rond, habillé du même bois que les objets du pack.

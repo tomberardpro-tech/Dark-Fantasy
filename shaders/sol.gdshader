@@ -14,6 +14,15 @@ uniform float fin_de_la_clairiere = 9.0;
 uniform float variations = 0.15;
 // Texture de la terre (essai demandé par Tom) : mottes et grain, mats. 0 = sol lisse.
 uniform float texture_terre = 0.5;
+// Le sol de Bruneval, dans l'enceinte : une terre tassée par les pas, un peu plus claire
+// et plus chaude que la forêt, plus sombre le long de la palissade. Réglé par bruneval.gd
+// (l'ovale de la clairière, en mètres « comme à l'écran ») ; sans réglage, rien ne change.
+uniform vec3 terre_village : source_color = vec3(0.205, 0.172, 0.150);
+uniform vec2 village_origine = vec2(0.0, 0.0);
+uniform vec2 village_droite = vec2(1.0, 0.0);
+uniform vec2 village_haut = vec2(0.0, 1.0);
+uniform vec2 village_demi = vec2(0.0, 0.0);
+uniform float village_centre_y = 0.0;
 
 varying vec3 position_monde;
 
@@ -56,6 +65,16 @@ void fragment() {
 	vec3 couleur = mix(herbe_clairiere, sol_foret, smoothstep(fin_de_la_clairiere - 3.0, fin_de_la_clairiere + 2.0, r));
 	float r_terre = length(p) + ondulation(p) * 0.4;
 	couleur = mix(terre_du_feu, couleur, smoothstep(fin_de_la_terre - 1.8, fin_de_la_terre + 2.2, r_terre));
+	// Bruneval : la terre tassée de l'enceinte (bord un peu irrégulier, fondu doux),
+	// plus sombre en s'approchant de la palissade.
+	if (village_demi.x > 0.0) {
+		vec2 d = p - village_origine;
+		vec2 v = vec2(dot(d, village_droite), dot(d, village_haut) - village_centre_y);
+		float e = length(v / village_demi) + (nuages(p * 0.35) - 0.5) * 0.12;
+		vec3 enceinte = mix(terre_village, terre_village * 0.72, smoothstep(0.55, 0.98, e));
+		enceinte *= 0.94 + nuages(p * 0.22 + vec2(5.0, 2.0)) * 0.12;
+		couleur = mix(couleur, enceinte, 1.0 - smoothstep(0.96, 1.1, e));
+	}
 	// Seulement de grandes taches très douces, comme sur l'image de référence.
 	float grandes = nuages(p * 0.08);
 	couleur *= 1.0 - variations * 0.5 + grandes * variations;
