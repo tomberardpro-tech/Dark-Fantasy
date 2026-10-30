@@ -240,3 +240,11 @@ Couleurs : noir, gris et rouge sang.
   que des maisons modulaires identiques. Pistes (gratuites, CC0, à valider avant de télécharger) :
   KayKit Medieval Hexagon Pack (forge, taverne, puits, marché…), Quaternius LowPoly Medieval
   Village Pack (2020).
+- **Bruneval, maquette de Tom appliquée** : l'**auberge devient la maison du chef du village**
+  (icône de quête « ! » dorée qui flotte au-dessus de la porte ; le chef sera à l'intérieur,
+  on y entrera plus tard). **Le forgeron** se tient derrière son **établi** devant la forge
+  (enclume, pierre à aiguiser, râtelier d'armes, foyer rougeoyant) ; **la médecin** derrière son
+  **étal** devant sa maison (potions et fioles sur le comptoir, étagère de flacons, chaudron à
+  lueur verte). Répliques d'attente : leurs boutiques (armes, armures, potions) viendront ensuite.
+  Un **chemin de sortie vers la Zone 1** part de la place vers le haut de l'écran, entre la
+  maison du chef et le médecin, et se perd dans la forêt (fermé tant que la Zone 1 n'existe pas).

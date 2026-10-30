@@ -15,6 +15,12 @@ const COULEUR_FENETRE := Color("f2b766")
 var _rng := RandomNumberGenerator.new()
 var _feux: Array[OmniLight3D] = []
 var _temps := 0.0
+## L'icône de quête au-dessus de la porte du chef, qui flotte doucement.
+var _quete: Label3D
+var _hauteur_quete := 0.0
+## Où se tiennent le forgeron et le médecin, derrière leur étal.
+var _poste_forgeron := Vector3.ZERO
+var _poste_medecin := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -23,7 +29,7 @@ func _ready() -> void:
 	# Comme sur la maquette choisie par Tom : les maisons en arc autour de la place, façades
 	# éclairées vers la caméra. [x, y, largeur, longueur de façade, étages, briques, nom,
 	# rotation vers la place (0 = face à la caméra, 1 = face au feu)]
-	_maison(0.0, 15.2, 6, 10, 2, false, "Auberge", 0.0)
+	_maison(0.0, 15.2, 6, 10, 2, false, "Maison du chef", 0.0)
 	_maison(-19.3, 3.1, 4, 8, 1, true, "Forge", 0.3)
 	_maison(20.2, 3.8, 6, 8, 1, false, "Médecin", 0.3)
 	_maison(-17.1, -8.7, 4, 6, 1, false, "Abri", 0.25)
@@ -32,6 +38,8 @@ func _ready() -> void:
 	_creer_feu()
 	_creer_puits(5.6, 3.3)
 	_creer_etal(-7.4, -5.7)
+	_creer_etal_medecin(20.2, 3.8)
+	_chemin_de_sortie()
 	_creer_survivants()
 
 
@@ -40,6 +48,8 @@ func _process(delta: float) -> void:
 	_temps += delta
 	for i in _feux.size():
 		_feux[i].light_energy = 1.4 + sin(_temps * 11.0 + i) * 0.2 + sin(_temps * 6.3) * 0.15
+	if _quete:
+		_quete.position.y = _hauteur_quete + sin(_temps * 2.2) * 0.12
 
 
 # --- La place -------------------------------------------------------------------
@@ -159,12 +169,12 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 		pignon.position = Vector3(0, haut, bout * demi_p)
 		pignon.rotation.y = 0.0 if bout > 0.0 else PI
 		maison.add_child(pignon)
-	if nom == "Auberge" or nom == "Forge":
+	if nom == "Maison du chef" or nom == "Forge":
 		var cheminee := Modeles.creer("Prop_Chimney")
 		cheminee.position = Vector3(-demi_l + 0.9, haut + 0.4, demi_p - 1.2)
 		maison.add_child(cheminee)
-	# Une lanterne au-dessus de la porte de l'auberge.
-	if nom == "Auberge":
+	# Une lanterne au-dessus de la porte du chef, et l'icône de quête au-dessus de la porte.
+	if nom == "Maison du chef":
 		var lanterne := Modeles.creer("Lantern_Wall")
 		lanterne.position = Vector3(demi_l + 0.1, 2.6, demi_p - 1.0 - porte * 2.0 + 1.3)
 		lanterne.rotation.y = PI / 2.0
@@ -175,6 +185,20 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 		lumiere.omni_range = 6.0
 		lumiere.position = lanterne.position + Vector3(0.6, -0.2, 0)
 		maison.add_child(lumiere)
+		# L'icône de quête : un « ! » doré qui flotte au-dessus de la porte (le chef est
+		# à l'intérieur ; on pourra entrer plus tard).
+		_quete = Label3D.new()
+		_quete.text = "!"
+		_quete.font = load("res://assets/polices/Cinzel.ttf")
+		_quete.font_size = 96
+		_quete.pixel_size = 0.01
+		_quete.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_quete.modulate = Color("f2c46b")
+		_quete.outline_modulate = Color("07091a")
+		_quete.outline_size = 14
+		_quete.position = Vector3(demi_l + 0.4, 3.6, demi_p - 1.0 - porte * 2.0)
+		maison.add_child(_quete)
+		_hauteur_quete = _quete.position.y
 	# Un peu de lierre, des tonneaux ou des caisses contre les murs (au hasard).
 	if _rng.randf() < 0.6:
 		var lierre := Modeles.creer(["Prop_Vine1", "Prop_Vine4"][_rng.randi_range(0, 1)], Modeles.OBJETS, Color(0.42, 0.5, 0.52))
@@ -229,18 +253,36 @@ func _fenetre_allumee(maison: Node3D, pos: Vector3, angle: float) -> void:
 
 # --- La forge, le puits, l'étal… ----------------------------------------------------
 
+## Le poste du forgeron, devant la forge et tourné vers la place : l'établi (derrière
+## lequel il se tient), l'enclume et la pierre à aiguiser de chaque côté, le râtelier
+## d'armes et le foyer rougeoyant. C'est là qu'on lui achètera armes et armures.
 func _creer_forge(x: float, y: float) -> void:
-	var devant := Chemin.bruneval(x, y)
-	var vers_place := (Chemin.VILLAGE - devant).normalized()
+	var maison := Chemin.bruneval(x, y)
+	var vers_place := (Chemin.VILLAGE - maison).normalized()
 	var cote := Vector3(-vers_place.z, 0, vers_place.x)
+	var poste := maison + vers_place * 4.4
+	var face := _vers(poste, Chemin.VILLAGE)
+	var etabli := Modeles.creer("Workbench")
+	etabli.position = poste
+	etabli.rotation.y = face
+	add_child(etabli)
+	var forme := BoxShape3D.new()
+	forme.size = Vector3(2.0, 0.9, 1.0)
+	_obstacle(forme, Transform3D(Basis(Vector3.UP, face), poste + Vector3(0, 0.45, 0)))
+	_poste_forgeron = poste - vers_place * 1.0
 	var enclume := Modeles.creer("Anvil")
-	enclume.position = devant + vers_place * 4.3 + cote * 1.4
-	enclume.rotation.y = _rng.randf_range(0.0, TAU)
+	enclume.position = poste + cote * 1.7 + vers_place * 0.2
+	enclume.rotation.y = face + 0.3
 	add_child(enclume)
 	_obstacle_rond(enclume.position, 0.45)
+	var meule := Modeles.creer("Whetstone")
+	meule.position = poste - cote * 1.8
+	meule.rotation.y = face - 0.4
+	add_child(meule)
+	_obstacle_rond(meule.position, 0.5)
 	var armes := Modeles.creer("WeaponStand")
-	armes.position = devant + vers_place * 3.7 - cote * 2.0
-	armes.rotation.y = _vers(armes.position, devant) + PI
+	armes.position = poste - cote * 3.1 - vers_place * 0.8
+	armes.rotation.y = face + 0.5
 	add_child(armes)
 	# Le foyer : un bloc de briques dont le dessus rougeoie.
 	var foyer := MeshInstance3D.new()
@@ -248,7 +290,7 @@ func _creer_forge(x: float, y: float) -> void:
 	bloc.size = Vector3(1.0, 0.8, 1.0)
 	foyer.mesh = bloc
 	foyer.material_override = Modeles.materiau_de("Wall_UnevenBrick_Straight")
-	foyer.position = devant + vers_place * 3.9 + Vector3(0, 0.4, 0) - cote * 0.2
+	foyer.position = poste + cote * 3.0 - vers_place * 0.9 + Vector3(0, 0.4, 0)
 	add_child(foyer)
 	var braise := MeshInstance3D.new()
 	var dessus := BoxMesh.new()
@@ -309,6 +351,97 @@ func _creer_puits(x: float, y: float) -> void:
 	_obstacle_rond(centre, 0.85)
 
 
+## L'étal du médecin, devant sa maison et tourné vers la place : des potions et des
+## flacons sur le comptoir, une étagère de fioles, un chaudron qui fume doucement. C'est là
+## qu'on lui achètera des potions.
+func _creer_etal_medecin(x: float, y: float) -> void:
+	var maison := Chemin.bruneval(x, y)
+	var vers_place := (Chemin.VILLAGE - maison).normalized()
+	var cote := Vector3(-vers_place.z, 0, vers_place.x)
+	var poste := maison + vers_place * 4.6
+	var face := _vers(poste, Chemin.VILLAGE)
+	var tourne := Basis(Vector3.UP, face)
+	var etal := Modeles.creer("Stall_Empty")
+	etal.position = poste
+	etal.rotation.y = face
+	add_child(etal)
+	var forme := BoxShape3D.new()
+	forme.size = Vector3(1.9, 1.0, 1.0)
+	_obstacle(forme, Transform3D(tourne, poste + Vector3(0, 0.5, 0)))
+	_poste_medecin = poste - vers_place * 0.95
+	# Sur le comptoir (à 0,83 m, mesuré) : des potions et des petits flacons.
+	var comptoir := 0.83
+	for o in [["Potion_1", Vector3(-0.65, 0, 0.1)], ["Potion_2", Vector3(-0.4, 0, -0.05)], ["Potion_4", Vector3(-0.15, 0, 0.15)],
+			["SmallBottles_1", Vector3(0.2, 0, 0.0)], ["Potion_2", Vector3(0.5, 0, 0.12)], ["Potion_1", Vector3(0.7, 0, -0.1)]]:
+		var objet := Modeles.creer(o[0])
+		objet.position = poste + tourne * o[1] + Vector3(0, comptoir, 0)
+		objet.rotation.y = _rng.randf_range(0.0, TAU)
+		add_child(objet)
+	var etagere := Modeles.creer("Shelf_Small_Bottles")
+	etagere.position = poste - vers_place * 1.6 + Vector3(0, 1.1, 0)
+	etagere.rotation.y = face
+	add_child(etagere)
+	var chaudron := Modeles.creer("Cauldron")
+	chaudron.position = poste + cote * 1.7 - vers_place * 0.3
+	add_child(chaudron)
+	_obstacle_rond(chaudron.position, 0.5)
+	# Une lueur verdâtre très douce sort du chaudron.
+	var lueur := OmniLight3D.new()
+	lueur.light_color = Color("8fbf7a")
+	lueur.light_energy = 0.5
+	lueur.omni_range = 2.5
+	lueur.position = chaudron.position + Vector3(0, 1.0, 0)
+	add_child(lueur)
+
+
+## Le chemin qui part de la place vers le haut de l'écran, entre la maison du chef et le
+## médecin : la future sortie vers la Zone 1 (pas encore ouverte, la forêt la ferme).
+func _chemin_de_sortie() -> void:
+	var courbe := Curve3D.new()
+	courbe.bake_interval = 1.0
+	var points := [Chemin.bruneval(4.5, 5.5), Chemin.bruneval(7.5, 11.0), Chemin.bruneval(9.5, 17.0),
+		Chemin.bruneval(10.5, 23.0), Chemin.bruneval(11.0, 29.0)]
+	for i in points.size():
+		var avant: Vector3 = points[max(i - 1, 0)]
+		var apres: Vector3 = points[min(i + 1, points.size() - 1)]
+		courbe.add_point(points[i], -(apres - avant) * 0.25, (apres - avant) * 0.25)
+	var mat := ShaderMaterial.new()
+	mat.shader = load("res://shaders/chemin.gdshader")
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var cuits := courbe.get_baked_points()
+	var travers := [-1.9, -1.2, -0.6, 0.0, 0.6, 1.2, 1.9]
+	var parcouru := 0.0
+	for i in cuits.size():
+		if i > 0:
+			parcouru += cuits[i].distance_to(cuits[i - 1])
+		var tangente := (cuits[min(i + 1, cuits.size() - 1)] - cuits[max(i - 1, 0)]).normalized()
+		var cote := Vector3(-tangente.z, 0.0, tangente.x)
+		var demi := Chemin.demi_largeur(parcouru + 40.0) * 0.85
+		# Le chemin naît de la place en dégradé et se perd dans la forêt au bout.
+		var apparition := smoothstep(0.0, 3.0, parcouru) * (1.0 - smoothstep(cuits.size() - 7.0, cuits.size() - 1.0, float(i)))
+		for u in travers:
+			outil.set_color(Color(0.2, 0, 0, apparition))
+			outil.set_normal(Vector3.UP)
+			outil.set_uv(Vector2(u, parcouru))
+			outil.add_vertex(cuits[i] + cote * u * demi + Vector3(0, 0.03, 0))
+	var n := travers.size()
+	for i in cuits.size() - 1:
+		for k in n - 1:
+			var a := i * n + k
+			outil.add_index(a)
+			outil.add_index(a + 1)
+			outil.add_index(a + n)
+			outil.add_index(a + 1)
+			outil.add_index(a + n + 1)
+			outil.add_index(a + n)
+	var bande := MeshInstance3D.new()
+	bande.mesh = outil.commit()
+	bande.material_override = mat
+	bande.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(bande)
+
+
 func _creer_etal(x: float, y: float) -> void:
 	var pos := Chemin.bruneval(x, y)
 	var etal := Modeles.creer("Stall_Empty")
@@ -331,6 +464,21 @@ func _creer_etal(x: float, y: float) -> void:
 ## Les cinq survivants (étape 10), leurs tenues, leur activité et leurs répliques
 ## (proposées par Claude, à valider par Tom : on peut les changer ici).
 func _creer_survivants() -> void:
+	# Les deux marchands, derrière leur étal, face à la place (boutiques à venir).
+	_survivant({"nom": "Le forgeron", "tenue": "Male_Peasant", "teinte": Color(0.36, 0.32, 0.3), "activite": "etal",
+		"coiffures": ["Hair_Buzzed", "Hair_Beard"], "cheveux": Color(0.16, 0.12, 0.1),
+		"ou": _poste_forgeron, "regard": Chemin.VILLAGE,
+		"repliques": [
+			"Des lames, des armures… Le métal ne manque pas. C'est le temps qui manque.",
+			"Reviens me voir bientôt : je te forgerai de quoi tenir face aux morts.",
+		]})
+	_survivant({"nom": "La médecin", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.46, 0.5, 0.44), "activite": "etal",
+		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.12, 0.1, 0.1),
+		"ou": _poste_medecin, "regard": Chemin.VILLAGE,
+		"repliques": [
+			"Des potions pour les blessures, des herbes contre la fièvre… et contre la peur, rien.",
+			"Mes fioles ne sont pas encore prêtes. Repasse plus tard, je t'en garderai.",
+		]})
 	_survivant({"nom": "Bran", "tenue": "Male_Ranger", "teinte": Color(0.42, 0.48, 0.45), "activite": "garde",
 		"ou": Chemin.bruneval(2.4, -19.0), "regard": Chemin.bruneval(2.4, -30.0),
 		"repliques": [

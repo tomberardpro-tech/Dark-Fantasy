@@ -15748,20 +15748,6 @@
 		"z": 134.745
 	},
 	{
-		"decalage": 4.616,
-		"modele": "DeadTree_2",
-		"rotation": 3.6891,
-		"souplesse": 0.03,
-		"taille": 0.6261,
-		"x": 116.736,
-		"z": 125.159
-	},
-	{
-		"obstacle": 0.35,
-		"x": 116.736,
-		"z": 125.159
-	},
-	{
 		"decalage": 3.7318,
 		"modele": "Pine_4",
 		"rotation": 0.2786,
@@ -15774,34 +15760,6 @@
 		"obstacle": 0.35,
 		"x": 112.313,
 		"z": 130.12
-	},
-	{
-		"decalage": 0.481,
-		"modele": "Pine_1",
-		"rotation": 0.7481,
-		"souplesse": 0.03,
-		"taille": 0.5113,
-		"x": 117.239,
-		"z": 126.607
-	},
-	{
-		"obstacle": 0.35,
-		"x": 117.239,
-		"z": 126.607
-	},
-	{
-		"decalage": 3.7695,
-		"modele": "Pine_1",
-		"rotation": 3.7597,
-		"souplesse": 0.03,
-		"taille": 0.5439,
-		"x": 117.547,
-		"z": 128.203
-	},
-	{
-		"obstacle": 0.35,
-		"x": 117.547,
-		"z": 128.203
 	},
 	{
 		"decalage": 0.6375,
@@ -15844,20 +15802,6 @@
 		"obstacle": 0.35,
 		"x": 110.144,
 		"z": 130.585
-	},
-	{
-		"decalage": 5.5539,
-		"modele": "Pine_4",
-		"rotation": 4.4518,
-		"souplesse": 0.03,
-		"taille": 0.6581,
-		"x": 114.867,
-		"z": 126.09
-	},
-	{
-		"obstacle": 0.35,
-		"x": 114.867,
-		"z": 126.09
 	},
 	{
 		"decalage": 3.7574,
@@ -17358,20 +17302,6 @@
 		"z": 91.574
 	},
 	{
-		"decalage": 5.8278,
-		"modele": "Pine_2",
-		"rotation": 5.845,
-		"souplesse": 0.03,
-		"taille": 0.7578,
-		"x": 119.168,
-		"z": 129.199
-	},
-	{
-		"obstacle": 0.35,
-		"x": 119.168,
-		"z": 129.199
-	},
-	{
 		"decalage": 3.36,
 		"modele": "Pine_1",
 		"rotation": 3.336,
@@ -17666,20 +17596,6 @@
 		"z": 78.514
 	},
 	{
-		"decalage": 2.5295,
-		"modele": "Pine_2",
-		"rotation": 1.1268,
-		"souplesse": 0.03,
-		"taille": 0.6463,
-		"x": 119.429,
-		"z": 130.832
-	},
-	{
-		"obstacle": 0.35,
-		"x": 119.429,
-		"z": 130.832
-	},
-	{
 		"decalage": 5.1913,
 		"modele": "Pine_5",
 		"rotation": 1.4381,
@@ -17776,20 +17692,6 @@
 		"obstacle": 0.35,
 		"x": 77.078,
 		"z": 114.336
-	},
-	{
-		"decalage": 5.1136,
-		"modele": "DeadTree_1",
-		"rotation": 3.0061,
-		"souplesse": 0.03,
-		"taille": 0.6216,
-		"x": 119.695,
-		"z": 126.166
-	},
-	{
-		"obstacle": 0.35,
-		"x": 119.695,
-		"z": 126.166
 	},
 	{
 		"decalage": 0.7707,
@@ -19486,20 +19388,6 @@
 		"z": 133.182
 	},
 	{
-		"decalage": 0.9023,
-		"modele": "Pine_5",
-		"rotation": 0.0051,
-		"souplesse": 0.03,
-		"taille": 0.5856,
-		"x": 122.312,
-		"z": 127.869
-	},
-	{
-		"obstacle": 0.35,
-		"x": 122.312,
-		"z": 127.869
-	},
-	{
 		"decalage": 6.0044,
 		"modele": "DeadTree_4",
 		"rotation": 3.2712,
@@ -20466,34 +20354,6 @@
 		"z": 124.796
 	},
 	{
-		"decalage": 0.7842,
-		"modele": "Pine_2",
-		"rotation": 0.4038,
-		"souplesse": 0.03,
-		"taille": 0.6204,
-		"x": 121.314,
-		"z": 131.133
-	},
-	{
-		"obstacle": 0.35,
-		"x": 121.314,
-		"z": 131.133
-	},
-	{
-		"decalage": 0.086,
-		"modele": "Pine_1",
-		"rotation": 3.9896,
-		"souplesse": 0.03,
-		"taille": 0.5228,
-		"x": 123.334,
-		"z": 131.437
-	},
-	{
-		"obstacle": 0.35,
-		"x": 123.334,
-		"z": 131.437
-	},
-	{
 		"decalage": 0.1405,
 		"modele": "Pine_5",
 		"rotation": 3.2657,
@@ -20520,20 +20380,6 @@
 		"obstacle": 0.35,
 		"x": 80.919,
 		"z": 93.704
-	},
-	{
-		"decalage": 5.1247,
-		"modele": "Pine_5",
-		"rotation": 0.5079,
-		"souplesse": 0.03,
-		"taille": 0.6923,
-		"x": 120.802,
-		"z": 129.065
-	},
-	{
-		"obstacle": 0.35,
-		"x": 120.802,
-		"z": 129.065
 	},
 	{
 		"decalage": 6.1897,
@@ -22194,20 +22040,6 @@
 		"obstacle": 0.35,
 		"x": 80.536,
 		"z": 129.134
-	},
-	{
-		"decalage": 4.623,
-		"modele": "Pine_3",
-		"rotation": 3.0114,
-		"souplesse": 0.03,
-		"taille": 0.6723,
-		"x": 118.424,
-		"z": 124.504
-	},
-	{
-		"obstacle": 0.35,
-		"x": 118.424,
-		"z": 124.504
 	},
 	{
 		"decalage": 3.7337,
