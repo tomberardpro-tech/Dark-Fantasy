@@ -48,33 +48,83 @@ func interagir(joueur: Node3D) -> void:
 		interface.notifier("Partie sauvegardée")
 
 
-## Le tronc couché du pack Quaternius Ultimate Nature (« WoodLog », choix de Tom), un peu
-## réduit pour que le héros s'assoie à la bonne hauteur, et assombri pour la nuit.
-## Il remplace la forme simple du nœud « Apparence » (gardée cachée dans la scène).
-const MODELE := "res://assets/nature/WoodLog.fbx"
-const ECHELLE := 0.7
-
-
+## Un rondin simple et net (choix de Tom) : bien rond, à peine irrégulier, un peu plus épais d'un
+## côté, habillé de l'écorce brune des pins du pack nature, avec les bouts coupés qui
+## montrent les cernes du bois.
 func _habiller_d_ecorce() -> void:
 	var apparence := get_node_or_null("Apparence") as MeshInstance3D
-	if apparence:
-		apparence.visible = false
-	var tronc := (load(MODELE) as PackedScene).instantiate() as Node3D
-	tronc.name = "Tronc couché"
-	Modeles.teinter(tronc, Color(0.85, 0.78, 0.76))
-	add_child(tronc)
-	# Le modèle est couché le long de son Z : on le tourne pour qu'il suive le X du tronc,
-	# puis on le centre (son milieu sur le point du tronc, posé au sol).
-	tronc.rotation.y = PI / 2.0
-	tronc.scale = Vector3.ONE * ECHELLE
-	var boite := AABB()
-	var premier := true
-	for m in tronc.find_children("*", "MeshInstance3D", true, false):
-		var b: AABB = (global_transform.affine_inverse() * m.global_transform) * (m as MeshInstance3D).get_aabb()
-		boite = b if premier else boite.merge(b)
-		premier = false
-	var milieu := boite.get_center()
-	tronc.position = Vector3(-milieu.x, -boite.position.y, -milieu.z)
+	if apparence == null:
+		return
+	var ecorce := StandardMaterial3D.new()
+	ecorce.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
+	ecorce.normal_enabled = true
+	ecorce.normal_texture = load("res://assets/nature/Bark_NormalTree_Normal.png")
+	ecorce.albedo_color = Color(0.72, 0.58, 0.48)
+	ecorce.roughness = 1.0
+	var bois_coupe := ShaderMaterial.new()
+	bois_coupe.shader = load("res://shaders/bois_coupe.gdshader")
+	apparence.mesh = _maillage_rondin(ecorce, bois_coupe)
+	apparence.material_override = null
+
+
+## Fabrique le rondin : un tube bosselé (l'écorce) fermé par deux bouts plats (le bois coupé).
+## Son axe est le Y du maillage (le nœud « Apparence » le couche à l'horizontale).
+func _maillage_rondin(ecorce: Material, bois_coupe: Material) -> ArrayMesh:
+	const LONGUEUR := 1.6
+	const TOURS := 24
+	const ANNEAUX := 14
+	var bruit := FastNoiseLite.new()
+	bruit.seed = 5
+	bruit.frequency = 0.9
+	var rayon := func(angle: float, t: float) -> float:
+		var base := lerpf(0.23, 0.215, t)
+		var p := Vector2(cos(angle), sin(angle)) * 1.5
+		return base * (1.0 + bruit.get_noise_3d(p.x, p.y, t * 4.0) * 0.025)
+	var outil := SurfaceTool.new()
+	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for a in ANNEAUX + 1:
+		var t := float(a) / ANNEAUX
+		for k in TOURS + 1:
+			var angle := TAU * k / TOURS
+			var r: float = rayon.call(angle, t)
+			outil.set_uv(Vector2(float(k) / TOURS * 2.0, t * 2.2))
+			outil.add_vertex(Vector3(cos(angle) * r, (t - 0.5) * LONGUEUR, sin(angle) * r))
+	for a in ANNEAUX:
+		for k in TOURS:
+			var i := a * (TOURS + 1) + k
+			var j := i + TOURS + 1
+			outil.add_index(i)
+			outil.add_index(j)
+			outil.add_index(i + 1)
+			outil.add_index(i + 1)
+			outil.add_index(j)
+			outil.add_index(j + 1)
+	outil.generate_normals()
+	outil.generate_tangents()
+	var maillage := outil.commit()
+	maillage.surface_set_material(0, ecorce)
+	# Les deux bouts coupés.
+	var bouts := SurfaceTool.new()
+	bouts.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for cote in [0.0, 1.0]:
+		var y: float = (cote - 0.5) * LONGUEUR
+		var normale := Vector3(0, 1 if cote > 0.5 else -1, 0)
+		for k in TOURS:
+			var a1 := TAU * k / TOURS
+			var a2 := TAU * (k + 1) / TOURS
+			var r1: float = rayon.call(a1, cote)
+			var r2: float = rayon.call(a2, cote)
+			var points := [Vector3(0, y, 0), Vector3(cos(a1) * r1, y, sin(a1) * r1), Vector3(cos(a2) * r2, y, sin(a2) * r2)]
+			if cote < 0.5:
+				points = [points[0], points[2], points[1]]
+			for p in points:
+				bouts.set_normal(normale)
+				# UV : position sur le disque, de -1 à 1, pour dessiner les cernes.
+				bouts.set_uv(Vector2(p.x, p.z) / 0.235)
+				bouts.add_vertex(p)
+	bouts.commit(maillage)
+	maillage.surface_set_material(1, bois_coupe)
+	return maillage
 
 
 ## Vrai si c'est ici que le héros doit se réveiller (dernier feu utilisé, ou feu de départ).
