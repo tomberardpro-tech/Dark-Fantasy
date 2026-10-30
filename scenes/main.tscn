@@ -37,7 +37,7 @@ fog_height = 0.8
 fog_height_density = 0.35
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_sol"]
-size = Vector2(420, 420)
+size = Vector2(1000, 1000)
 
 [sub_resource type="ShaderMaterial" id="Material_sol"]
 shader = ExtResource("10_sol")

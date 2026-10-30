@@ -21,11 +21,15 @@ var _temps := 0.0
 var _porte_chef := Vector3.ZERO
 var _devant_chef := Vector3.ZERO
 ## L'intérieur de la maison du chef, loin du monde (voir interieur_chef.gd).
-const INTERIEUR_CHEF := Vector3(420, 0, 420)
+const INTERIEUR_CHEF := Vector3(2000, 0, 2000)
 var _interieur: Node3D
 ## Où se tiennent le forgeron et le médecin, derrière leur étal.
 var _poste_forgeron := Vector3.ZERO
 var _poste_medecin := Vector3.ZERO
+## Le poteau de droite de l'entrée du rempart (Bran s'y adosse) et la place d'Osric.
+var _poteau_entree := Vector3.ZERO
+var _poste_osric := Vector3.ZERO
+var _regard_osric := Vector3.ZERO
 
 
 func _ready() -> void:
@@ -35,14 +39,14 @@ func _ready() -> void:
 	# tournées vers le feu, le forgeron et la médecin devant leur stand.
 	# [x, y, largeur, longueur de façade, étages, briques, nom,
 	# rotation vers la place (0 = face à la caméra, 1 = face au feu)]
-	_maison(0.0, 10.0, 4, 4, 2, false, "Maison du chef", 1.0)
+	_maison(0.0, 10.0, 4, 6, 1, false, "Maison du chef", 1.0)
 	_maison(-11.0, 2.5, 4, 4, 1, true, "Forge", 1.0)
 	_maison(11.0, 3.0, 4, 4, 1, false, "Médecin", 1.0)
 	_maison(-9.5, -8.5, 4, 4, 1, false, "Abri", 1.0)
 	_maison(9.5, -8.5, 4, 4, 1, false, "Abri de l'est", 1.0)
 	_creer_forge(-11.0, 2.5)
 	_creer_feu()
-	_creer_puits(5.8, 2.2)
+	_creer_puits(-3.6, 4.6)
 	_creer_etal(-6.0, -5.2)
 	_creer_etal_medecin(11.0, 3.0)
 	_chemin_de_sortie()
@@ -127,14 +131,15 @@ func _creer_feu() -> void:
 	feu.portee = 14.0
 	feu.position = Chemin.VILLAGE
 	add_child(feu)
-	# Le banc du vieux Hugo, tourné vers le feu.
-	var banc := Modeles.creer("Bench")
-	banc.position = Chemin.bruneval(-2.8, -2.9)
-	banc.rotation.y = _vers(banc.position, feu.position) + 0.1
-	add_child(banc)
-	var forme := BoxShape3D.new()
-	forme.size = Vector3(2.8, 0.5, 0.55)
-	_obstacle(forme, Transform3D(Basis(Vector3.UP, banc.rotation.y), banc.position + Vector3(0, 0.25, 0)))
+	# Deux bancs tournés vers le feu : celui du vieux Hugo, et un autre en face, à droite.
+	for place in [[Vector2(-2.8, -2.9), 0.1], [Vector2(3.0, -2.6), -0.15]]:
+		var banc := Modeles.creer("Bench")
+		banc.position = Chemin.bruneval(place[0].x, place[0].y)
+		banc.rotation.y = _vers(banc.position, feu.position) + place[1]
+		add_child(banc)
+		var forme := BoxShape3D.new()
+		forme.size = Vector3(2.8, 0.5, 0.55)
+		_obstacle(forme, Transform3D(Basis(Vector3.UP, banc.rotation.y), banc.position + Vector3(0, 0.25, 0)))
 
 
 # --- Les maisons ------------------------------------------------------------------
@@ -470,11 +475,25 @@ func _chemin_de_sortie() -> void:
 ## sur le chemin de sortie, une porte de planches reste fermée (la Zone 1 n'existe pas
 ## encore). On ne le traverse pas.
 func _creer_rempart() -> void:
+	# Le bois des maisons du pack (T_WoodTrim) : le fil du bois court le long du pieu, et la
+	# pointe taillée montre le bois coupé, plus clair.
 	var ecorce := StandardMaterial3D.new()
-	ecorce.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
-	ecorce.albedo_color = Color(0.62, 0.52, 0.45)
+	ecorce.albedo_texture = load("res://assets/objets/T_WoodTrim_BaseColor.png")
+	ecorce.normal_enabled = true
+	ecorce.normal_texture = load("res://assets/objets/T_WoodTrim_Normal.png")
+	ecorce.albedo_color = Color(0.78, 0.72, 0.7)
 	ecorce.roughness = 1.0
+	# Les gros poteaux et les planches des portes : de l'écorce, dont le relief court en long.
+	var bois_porte := StandardMaterial3D.new()
+	bois_porte.albedo_texture = load("res://assets/nature/Bark_NormalTree.png")
+	bois_porte.normal_enabled = true
+	bois_porte.normal_texture = load("res://assets/nature/Bark_NormalTree_Normal.png")
+	bois_porte.albedo_color = Color(0.62, 0.5, 0.44)
+	bois_porte.uv1_scale = Vector3(1.0, 1.5, 1.0)
+	bois_porte.roughness = 1.0
 	# Un pieu : un tronc fin et sa pointe, en un seul maillage, répété avec un MultiMesh.
+	# Dans la texture : le fil du bois foncé est entre v = 0,33 et 0,6 (horizontal, donc u
+	# suit la hauteur du pieu) ; le bois coupé est vers u = 0,25, v = 0,7.
 	var outil := SurfaceTool.new()
 	outil.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var cotes := 7
@@ -485,11 +504,16 @@ func _creer_rempart() -> void:
 		var pb := Vector3(cos(b), 0, sin(b)) * 0.17
 		var h := Vector3.UP * 2.3
 		var pointe := Vector3.UP * 2.75
-		for v in [[pa, 0.0], [pa + h, 2.3], [pb + h, 2.3], [pa, 0.0], [pb + h, 2.3], [pb, 0.0], [pa + h, 2.3], [pointe, 2.75], [pb + h, 2.3]]:
-			var p: Vector3 = v[0]
-			outil.set_uv(Vector2(float(i) / cotes, v[1] * 0.5))
-			outil.add_vertex(p)
+		var va := lerpf(0.34, 0.6, float(i) / cotes)
+		var vb := lerpf(0.34, 0.6, float(i + 1) / cotes)
+		var decale := float(i % 3) * 0.3
+		for v in [[pa, Vector2(decale, va)], [pa + h, Vector2(decale + 0.9, va)], [pb + h, Vector2(decale + 0.9, vb)],
+				[pa, Vector2(decale, va)], [pb + h, Vector2(decale + 0.9, vb)], [pb, Vector2(decale, vb)],
+				[pa + h, Vector2(0.19, 0.66)], [pointe, Vector2(0.25, 0.76)], [pb + h, Vector2(0.31, 0.66)]]:
+			outil.set_uv(v[1])
+			outil.add_vertex(v[0])
 	outil.generate_normals()
+	outil.generate_tangents()
 	var pieu := outil.commit()
 	pieu.surface_set_material(0, ecorce)
 	# Les places des pieux, tous les 0,36 m le long du bord de la clairière.
@@ -497,6 +521,7 @@ func _creer_rempart() -> void:
 	var places: Array[Transform3D] = []
 	var porte := Vector3.INF
 	var fin_porte := Vector3.INF
+	var entree: Array[Vector3] = []
 	var pas := 400
 	var avant := Chemin.bord_bruneval(0.0, 0.3)
 	var depuis := 0.0
@@ -505,6 +530,8 @@ func _creer_rempart() -> void:
 		var p := Chemin.bord_bruneval(TAU * i / pas, 0.3)
 		depuis += p.distance_to(avant)
 		var ouvert := Chemin.distance_au_chemin(p) < 2.6
+		if ouvert:
+			entree.append(p)
 		if _distance_a(p, sortie) < 1.8:
 			if porte == Vector3.INF:
 				porte = p
@@ -548,6 +575,28 @@ func _creer_rempart() -> void:
 		var dedans := (Chemin.VILLAGE - (a + b) / 2.0).normalized() * 0.22
 		for hauteur in [0.7, 1.8]:
 			add_child(_poutre(a + dedans + Vector3.UP * hauteur, b + dedans + Vector3.UP * hauteur, 0.06, bois))
+	# L'entrée, là où arrive le chemin : deux gros poteaux et une traverse au-dessus.
+	# Bran est adossé au poteau de droite.
+	var bout_a := entree[0]
+	var bout_b := entree[0]
+	for p in entree:
+		for q in entree:
+			if p.distance_to(q) > bout_a.distance_to(bout_b):
+				bout_a = p
+				bout_b = q
+	var milieu := (bout_a + bout_b) / 2.0
+	var ecart := (bout_b - bout_a).normalized()
+	var gauche_entree := milieu - ecart * (bout_a.distance_to(bout_b) / 2.0 + 0.25)
+	var droite_entree := milieu + ecart * (bout_a.distance_to(bout_b) / 2.0 + 0.25)
+	if (droite_entree - gauche_entree).dot(Chemin.DROITE_ECRAN) < 0.0:
+		var echange := gauche_entree
+		gauche_entree = droite_entree
+		droite_entree = echange
+	for poteau in [gauche_entree, droite_entree]:
+		add_child(_poutre(poteau, poteau + Vector3.UP * 3.4, 0.24, bois_porte))
+		_obstacle_rond(poteau, 0.3)
+	add_child(_poutre(gauche_entree + Vector3.UP * 3.15 - ecart * 0.4, droite_entree + Vector3.UP * 3.15 + ecart * 0.4, 0.14, bois_porte))
+	_poteau_entree = droite_entree
 	# La porte fermée sur le chemin de sortie : des planches entre deux gros poteaux.
 	if porte != Vector3.INF:
 		var centre := (porte + fin_porte) / 2.0
@@ -556,11 +605,11 @@ func _creer_rempart() -> void:
 		var gauche := centre - travers * demi
 		var droite := centre + travers * demi
 		for poteau in [gauche, droite]:
-			add_child(_poutre(poteau, poteau + Vector3.UP * 3.2, 0.24, ecorce))
+			add_child(_poutre(poteau, poteau + Vector3.UP * 3.2, 0.24, bois_porte))
 		var planches := int(demi / 0.38) * 2 + 1
 		for k in planches:
 			var x := lerpf(-demi + 0.2, demi - 0.2, k / float(planches - 1))
-			add_child(_poutre(centre + travers * x, centre + travers * x + Vector3.UP * _rng.randf_range(2.35, 2.55), 0.19, ecorce))
+			add_child(_poutre(centre + travers * x, centre + travers * x + Vector3.UP * _rng.randf_range(2.35, 2.55), 0.17, bois_porte))
 		for hauteur in [0.6, 1.9]:
 			add_child(_poutre(gauche + Vector3.UP * hauteur, droite + Vector3.UP * hauteur, 0.08, bois))
 		_mur(gauche, droite)
@@ -599,6 +648,10 @@ func _creer_etal(x: float, y: float) -> void:
 	var forme := BoxShape3D.new()
 	forme.size = Vector3(1.9, 1.2, 1.0)
 	_obstacle(forme, Transform3D(Basis(Vector3.UP, etal.rotation.y), pos + Vector3(0, 0.6, 0)))
+	# Osric se tient devant son étal, du côté des passants (demande de Tom).
+	var devant := Basis(Vector3.UP, etal.rotation.y) * Vector3.BACK
+	_poste_osric = pos + devant * 1.25
+	_regard_osric = pos + devant * 6.0
 	for o in [["FarmCrate_Apple", Vector3(1.4, 0, 0.5)], ["FarmCrate_Carrot", Vector3(-1.5, 0, 0.3)], ["Barrel_Apples", Vector3(1.2, 0, -0.7)]]:
 		var objet := Modeles.creer(o[0])
 		objet.position = pos + Basis(Vector3.UP, etal.rotation.y) * o[1]
@@ -608,13 +661,22 @@ func _creer_etal(x: float, y: float) -> void:
 
 # --- Les survivants -------------------------------------------------------------------
 
-## Les cinq survivants (étape 10), leurs tenues, leur activité et leurs répliques
-## (proposées par Claude, à valider par Tom : on peut les changer ici).
+
+## Les habitants : chacun a sa silhouette (costaud, mince, petit…), sa place, son activité,
+## ses petits gestes et ses répliques (proposées par Claude, à valider par Tom : on peut
+## les changer ici). Certains flânent sur la place, d'un point à l'autre.
 func _creer_survivants() -> void:
+	# Les endroits où l'on flâne, en tour autour de la place (sans passer sur le feu, les
+	# bancs, le puits ni les étals).
+	var balade: Array[Vector3] = []
+	for p in [Vector2(0.0, -6.8), Vector2(3.6, -6.0), Vector2(6.0, -3.3), Vector2(4.6, 0.2), Vector2(3.2, 6.2),
+			Vector2(1.2, 5.6), Vector2(-4.4, 0.4), Vector2(-5.2, -2.4), Vector2(-2.4, -6.7)]:
+		balade.append(Chemin.bruneval(p.x, p.y))
 	# Le chef du village, chez lui, derrière sa grande table, un petit « ! » au-dessus de
 	# la tête : il a une quête à donner (la quête elle-même viendra plus tard).
 	_survivant({"nom": "Aubert", "tenue": "Male_Peasant", "teinte": Color(0.42, 0.38, 0.46), "activite": "bras_croises",
-		"coiffures": ["Hair_SimpleParted", "Hair_Beard"], "cheveux": Color(0.45, 0.42, 0.4), "quete": true,
+		"coiffures": ["Hair_SimpleParted", "Hair_Beard"], "cheveux": Color(0.55, 0.53, 0.5), "quete": true,
+		"taille": 1.03, "corpulence": 1.06, "gestes": ["Idle_Talking", "ual2/Yes"],
 		"ou": _interieur.place_du_chef, "regard": _interieur.arrivee,
 		"repliques": [
 			"Entre, et ferme derrière toi. Le froid suit les vivants jusque sur le seuil.",
@@ -622,61 +684,92 @@ func _creer_survivants() -> void:
 			"Bran dit que tu es sorti de la forêt sans un souvenir. Ici, on ne demande pas d'où l'on vient. On demande ce qu'on peut faire.",
 			"J'aurai besoin de ton épée. Prépare-toi, puis reviens me voir : il faudra rouvrir la porte du nord.",
 		]})
-	# Les deux marchands, derrière leur étal, face à la place. Après la première
+	# Les deux marchands, derrière leur stand, face à la place. Après la première
 	# conversation, E ouvre directement leur boutique (voir boutiques.gd).
-	_survivant({"nom": "Le forgeron", "tenue": "Male_Peasant", "teinte": Color(0.36, 0.32, 0.3), "activite": "etal",
+	# Le forgeron : un colosse, large et barbu, qui range ses outils.
+	_survivant({"nom": "Le forgeron", "tenue": "Male_Peasant", "teinte": Color(0.34, 0.3, 0.28), "activite": "etal",
 		"coiffures": ["Hair_Buzzed", "Hair_Beard"], "cheveux": Color(0.16, 0.12, 0.1),
+		"taille": 1.06, "corpulence": 1.2, "ventre": 1.65, "gestes": ["Interact", "PickUp_Table"],
 		"ou": _poste_forgeron, "regard": Chemin.VILLAGE,
 		"boutique": "forgeron", "titre_boutique": "Armes et armures",
 		"repliques": [
 			"Des lames, des armures… Le métal ne manque pas. C'est le temps qui manque.",
 			"Regarde, si tu veux. Mais ici rien n'est gratuit : l'or des morts paie aussi bien que le tien.",
 		]})
-	_survivant({"nom": "La médecin", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.46, 0.5, 0.44), "activite": "etal",
+	# La médecin : grande et mince, elle goûte ses mélanges.
+	_survivant({"nom": "La médecin", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.46, 0.52, 0.44), "activite": "etal",
 		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.12, 0.1, 0.1),
+		"taille": 1.03, "corpulence": 0.9, "gestes": ["Interact", "ual2/Consume"],
 		"ou": _poste_medecin, "regard": Chemin.VILLAGE,
 		"boutique": "medecin", "titre_boutique": "Potions et remèdes",
 		"repliques": [
 			"Des potions pour les blessures, des herbes contre la fièvre… et contre la peur, rien.",
 			"Les herbes coûtent cher à cueillir, quand la forêt mord. Voilà ce que j'ai.",
 		]})
-	_survivant({"nom": "Bran", "tenue": "Male_Ranger", "teinte": Color(0.42, 0.48, 0.45), "activite": "garde",
-		"ou": Chemin.bruneval(2.4, -19.0), "regard": Chemin.bruneval(2.4, -30.0),
+	# Bran : adossé au poteau de l'entrée, bras croisés, il regarde la route.
+	var bran := _poteau_entree - Chemin.HAUT_ECRAN * 0.45
+	_survivant({"nom": "Bran", "tenue": "Male_Ranger", "teinte": Color(0.42, 0.48, 0.45), "activite": "bras_croises",
+		"taille": 1.04, "gestes": ["ual2/Idle_No"],
+		"ou": bran, "regard": bran - Chemin.HAUT_ECRAN * 5.0,
 		"repliques": [
 			"Halte. … Tu as la peau froide, mais tu respires. Ça me suffit.",
 			"Je garde l'entrée. Les os remontent de la terre, et ici la nuit ne finit plus.",
 			"Va te réchauffer au feu. Le vieux Hugo te fera une place.",
 		]})
+	# Hugo : le vieux conteur, petit et voûté, assis au feu ; il parle tout seul.
 	_survivant({"nom": "Hugo", "tenue": "Male_Peasant", "teinte": Color(0.5, 0.42, 0.36), "activite": "assis",
-		"coiffures": ["Hair_Buzzed", "Hair_Beard"], "cheveux": Color(0.62, 0.6, 0.58),
+		"coiffures": ["Hair_Buzzed", "Hair_Beard"], "cheveux": Color(0.66, 0.64, 0.62),
+		"taille": 0.94, "corpulence": 1.05, "gestes": ["Sitting_Talking"],
 		"ou": Chemin.bruneval(-2.8, -2.9), "regard": Chemin.VILLAGE,
 		"repliques": [
 			"Assieds-toi, l'ami. Le feu est la dernière chose qui ne nous ment pas.",
 			"Tu ne te souviens de rien ? Alors tu es comme nous : on a tous oublié à quoi ressemblait le jour.",
 			"On dit qu'un dieu nous a tourné le dos. Moi, je crois qu'il nous a regardés trop longtemps.",
 		]})
+	# Élise : la plus jeune, toujours pressée, elle porte l'eau du puits à la médecin.
 	_survivant({"nom": "Élise", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.42, 0.46, 0.55), "activite": "porte_eau",
-		"coiffures": ["Hair_Buns"], "cheveux": Color(0.35, 0.24, 0.16),
-		"ou": Chemin.bruneval(7.0, 0.8), "aller_vers": Chemin.bruneval(8.4, -6.4), "regard": Chemin.bruneval(8.4, -6.4),
+		"coiffures": ["Hair_Buns"], "cheveux": Color(0.35, 0.24, 0.16), "taille": 0.94,
+		"ou": Chemin.bruneval(-2.7, 3.3), "aller_vers": Chemin.bruneval(5.8, 4.4), "regard": Chemin.bruneval(5.8, 4.4),
 		"repliques": [
-			"Pardon, je n'ai pas le temps… Il faut de l'eau pour le médecin.",
+			"Pardon, je n'ai pas le temps… Il faut de l'eau pour la médecin.",
 			"L'eau du puits a un goût de fer depuis trois jours. Personne ne veut savoir pourquoi.",
 		]})
+	# Osric : le marchand bavard et bien nourri, chauve et barbu, devant son étal.
 	_survivant({"nom": "Osric", "tenue": "Male_Peasant", "teinte": Color(0.6, 0.48, 0.3), "activite": "etal",
-		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.2, 0.15, 0.12),
-		"ou": Chemin.bruneval(-6.5, -4.1), "regard": Chemin.bruneval(-3.6, -9.5),
+		"coiffures": ["Hair_Beard"], "cheveux": Color(0.3, 0.2, 0.14),
+		"taille": 0.98, "corpulence": 1.08, "ventre": 1.5, "gestes": ["Idle_Talking", "ual2/Yes", "Interact"],
+		"ou": _poste_osric, "regard": _regard_osric,
 		"repliques": [
 			"Des pommes, des carottes, de la corde. Le reste, je ne le vends plus.",
 			"Les pièces se font rares, l'ami. Les morts en portent encore sur eux, va savoir pourquoi.",
 			"Si tu sors du hameau, garde ton épée près de toi. Les morts ne marchandent pas.",
 		]})
+	# Maren : la rôdeuse silencieuse, bras croisés à droite de la maison du chef.
 	_survivant({"nom": "Maren", "tenue": "Female_Ranger", "femme": true, "teinte": Color(0.4, 0.36, 0.46), "activite": "bras_croises",
-		"ou": Chemin.bruneval(-3.8, 7.6), "regard": Chemin.VILLAGE,
+		"taille": 1.0, "corpulence": 0.95, "gestes": ["ual2/Idle_No"],
+		"ou": Chemin.bruneval(3.8, 7.6), "regard": Chemin.VILLAGE,
 		"repliques": [
 			"… Tu viens de la forêt. Tu as vu l'autel rouge, n'est-ce pas ?",
 			"J'ai laissé une lettre dans la cabane, sur la route. Pour Aldric.",
 			"Il est parti chercher sa fille avant que les routes se ferment. Il n'est jamais revenu.",
 			"Ce dieu n'a pas fini. Tant qu'il restera quelqu'un à protéger, il restera un dieu à abattre.",
+		]})
+	# Deux villageois qui flânent sur la place.
+	_survivant({"nom": "Jeanne", "tenue": "Female_Peasant", "femme": true, "teinte": Color(0.56, 0.42, 0.4), "activite": "balade",
+		"coiffures": ["Hair_SimpleParted"], "cheveux": Color(0.42, 0.2, 0.12), "taille": 0.97,
+		"points": balade, "gestes": ["ual2/Yes"],
+		"ou": balade[2], "regard": Chemin.VILLAGE,
+		"repliques": [
+			"Je fais le tour de la place. Si je m'arrête, je pense.",
+			"Mon mari est parti couper du bois avant la nuit. La nuit qui ne finit plus.",
+		]})
+	_survivant({"nom": "Thibault", "tenue": "Male_Peasant", "teinte": Color(0.4, 0.46, 0.36), "activite": "balade",
+		"coiffures": ["Hair_Buzzed"], "cheveux": Color(0.3, 0.22, 0.15), "taille": 1.0, "corpulence": 0.95,
+		"points": balade, "gestes": ["Idle_Talking"],
+		"ou": balade[6], "regard": Chemin.VILLAGE,
+		"repliques": [
+			"T'as une épée ? Moi j'ai qu'un bâton. Bran dit que ça suffit pas.",
+			"Un jour je partirai avec toi, au-delà de la porte du nord.",
 		]})
 
 
@@ -692,6 +785,15 @@ func _survivant(d: Dictionary) -> void:
 	s.boutique = d.get("boutique", "")
 	s.titre_boutique = d.get("titre_boutique", "")
 	s.quete = d.get("quete", false)
+	s.taille = d.get("taille", 1.0)
+	s.corpulence = d.get("corpulence", 1.0)
+	s.ventre = d.get("ventre", 1.0)
+	var gestes: Array[String] = []
+	gestes.assign(d.get("gestes", []))
+	s.gestes = gestes
+	var points: Array[Vector3] = []
+	points.assign(d.get("points", []))
+	s.points_de_balade = points
 	var coiffures: Array[String] = []
 	coiffures.assign(d.get("coiffures", []))
 	s.coiffures = coiffures

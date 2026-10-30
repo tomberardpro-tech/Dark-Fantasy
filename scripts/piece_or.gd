@@ -19,13 +19,13 @@ var _modele: Node3D
 
 func _ready() -> void:
 	_modele = Modeles.creer("Coin", Modeles.OBJETS, Color(1.25, 1.05, 0.6))
-	_modele.scale = Vector3.ONE * 1.6
+	_modele.scale = Vector3.ONE * 3.2
 	add_child(_modele)
 	# Une petite lueur dorée pour qu'on la voie dans la nuit.
 	var lueur := OmniLight3D.new()
 	lueur.light_color = Color("f0ad55")
-	lueur.light_energy = 0.35
-	lueur.omni_range = 1.2
+	lueur.light_energy = 0.5
+	lueur.omni_range = 1.6
 	lueur.position.y = 0.2
 	add_child(lueur)
 	# Elle jaillit dans une direction au hasard.
@@ -51,8 +51,8 @@ func _process(delta: float) -> void:
 	if not _au_sol:
 		_vitesse += Vector3.DOWN * 12.0 * delta
 		global_position += _vitesse * delta
-		if global_position.y <= 0.12 and _vitesse.y < 0.0:
-			global_position.y = 0.12
+		if global_position.y <= 0.25 and _vitesse.y < 0.0:
+			global_position.y = 0.25
 			_au_sol = true
 	# Elle tourne et flotte doucement.
 	_modele.rotation.y += delta * 3.0

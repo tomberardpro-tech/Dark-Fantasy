@@ -46,16 +46,18 @@ func _sol() -> void:
 	for x in [-3.0, -1.0, 1.0, 3.0]:
 		for z in [-2.0, 0.0, 2.0]:
 			_poser("Floor_WoodDark", Vector3(x, 0.01, z))
-	# Le sol de la pièce ne s'arrête pas net dans le noir : une bordure de planches sombres.
-	var bord := MeshInstance3D.new()
+	# Tout autour de la pièce, du noir complet (demande de Tom), jusqu'aux bords de l'écran.
+	var noir := MeshInstance3D.new()
 	var plan := PlaneMesh.new()
-	plan.size = Vector2(LARGEUR + 1.0, PROFONDEUR + 1.0)
-	bord.mesh = plan
+	plan.size = Vector2(300.0, 300.0)
+	noir.mesh = plan
 	var mat := StandardMaterial3D.new()
-	mat.albedo_color = Color(0.05, 0.045, 0.05)
-	bord.material_override = mat
-	bord.position.y = 0.0
-	add_child(bord)
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color.BLACK
+	mat.disable_fog = true
+	noir.material_override = mat
+	noir.position.y = -0.01
+	add_child(noir)
 
 
 ## Le mur du fond (deux fenêtres, la cheminée au milieu) et les murs de gauche et de droite.

@@ -11,11 +11,20 @@ extends Node3D
 @export var coiffures: Array[String] = []
 @export var teinte := Color(0.6, 0.6, 0.65)
 @export var couleur_cheveux := Color(0.25, 0.22, 0.2)
-## « garde » (torche), « assis », « porte_eau », « etal », « bras_croises ».
+## « garde » (torche), « assis », « porte_eau », « etal », « bras_croises », « balade ».
 @export var activite := "bras_croises"
 @export var repliques: Array[String] = []
 ## Pour « porte_eau » : l'autre bout de son aller-retour.
 @export var aller_vers := Vector3.ZERO
+## Pour « balade » : les endroits où il flâne, dans l'ordre (il va d'un point à son voisin).
+@export var points_de_balade: Array[Vector3] = []
+## Sa silhouette : « corpulence » élargit le corps (1,3 = costaud), « taille » le grandit.
+@export var corpulence := 1.0
+@export var taille := 1.0
+## Un ventre rond (1 = normal, 1,3 = bedonnant).
+@export var ventre := 1.0
+## Ses petits gestes, joués de temps en temps (sa personnalité), par ex. « Interact ».
+@export var gestes: Array[String] = []
 @export var distance_interaction := 2.0
 ## Pour un marchand : sa boutique (« forgeron » ou « medecin », voir boutiques.gd) et son
 ## titre. Elle s'ouvre après la première conversation, puis directement avec E.
@@ -42,6 +51,10 @@ var _cible := Vector3.ZERO
 var _pause := 0.0
 var _temps := 0.0
 var _rng := RandomNumberGenerator.new()
+var _point := 0
+var _sens := 1
+## Le temps qu'il reste au geste en cours (0 : pas de geste).
+var _geste_restant := 0.0
 
 
 func _ready() -> void:
@@ -64,7 +77,13 @@ func _ready() -> void:
 		_icone_quete.outline_size = 12
 		_icone_quete.position.y = 2.25
 		add_child(_icone_quete)
-	if activite != "porte_eau":
+	if activite == "balade" and not points_de_balade.is_empty():
+		_point = _rng.randi_range(0, points_de_balade.size() - 1)
+		_cible = points_de_balade[_point]
+		_pause = _rng.randf_range(0.5, 3.0)
+		_sens = 1 if _rng.randf() < 0.5 else -1
+	# Ceux qui marchent n'ont pas de corps solide (le héros passe à côté sans être bloqué).
+	if activite != "porte_eau" and activite != "balade":
 		var forme := CapsuleShape3D.new()
 		forme.radius = 0.35
 		forme.height = 1.8
@@ -84,30 +103,65 @@ func _process(delta: float) -> void:
 		return
 	match activite:
 		"porte_eau":
-			_porter_l_eau(delta)
-		"etal":
-			# De temps en temps, il range quelque chose sur son étal.
-			if _anim.current_animation == "Idle" and _rng.randf() < delta * 0.15:
-				_anim.play("Interact", 0.3)
-				_anim.queue("Idle")
+			_marcher(delta)
+		"balade":
+			_marcher(delta)
+		_:
+			_faire_des_gestes(delta)
 
 
-## Élise : elle va du puits à la maison et revient, avec une pause à chaque bout.
-func _porter_l_eau(delta: float) -> void:
+## Élise va du puits à la médecin et revient ; ceux qui flânent vont de point en point.
+## Une pause à chaque arrêt (avec parfois un petit geste).
+func _marcher(delta: float) -> void:
 	if _pause > 0.0:
 		_pause -= delta
+		_faire_des_gestes(delta)
 		if _pause <= 0.0:
-			_anim.play("ual2/Walk_Carry", 0.3)
+			_geste_restant = 0.0
+			_anim.play(_animation_de_marche(), 0.3)
 		return
 	var vers := _cible - position
 	vers.y = 0.0
 	if vers.length() < 0.15:
-		_cible = _depart if _cible == aller_vers else aller_vers
-		_pause = _rng.randf_range(2.0, 4.0)
+		if activite == "balade":
+			# Le point suivant, voisin ; parfois il fait demi-tour.
+			if _rng.randf() < 0.3:
+				_sens = -_sens
+			_point = posmod(_point + _sens, points_de_balade.size())
+			_cible = points_de_balade[_point]
+			_pause = _rng.randf_range(2.0, 7.0)
+		else:
+			_cible = _depart if _cible == aller_vers else aller_vers
+			_pause = _rng.randf_range(2.0, 4.0)
 		_anim.play("Idle", 0.3)
 		return
-	position += vers.normalized() * min(VITESSE_MARCHE * delta, vers.length())
+	position += vers.normalized() * min(_vitesse() * delta, vers.length())
 	_modele.rotation.y = lerp_angle(_modele.rotation.y, atan2(vers.x, vers.z), 1.0 - exp(-6.0 * delta))
+
+
+func _vitesse() -> float:
+	return VITESSE_MARCHE * (0.85 if activite == "balade" else 1.0)
+
+
+func _animation_de_marche() -> String:
+	return "ual2/Walk_Carry" if activite == "porte_eau" else "Walk"
+
+
+## De temps en temps, un petit geste qui lui ressemble, puis il reprend sa pose.
+func _faire_des_gestes(delta: float) -> void:
+	if _geste_restant > 0.0:
+		_geste_restant -= delta
+		if _geste_restant <= 0.0:
+			_anim.play("Idle" if _pause > 0.0 else _animation_de_repos(), 0.4)
+		return
+	if gestes.is_empty() or _rng.randf() > delta * 0.1:
+		return
+	var geste: String = gestes[_rng.randi_range(0, gestes.size() - 1)]
+	if not _anim.has_animation(geste):
+		return
+	_anim.play(geste, 0.35)
+	var longueur := _anim.get_animation(geste).length
+	_geste_restant = 3.5 if _anim.get_animation(geste).loop_mode != Animation.LOOP_NONE else maxf(longueur - 0.3, 0.8)
 
 
 func _animation_de_repos() -> String:
@@ -159,6 +213,11 @@ func interagir(joueur: Node3D) -> void:
 func fin_de_dialogue() -> void:
 	parle = false
 	_anim.play(_animation_de_repos(), 0.4)
+	_geste_restant = 0.0
+	# Ceux qui marchaient attendent un instant, puis repartent.
+	if activite == "balade" or activite == "porte_eau":
+		_pause = maxf(_pause, 0.8)
+		_anim.play("Idle", 0.4)
 	_deja_parle = true
 	if boutique != "" and is_instance_valid(_client):
 		get_tree().get_first_node_in_group("interface").ouvrir_boutique(titre_boutique, boutique, _client)
@@ -169,6 +228,7 @@ func fin_de_dialogue() -> void:
 func _construire() -> void:
 	_modele = (load(DOSSIER + tenue + ".gltf") as PackedScene).instantiate()
 	add_child(_modele)
+	_modele.scale = Vector3(corpulence, 1.0, corpulence) * taille
 	_squelette = _modele.find_children("*", "Skeleton3D", true, false)[0]
 	# La tête (et les yeux, les sourcils) du corps de base ; la tenue n'en a pas.
 	var corps := (load(DOSSIER + ("Superhero_Female_FullBody" if femme else "Superhero_Male_FullBody") + ".gltf") as PackedScene).instantiate()
@@ -177,10 +237,32 @@ func _construire() -> void:
 			_garder_seulement_la_tete(maillage)
 		_deplacer_sur_le_corps(maillage)
 	corps.free()
+	# Les coiffures et barbes ne sont pas articulées : on les accroche à l'os de la tête,
+	# sinon elles restent en l'air quand le corps bouge (assis, penché…).
+	var tete := BoneAttachment3D.new()
+	tete.bone_name = "Head"
+	_squelette.add_child(tete)
+	var repos_tete := _squelette.get_bone_global_rest(_squelette.find_bone("Head"))
+	# Le squelette peut être décalé dans le modèle : on en tient compte.
+	var place_squelette := Transform3D()
+	var noeud: Node = _squelette
+	while noeud and noeud != _modele:
+		place_squelette = (noeud as Node3D).transform * place_squelette
+		noeud = noeud.get_parent()
+	repos_tete = place_squelette * repos_tete
 	for coiffure in coiffures:
 		var cheveux := (load(DOSSIER + coiffure + ".gltf") as PackedScene).instantiate()
 		for maillage in cheveux.find_children("*", "MeshInstance3D", true, false):
-			_deplacer_sur_le_corps(maillage)
+			# Sa place dans le fichier de la coiffure (le fichier n'est pas dans la scène).
+			var place: Transform3D = maillage.transform
+			var parent := maillage.get_parent() as Node3D
+			while parent and parent != cheveux:
+				place = parent.transform * place
+				parent = parent.get_parent() as Node3D
+			maillage.get_parent().remove_child(maillage)
+			maillage.owner = null
+			tete.add_child(maillage)
+			maillage.transform = repos_tete.affine_inverse() * place
 			_teinter(maillage, couleur_cheveux)
 		cheveux.free()
 	for maillage in _modele.find_children("*", "MeshInstance3D", true, false):
@@ -194,6 +276,13 @@ func _construire() -> void:
 	_anim.root_node = NodePath("..")
 	_anim.add_animation_library("", _bibliotheque("UAL1_Standard.glb"))
 	_anim.add_animation_library("ual2", _bibliotheque("UAL2_Standard.glb"))
+	# Un ventre rond pour les costauds : le bas du torse gonfle, le haut reste normal.
+	# (Les animations ne touchent pas à la taille des os : il suffit de le faire une fois.)
+	if ventre != 1.0:
+		var bas := _squelette.find_bone("spine_01")
+		var haut := _squelette.find_bone("spine_03")
+		_squelette.set_bone_pose_scale(bas, Vector3(ventre, 1.0, ventre))
+		_squelette.set_bone_pose_scale(haut, Vector3(1.0 / ventre, 1.0, 1.0 / ventre))
 	# La torche de Bran, dans sa main, avec sa lumière.
 	if activite == "garde":
 		var attache := BoneAttachment3D.new()
@@ -216,7 +305,7 @@ static func _bibliotheque(fichier: String) -> AnimationLibrary:
 		var source := (load(DOSSIER + fichier) as PackedScene).instantiate()
 		var lecteur := source.find_children("*", "AnimationPlayer", true, false)[0] as AnimationPlayer
 		var biblio := lecteur.get_animation_library("")
-		for nom_anim in ["Idle", "Idle_Torch", "Sitting_Idle", "Sitting_Talking", "Idle_Talking", "Walk_Carry", "Idle_FoldArms"]:
+		for nom_anim in ["Idle", "Idle_Torch", "Sitting_Idle", "Sitting_Talking", "Idle_Talking", "Walk_Carry", "Idle_FoldArms", "Walk"]:
 			if biblio.has_animation(nom_anim):
 				biblio.get_animation(nom_anim).loop_mode = Animation.LOOP_LINEAR
 		_bibliotheques[fichier] = biblio
