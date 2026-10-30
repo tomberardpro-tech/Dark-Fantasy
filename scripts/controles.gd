@@ -14,6 +14,11 @@ func _ready() -> void:
 	_ajouter("roulade", [KEY_SPACE])
 	_ajouter("interagir", [KEY_E])
 	_ajouter("degainer", [KEY_R])
+	# Les potions : la touche A d'un clavier AZERTY (Q en QWERTY) ou 1 pour le soin, 2 pour la
+	# force, 3 pour la résistance.
+	_ajouter("potion_soin", [KEY_Q, KEY_1])
+	_ajouter("potion_force", [KEY_2])
+	_ajouter("potion_resistance", [KEY_3])
 
 
 func _ajouter(action: StringName, touches: Array) -> void:
