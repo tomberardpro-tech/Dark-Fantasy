@@ -210,6 +210,7 @@ func _process(delta: float) -> void:
 		var frappe := epee_sortie and ((_action == "attaque" and _phase == "coup") or _en_bond)
 		_trainee.suivre(lame * Vector3(0, 0.15, 0), lame * Vector3(0, 0.9, 0), frappe, delta)
 	var interface := get_tree().get_first_node_in_group("interface")
+	_raccourcis(interface)
 	if est_mort:
 		return
 	# Pendant une conversation, c'est la bulle qui réagit à E.
@@ -674,6 +675,36 @@ func teleporter(arrivee: Vector3, regard: Vector3, dedans: bool) -> void:
 	var camera := get_viewport().get_camera_3d()
 	if camera and camera.has_method("sauter"):
 		camera.sauter()
+
+
+## Raccourcis de travail (pour Tom, pendant la fabrication du jeu) : F1 ramène au feu de
+## départ, F2 à l'entrée de Bruneval, F3 sur la place, F4 chez le chef. Hors du feu de
+## départ, le héros reçoit l'épée s'il ne l'a pas encore, pour pouvoir tout essayer.
+func _raccourcis(interface: Node) -> void:
+	if interface == null or est_mort or interface.dialogue_ouvert() or interface.boutique_ouverte():
+		return
+	var hameau := get_tree().get_first_node_in_group("bruneval")
+	var arrivee := Vector3.INF
+	var regard := Chemin.HAUT_ECRAN
+	var dedans := false
+	if Input.is_action_just_pressed("aller_feu"):
+		# Debout devant le tronc du feu de départ, tourné vers le feu.
+		for objet in get_tree().get_nodes_in_group("interactif"):
+			if objet.has_method("reveiller_au_feu") and objet.feu_de_depart:
+				regard = objet.regard()
+				arrivee = objet.point_assise() + regard * 0.5
+	elif Input.is_action_just_pressed("aller_entree"):
+		arrivee = Chemin.bruneval(0.0, -18.0)
+	elif Input.is_action_just_pressed("aller_place"):
+		arrivee = Chemin.bruneval(0.0, -4.8)
+	elif Input.is_action_just_pressed("aller_chef") and hameau:
+		arrivee = hameau.arrivee_chez_le_chef()
+		dedans = true
+	if arrivee == Vector3.INF:
+		return
+	if not a_epee and not Input.is_action_just_pressed("aller_feu"):
+		prendre_epee()
+	interface.passer_la_porte(self, arrivee, regard, dedans)
 
 
 # --- L'or, les achats et les potions ------------------------------------------

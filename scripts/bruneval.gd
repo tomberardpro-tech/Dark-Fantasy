@@ -33,6 +33,7 @@ var _regard_osric := Vector3.ZERO
 
 
 func _ready() -> void:
+	add_to_group("bruneval")
 	_rng.seed = 1848
 	_creer_place()
 	# Comme sur la maquette de Tom : de petites maisons serrées autour de la place, toutes
@@ -53,6 +54,11 @@ func _ready() -> void:
 	_creer_rempart()
 	_creer_interieur_du_chef()
 	_creer_survivants()
+
+
+## Où l'on arrive en entrant chez le chef (utilisé aussi par le raccourci F4).
+func arrivee_chez_le_chef() -> Vector3:
+	return _interieur.arrivee
 
 
 ## La maison du chef : sa porte (E pour entrer), la pièce à part, et la porte pour ressortir.

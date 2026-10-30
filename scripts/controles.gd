@@ -19,6 +19,13 @@ func _ready() -> void:
 	_ajouter("potion_soin", [KEY_Q, KEY_1])
 	_ajouter("potion_force", [KEY_2])
 	_ajouter("potion_resistance", [KEY_3])
+	# Raccourcis de travail, pour aller tout de suite à un endroit sans refaire le trajet
+	# (voir joueur.gd, _raccourcis) : F1 le feu de départ, F2 l'entrée de Bruneval,
+	# F3 la place du village, F4 chez le chef.
+	_ajouter("aller_feu", [KEY_F1])
+	_ajouter("aller_entree", [KEY_F2])
+	_ajouter("aller_place", [KEY_F3])
+	_ajouter("aller_chef", [KEY_F4])
 
 
 func _ajouter(action: StringName, touches: Array) -> void:
