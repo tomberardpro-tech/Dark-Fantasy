@@ -20,12 +20,23 @@ func _ready() -> void:
 	_ajouter("potion_force", [KEY_2])
 	_ajouter("potion_resistance", [KEY_3])
 	# Raccourcis de travail, pour aller tout de suite à un endroit sans refaire le trajet
-	# (voir joueur.gd, _raccourcis) : F1 le feu de départ, F2 l'entrée de Bruneval,
-	# F3 la place du village, F4 chez le chef.
-	_ajouter("aller_feu", [KEY_F1])
-	_ajouter("aller_entree", [KEY_F2])
-	_ajouter("aller_place", [KEY_F3])
-	_ajouter("aller_chef", [KEY_F4])
+	# (voir joueur.gd, _raccourcis). Ce sont les lettres écrites sur les touches de Tom :
+	# H le feu de départ, J l'entrée de Bruneval, K la place du village, L chez le chef,
+	# M sur le chemin, juste avant les squelettes.
+	_ajouter_lettre("aller_feu", KEY_H)
+	_ajouter_lettre("aller_entree", KEY_J)
+	_ajouter_lettre("aller_place", KEY_K)
+	_ajouter_lettre("aller_chef", KEY_L)
+	_ajouter_lettre("aller_squelettes", KEY_M)
+
+
+## Une touche repérée par la lettre écrite dessus (et non par sa place sur le clavier).
+func _ajouter_lettre(action: StringName, lettre: Key) -> void:
+	if not InputMap.has_action(action):
+		InputMap.add_action(action)
+	var evenement := InputEventKey.new()
+	evenement.keycode = lettre
+	InputMap.action_add_event(action, evenement)
 
 
 func _ajouter(action: StringName, touches: Array) -> void:

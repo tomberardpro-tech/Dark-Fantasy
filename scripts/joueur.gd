@@ -677,9 +677,10 @@ func teleporter(arrivee: Vector3, regard: Vector3, dedans: bool) -> void:
 		camera.sauter()
 
 
-## Raccourcis de travail (pour Tom, pendant la fabrication du jeu) : F1 ramène au feu de
-## départ, F2 à l'entrée de Bruneval, F3 sur la place, F4 chez le chef. Hors du feu de
-## départ, le héros reçoit l'épée s'il ne l'a pas encore, pour pouvoir tout essayer.
+## Raccourcis de travail (pour Tom, pendant la fabrication du jeu) : H ramène au feu de
+## départ, J à l'entrée de Bruneval, K sur la place, L chez le chef, M sur le chemin juste
+## avant les squelettes. Hors du feu de départ, le héros reçoit l'épée s'il ne l'a pas
+## encore, pour pouvoir tout essayer.
 func _raccourcis(interface: Node) -> void:
 	if interface == null or est_mort or interface.dialogue_ouvert() or interface.boutique_ouverte():
 		return
@@ -700,6 +701,17 @@ func _raccourcis(interface: Node) -> void:
 	elif Input.is_action_just_pressed("aller_chef") and hameau:
 		arrivee = hameau.arrivee_chez_le_chef()
 		dedans = true
+	elif Input.is_action_just_pressed("aller_squelettes"):
+		# Sur le chemin, 9 m avant le squelette le plus proche du départ.
+		var courbe := Chemin.courbe_chemin
+		var plus_tot := INF
+		for ennemi in get_tree().get_nodes_in_group("ennemi"):
+			plus_tot = minf(plus_tot, courbe.get_closest_offset(ennemi.global_position))
+		if plus_tot < INF:
+			arrivee = courbe.sample_baked(maxf(plus_tot - 9.0, 0.0))
+			regard = courbe.sample_baked(plus_tot) - arrivee
+			regard.y = 0.0
+			arrivee.y = 0.0
 	if arrivee == Vector3.INF:
 		return
 	if not a_epee and not Input.is_action_just_pressed("aller_feu"):
