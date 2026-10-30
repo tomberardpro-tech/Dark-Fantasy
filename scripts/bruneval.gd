@@ -17,9 +17,12 @@ const ECHELLE_MAISONS := 0.8
 var _rng := RandomNumberGenerator.new()
 var _feux: Array[OmniLight3D] = []
 var _temps := 0.0
-## L'icône de quête au-dessus de la porte du chef, qui flotte doucement.
-var _quete: Label3D
-var _hauteur_quete := 0.0
+## La porte de la maison du chef (dehors) et la direction de la place depuis elle.
+var _porte_chef := Vector3.ZERO
+var _devant_chef := Vector3.ZERO
+## L'intérieur de la maison du chef, loin du monde (voir interieur_chef.gd).
+const INTERIEUR_CHEF := Vector3(420, 0, 420)
+var _interieur: Node3D
 ## Où se tiennent le forgeron et le médecin, derrière leur étal.
 var _poste_forgeron := Vector3.ZERO
 var _poste_medecin := Vector3.ZERO
@@ -44,7 +47,36 @@ func _ready() -> void:
 	_creer_etal_medecin(11.0, 3.0)
 	_chemin_de_sortie()
 	_creer_rempart()
+	_creer_interieur_du_chef()
 	_creer_survivants()
+
+
+## La maison du chef : sa porte (E pour entrer), la pièce à part, et la porte pour ressortir.
+func _creer_interieur_du_chef() -> void:
+	_interieur = Node3D.new()
+	_interieur.name = "Intérieur du chef"
+	_interieur.set_script(load("res://scripts/interieur_chef.gd"))
+	_interieur.position = INTERIEUR_CHEF
+	add_child(_interieur)
+	var entree := Node3D.new()
+	entree.set_script(load("res://scripts/porte.gd"))
+	entree.name = "Porte du chef"
+	entree.texte = "E : entrer chez le chef"
+	entree.arrivee = _interieur.arrivee
+	entree.regard = Chemin.HAUT_ECRAN
+	entree.vers_l_interieur = true
+	entree.position = _porte_chef + _devant_chef * 0.6
+	add_child(entree)
+	var sortie := Node3D.new()
+	sortie.set_script(load("res://scripts/porte.gd"))
+	sortie.name = "Sortie du chef"
+	sortie.texte = "E : sortir"
+	sortie.arrivee = _porte_chef + _devant_chef * 2.2
+	sortie.regard = _devant_chef
+	sortie.vers_l_interieur = false
+	sortie.portee = 1.2
+	sortie.position = _interieur.sortie
+	add_child(sortie)
 
 
 ## La lueur de la forge vacille.
@@ -52,8 +84,6 @@ func _process(delta: float) -> void:
 	_temps += delta
 	for i in _feux.size():
 		_feux[i].light_energy = 1.4 + sin(_temps * 11.0 + i) * 0.2 + sin(_temps * 6.3) * 0.15
-	if _quete:
-		_quete.position.y = _hauteur_quete + sin(_temps * 2.2) * 0.12
 
 
 # --- La place -------------------------------------------------------------------
@@ -178,8 +208,10 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 		var cheminee := Modeles.creer("Prop_Chimney")
 		cheminee.position = Vector3(-demi_l + 0.9, haut + 0.4, demi_p - 1.2)
 		maison.add_child(cheminee)
-	# Une lanterne au-dessus de la porte du chef, et l'icône de quête au-dessus de la porte.
+	# Une lanterne au-dessus de la porte du chef, et la porte qu'on passe avec E.
 	if nom == "Maison du chef":
+		_porte_chef = maison.to_global(Vector3(demi_l, 0, demi_p - 1.0 - porte * 2.0))
+		_devant_chef = maison.global_basis.x.normalized()
 		var lanterne := Modeles.creer("Lantern_Wall")
 		lanterne.position = Vector3(demi_l + 0.1, 2.6, demi_p - 1.0 - porte * 2.0 + 1.3)
 		lanterne.rotation.y = PI / 2.0
@@ -190,20 +222,6 @@ func _maison(x: float, y: float, largeur: int, profondeur: int, etages: int, bri
 		lumiere.omni_range = 6.0
 		lumiere.position = lanterne.position + Vector3(0.6, -0.2, 0)
 		maison.add_child(lumiere)
-		# L'icône de quête : un « ! » doré qui flotte au-dessus de la porte (le chef est
-		# à l'intérieur ; on pourra entrer plus tard).
-		_quete = Label3D.new()
-		_quete.text = "!"
-		_quete.font = load("res://assets/polices/Cinzel.ttf")
-		_quete.font_size = 96
-		_quete.pixel_size = 0.01
-		_quete.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-		_quete.modulate = Color("f2c46b")
-		_quete.outline_modulate = Color("07091a")
-		_quete.outline_size = 14
-		_quete.position = Vector3(demi_l + 0.4, 3.6, demi_p - 1.0 - porte * 2.0)
-		maison.add_child(_quete)
-		_hauteur_quete = _quete.position.y
 	# Un peu de lierre, des tonneaux ou des caisses contre les murs (au hasard).
 	if _rng.randf() < 0.6:
 		var lierre := Modeles.creer(["Prop_Vine1", "Prop_Vine4"][_rng.randi_range(0, 1)], Modeles.OBJETS, Color(0.42, 0.5, 0.52))
@@ -593,6 +611,17 @@ func _creer_etal(x: float, y: float) -> void:
 ## Les cinq survivants (étape 10), leurs tenues, leur activité et leurs répliques
 ## (proposées par Claude, à valider par Tom : on peut les changer ici).
 func _creer_survivants() -> void:
+	# Le chef du village, chez lui, derrière sa grande table, un petit « ! » au-dessus de
+	# la tête : il a une quête à donner (la quête elle-même viendra plus tard).
+	_survivant({"nom": "Aubert", "tenue": "Male_Peasant", "teinte": Color(0.42, 0.38, 0.46), "activite": "bras_croises",
+		"coiffures": ["Hair_SimpleParted", "Hair_Beard"], "cheveux": Color(0.45, 0.42, 0.4), "quete": true,
+		"ou": _interieur.place_du_chef, "regard": _interieur.arrivee,
+		"repliques": [
+			"Entre, et ferme derrière toi. Le froid suit les vivants jusque sur le seuil.",
+			"Je suis Aubert. Je tiens ce hameau debout, avec ce qu'il reste de nous.",
+			"Bran dit que tu es sorti de la forêt sans un souvenir. Ici, on ne demande pas d'où l'on vient. On demande ce qu'on peut faire.",
+			"J'aurai besoin de ton épée. Prépare-toi, puis reviens me voir : il faudra rouvrir la porte du nord.",
+		]})
 	# Les deux marchands, derrière leur étal, face à la place. Après la première
 	# conversation, E ouvre directement leur boutique (voir boutiques.gd).
 	_survivant({"nom": "Le forgeron", "tenue": "Male_Peasant", "teinte": Color(0.36, 0.32, 0.3), "activite": "etal",
@@ -662,6 +691,7 @@ func _survivant(d: Dictionary) -> void:
 	s.activite = d["activite"]
 	s.boutique = d.get("boutique", "")
 	s.titre_boutique = d.get("titre_boutique", "")
+	s.quete = d.get("quete", false)
 	var coiffures: Array[String] = []
 	coiffures.assign(d.get("coiffures", []))
 	s.coiffures = coiffures

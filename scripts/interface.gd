@@ -483,6 +483,25 @@ func _creer_boutique() -> void:
 		noeud.owner = _boutique
 
 
+## On passe une porte : l'écran s'assombrit, le héros change de place pendant le noir
+## (le jeu est en pause), puis l'image revient.
+func passer_la_porte(joueur: Node, arrivee: Vector3, regard: Vector3, dedans: bool) -> void:
+	var noir := ColorRect.new()
+	noir.color = Color(0.0, 0.0, 0.01, 0.0)
+	noir.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(noir)
+	noir.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_message.hide()
+	get_tree().paused = true
+	var anim := create_tween()
+	anim.tween_property(noir, "color:a", 1.0, 0.3)
+	anim.tween_callback(joueur.teleporter.bind(arrivee, regard, dedans))
+	anim.tween_interval(0.15)
+	anim.tween_callback(func(): get_tree().paused = false)
+	anim.tween_property(noir, "color:a", 0.0, 0.45)
+	anim.tween_callback(noir.queue_free)
+
+
 func afficher(texte: String) -> void:
 	_message.text = texte
 	_message.show()

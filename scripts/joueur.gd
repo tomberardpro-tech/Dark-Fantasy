@@ -116,6 +116,8 @@ var a_epee := false
 var epee_sortie := false
 var vie := 100.0
 var est_mort := false
+## Vrai quand le héros est dans une pièce (la maison du chef…).
+var a_l_interieur := false
 ## L'or et ce qu'on a acheté aux marchands (voir boutiques.gd).
 var pieces := 0
 ## Les potions qu'on porte : nom de la potion → combien.
@@ -654,6 +656,24 @@ func _mourir() -> void:
 	get_tree().call_group("ennemi", "reinitialiser")
 	if interface:
 		interface.notifier("Vous vous réveillez près du feu")
+
+
+# --- Les portes -----------------------------------------------------------------
+
+## Le héros passe une porte : il apparaît à « arrivee », tourné vers « regard », et la
+## caméra le rejoint tout de suite.
+func teleporter(arrivee: Vector3, regard: Vector3, dedans: bool) -> void:
+	if est_assis:
+		se_relever()
+	global_position = arrivee
+	velocity = Vector3.ZERO
+	_recul = Vector3.ZERO
+	_regarder(regard, 0.0, true)
+	reset_physics_interpolation()
+	a_l_interieur = dedans
+	var camera := get_viewport().get_camera_3d()
+	if camera and camera.has_method("sauter"):
+		camera.sauter()
 
 
 # --- L'or, les achats et les potions ------------------------------------------

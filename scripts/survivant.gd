@@ -21,6 +21,8 @@ extends Node3D
 ## titre. Elle s'ouvre après la première conversation, puis directement avec E.
 @export var boutique := ""
 @export var titre_boutique := ""
+## Un petit « ! » doré flotte au-dessus de sa tête : il a une quête à donner.
+@export var quete := false
 
 const DOSSIER := "res://assets/personnage/"
 const OS_DE_LA_TETE := ["Head", "neck_01"]
@@ -31,6 +33,7 @@ static var _bibliotheques := {}
 var parle := false
 var _deja_parle := false
 var _client: Node
+var _icone_quete: Label3D
 var _anim: AnimationPlayer
 var _squelette: Skeleton3D
 var _modele: Node3D
@@ -49,6 +52,18 @@ func _ready() -> void:
 	_construire()
 	_anim.play(_animation_de_repos())
 	_anim.seek(_rng.randf_range(0.0, 2.0), true)
+	if quete:
+		_icone_quete = Label3D.new()
+		_icone_quete.text = "!"
+		_icone_quete.font = load("res://assets/polices/Cinzel.ttf")
+		_icone_quete.font_size = 64
+		_icone_quete.pixel_size = 0.006
+		_icone_quete.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_icone_quete.modulate = Color("f2c46b")
+		_icone_quete.outline_modulate = Color("07091a")
+		_icone_quete.outline_size = 12
+		_icone_quete.position.y = 2.25
+		add_child(_icone_quete)
 	if activite != "porte_eau":
 		var forme := CapsuleShape3D.new()
 		forme.radius = 0.35
@@ -63,6 +78,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	_temps += delta
+	if _icone_quete:
+		_icone_quete.position.y = 2.25 + sin(_temps * 2.2) * 0.06
 	if parle:
 		return
 	match activite:

@@ -45,6 +45,13 @@ func _process(delta: float) -> void:
 	_placer()
 
 
+## Rejoint le personnage tout de suite, sans glisser (après une porte).
+func sauter() -> void:
+	if a_suivre:
+		_cible = a_suivre.global_position
+	_placer()
+
+
 ## Rapproche (pas négatif) ou éloigne (pas positif) la caméra, dans les limites.
 func zoomer(pas: float) -> void:
 	distance = clampf(distance + pas, distance_min, distance_max)

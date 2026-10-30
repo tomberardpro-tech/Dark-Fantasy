@@ -21,6 +21,8 @@ func _process(_delta: float) -> void:
 	var joueur := get_tree().get_first_node_in_group("joueur") as Node3D
 	if joueur:
 		global_position = joueur.global_position
+		# Pas de lucioles ni de feuilles dans les maisons.
+		visible = not joueur.a_l_interieur
 	# Les feuilles suivent la force du vent du moment (les rafales).
 	var vent := Vent.souffle(Time.get_ticks_msec() / 1000.0, global_position)
 	_feuilles.direction = vent.normalized() + Vector3(0, 0.15, 0)
