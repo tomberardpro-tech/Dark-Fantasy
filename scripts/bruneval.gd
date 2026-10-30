@@ -26,14 +26,14 @@ var _poste_medecin := Vector3.ZERO
 func _ready() -> void:
 	_rng.seed = 1848
 	_creer_place()
-	# Comme sur la maquette choisie par Tom : les maisons en arc autour de la place, façades
-	# éclairées vers la caméra. [x, y, largeur, longueur de façade, étages, briques, nom,
+	# Comme sur la dernière maquette validée par Tom : les maisons en arc autour de la place,
+	# toutes tournées vers le feu. [x, y, largeur, longueur de façade, étages, briques, nom,
 	# rotation vers la place (0 = face à la caméra, 1 = face au feu)]
-	_maison(0.0, 15.2, 6, 10, 2, false, "Maison du chef", 0.0)
-	_maison(-19.3, 3.1, 4, 8, 1, true, "Forge", 0.3)
-	_maison(20.2, 3.8, 6, 8, 1, false, "Médecin", 0.3)
-	_maison(-17.1, -8.7, 4, 6, 1, false, "Abri", 0.25)
-	_maison(17.1, -9.1, 4, 6, 1, false, "Abri de l'est", 0.25)
+	_maison(0.0, 15.2, 6, 10, 2, false, "Maison du chef", 1.0)
+	_maison(-19.3, 3.1, 4, 8, 1, true, "Forge", 1.0)
+	_maison(20.2, 3.8, 6, 8, 1, false, "Médecin", 1.0)
+	_maison(-17.1, -8.7, 4, 6, 1, false, "Abri", 1.0)
+	_maison(17.1, -9.1, 4, 6, 1, false, "Abri de l'est", 1.0)
 	_creer_forge(-19.3, 3.1)
 	_creer_feu()
 	_creer_puits(5.6, 3.3)
